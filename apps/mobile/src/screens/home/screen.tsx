@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
@@ -21,6 +21,30 @@ const languageOptions = [
   { code: 'en', label: 'English' },
   { code: 'ko', label: '한국어' },
 ] as const satisfies ReadonlyArray<{ code: SupportedLanguage; label: string }>;
+
+const languageStyles = StyleSheet.create({
+  mark: {
+    paddingHorizontal: 6,
+  },
+  menu: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  option: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  optionPressed: {
+    opacity: 0.68,
+  },
+  trigger: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  triggerPressed: {
+    transform: [{ scale: 0.96 }],
+  },
+});
 
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const { i18n, t } = useTranslation();
@@ -108,18 +132,18 @@ function LanguageMenu(): React.JSX.Element {
         accessibilityLabel={t(menuOpen ? 'language.closeMenu' : 'language.openMenu')}
         accessibilityRole="button"
         accessibilityState={{ expanded: menuOpen }}
-        className="min-h-10 rounded-full bg-card px-3 py-2"
+        className="min-h-10 items-center justify-center rounded-full bg-card px-3 py-2"
         testID="language-menu-trigger"
         onPress={() => setMenuOpen(open => !open)}
-        style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.96 : 1 }] }]}>
+        style={({ pressed }) => [languageStyles.trigger, pressed ? languageStyles.triggerPressed : undefined]}>
         <HStack gap={7} className="items-center">
-          <LanguageMark selected={menuOpen} />
+          <LanguageMark markTestID="language-mark-trigger" selected={menuOpen} />
           <Text className="text-xs font-semibold text-card-foreground">{activeLanguageLabel}</Text>
         </HStack>
       </Pressable>
 
       {menuOpen ? (
-        <VStack accessibilityRole="menu" className="w-full rounded-2xl bg-card p-1">
+        <VStack gap={4} accessibilityRole="menu" className="w-full bg-card p-1.5" style={languageStyles.menu}>
           {languageOptions.map(option => {
             const selected = option.code === activeLanguage;
 
@@ -128,11 +152,16 @@ function LanguageMenu(): React.JSX.Element {
                 accessibilityLabel={t('language.switchTo', { language: option.label })}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                className={selected ? 'min-h-10 rounded-xl bg-primary/10 px-3 py-2' : 'min-h-10 rounded-xl px-3 py-2'}
+                className={
+                  selected
+                    ? 'min-h-11 overflow-hidden rounded-xl bg-primary/10 px-3 py-2'
+                    : 'min-h-11 overflow-hidden rounded-xl px-3 py-2'
+                }
+                hitSlop={4}
                 key={option.code}
                 testID={`language-option-${option.code}`}
                 onPress={() => handleSelect(option.code)}
-                style={({ pressed }) => [{ opacity: pressed ? 0.68 : 1 }]}>
+                style={({ pressed }) => [languageStyles.option, pressed ? languageStyles.optionPressed : undefined]}>
                 <HStack className="items-center justify-between">
                   <HStack gap={8} className="items-center">
                     <LanguageMark selected={selected} />
@@ -143,7 +172,7 @@ function LanguageMenu(): React.JSX.Element {
                       {option.label}
                     </Text>
                   </HStack>
-                  <Box className={selected ? 'h-2 w-2 rounded-full bg-primary' : 'h-2 w-2 rounded-full bg-muted'} />
+                  <Box className={selected ? 'h-2 w-2 rounded-full bg-primary' : 'h-2 w-2 rounded-full bg-transparent'} />
                 </HStack>
               </Pressable>
             );
@@ -154,17 +183,21 @@ function LanguageMenu(): React.JSX.Element {
   );
 }
 
-function LanguageMark(props: { selected: boolean }): React.JSX.Element {
+function LanguageMark(props: { selected: boolean; markTestID?: string }): React.JSX.Element {
   return (
     <Box
+      testID={props.markTestID}
+      style={languageStyles.mark}
       className={
         props.selected
-          ? 'h-6 w-6 items-center justify-center rounded-full bg-primary'
-          : 'h-6 w-6 items-center justify-center rounded-full bg-primary/10'
+          ? 'h-7 min-w-10 items-center justify-center rounded-full bg-primary'
+          : 'h-7 min-w-10 items-center justify-center rounded-full bg-primary/10'
       }>
       <Text
+        allowFontScaling={false}
+        numberOfLines={1}
         className={
-          props.selected ? 'text-[10px] font-semibold text-primary-foreground' : 'text-[10px] font-semibold text-primary'
+          props.selected ? 'text-[11px] font-semibold text-primary-foreground' : 'text-[11px] font-semibold text-primary'
         }>
         A/가
       </Text>

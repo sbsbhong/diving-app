@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "design/mobile-watch-ui-language.md",
+                "file": "domains/dive-log.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "mobile-watch-ui-language"
+              "title": "dive-log"
             }
           }
         ]
@@ -185,8 +185,10 @@
   },
   "active": "ec651fb99c9a0a17",
   "lastOpenFiles": [
-    "decisions/adr-index.md",
+    "architecture/supabase.md",
+    "architecture/mobile.md",
     "design/mobile-watch-ui-language.md",
+    "decisions/adr-index.md",
     "design",
     "domains/dive-log.md",
     "domains/diving-glossary.md",
@@ -196,8 +198,6 @@
     "overview.md",
     "architecture/watch-app.md",
     "architecture/sync-flow.md",
-    "architecture/supabase.md",
-    "architecture/monorepo.md",
-    "architecture/mobile.md"
+    "architecture/monorepo.md"
   ]
 }
