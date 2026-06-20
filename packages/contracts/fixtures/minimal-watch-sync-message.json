@@ -1,0 +1,25 @@
+{
+  "type": "sessionEnded",
+  "session": {
+    "localSessionId": "fixture-minimal-session",
+    "startedAt": 1781352000,
+    "endedAt": 1781352600,
+    "samples": [
+      {
+        "localSessionId": "fixture-minimal-session",
+        "timestamp": 1781352000,
+        "depthMeters": 0
+      },
+      {
+        "localSessionId": "fixture-minimal-session",
+        "timestamp": 1781352300,
+        "depthMeters": 12.4
+      },
+      {
+        "localSessionId": "fixture-minimal-session",
+        "timestamp": 1781352600,
+        "depthMeters": 0
+      }
+    ]
+  }
+}

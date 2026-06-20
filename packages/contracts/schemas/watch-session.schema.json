@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.dive-app.local/watch-session.schema.json",
+  "title": "WatchSession",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "watchLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "horizontalAccuracyMeters": {
+          "type": "number"
+        },
+        "capturedAt": {
+          "type": "number",
+          "description": "Unix timestamp in seconds"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ]
+    }
+  },
+  "properties": {
+    "localSessionId": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "diveMode": {
+      "type": "string",
+      "enum": [
+        "scuba",
+        "freedive",
+        "snorkel",
+        "pool",
+        "unknown"
+      ]
+    },
+    "gasLabel": {
+      "type": "string"
+    },
+    "siteId": {
+      "type": "string"
+    },
+    "siteName": {
+      "type": "string"
+    },
+    "buddyIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "gearIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "perceivedExertion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "visibilityRating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "waterCondition": {
+      "type": "string",
+      "enum": [
+        "calm",
+        "mild",
+        "choppy",
+        "surge",
+        "current",
+        "unknown"
+      ]
+    },
+    "syncStatus": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "synced",
+        "failed"
+      ]
+    },
+    "entryLocation": {
+      "$ref": "#/definitions/watchLocation"
+    },
+    "exitLocation": {
+      "$ref": "#/definitions/watchLocation"
+    },
+    "startedAt": {
+      "type": "number",
+      "description": "Unix timestamp in seconds"
+    },
+    "endedAt": {
+      "type": "number",
+      "description": "Unix timestamp in seconds"
+    },
+    "maxDepthMeters": {
+      "type": "number"
+    },
+    "averageDepthMeters": {
+      "type": "number"
+    },
+    "waterTemperatureCelsius": {
+      "type": "number"
+    },
+    "samples": {
+      "type": "array",
+      "items": {
+        "$ref": "./watch-depth-sample.schema.json"
+      }
+    }
+  },
+  "required": [
+    "localSessionId",
+    "startedAt",
+    "samples"
+  ]
+}

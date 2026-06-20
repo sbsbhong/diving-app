@@ -1,0 +1,72 @@
+import type { WatchSyncMessage } from '../types/dive-session';
+
+export const watchFixtureMessages: WatchSyncMessage[] = [
+  {
+    type: 'sessionEnded',
+    session: {
+      localSessionId: 'fixture-rich-session',
+      schemaVersion: 1,
+      diveMode: 'scuba',
+      gasLabel: 'Air',
+      siteId: 'site-jeju-moon-island',
+      siteName: 'Jeju Moon Island',
+      buddyIds: ['buddy-hana'],
+      gearIds: ['mask-primary', 'bcd-travel'],
+      tags: ['training', 'clear-water'],
+      notes: 'Easy recreational checkout dive. Not for decompression planning.',
+      rating: 5,
+      perceivedExertion: 2,
+      visibilityRating: 4,
+      waterCondition: 'calm',
+      syncStatus: 'pending',
+      entryLocation: {
+        latitude: 33.2361,
+        longitude: 126.5658,
+        horizontalAccuracyMeters: 18,
+        capturedAt: 1781351980,
+      },
+      exitLocation: {
+        latitude: 33.2366,
+        longitude: 126.5661,
+        horizontalAccuracyMeters: 22,
+        capturedAt: 1781352620,
+      },
+      startedAt: 1781352000,
+      endedAt: 1781352600,
+      maxDepthMeters: 13.2,
+      averageDepthMeters: 7.8,
+      waterTemperatureCelsius: 24.2,
+      samples: [
+        {
+          localSessionId: 'fixture-rich-session',
+          timestamp: 1781352000,
+          depthMeters: 0,
+          pressureKPa: 101.325,
+          waterTemperatureCelsius: 24.8,
+        },
+        {
+          localSessionId: 'fixture-rich-session',
+          timestamp: 1781352240,
+          depthMeters: 13.2,
+          pressureKPa: 230.773,
+          waterTemperatureCelsius: 24.1,
+        },
+        {
+          localSessionId: 'fixture-rich-session',
+          timestamp: 1781352480,
+          depthMeters: 5,
+          pressureKPa: 150.358,
+          waterTemperatureCelsius: 24.3,
+        },
+        {
+          localSessionId: 'fixture-rich-session',
+          timestamp: 1781352600,
+          depthMeters: 0,
+          pressureKPa: 101.325,
+          waterTemperatureCelsius: 24.6,
+        },
+      ],
+    },
+  },
+];
+

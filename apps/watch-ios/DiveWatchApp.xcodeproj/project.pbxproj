@@ -1,0 +1,415 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* DiveWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* DiveWatchApp.swift */; };
+		A10000000000000000000002 /* DepthSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* DepthSample.swift */; };
+		A10000000000000000000003 /* DiveSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* DiveSession.swift */; };
+		A10000000000000000000004 /* DiveSessionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* DiveSessionSummary.swift */; };
+		A10000000000000000000005 /* DepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* DepthSensorProvider.swift */; };
+		A10000000000000000000006 /* MockDepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* MockDepthSensorProvider.swift */; };
+		A10000000000000000000007 /* RealDepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* RealDepthSensorProvider.swift */; };
+		A10000000000000000000008 /* DiveSessionRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* DiveSessionRecorder.swift */; };
+		A10000000000000000000009 /* DiveSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DiveSessionStore.swift */; };
+		A10000000000000000000010 /* DiveFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* DiveFormatters.swift */; };
+		A10000000000000000000011 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* HomeView.swift */; };
+		A10000000000000000000012 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* RecordingView.swift */; };
+		A10000000000000000000013 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* SummaryView.swift */; };
+		A10000000000000000000014 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* SessionListView.swift */; };
+		A10000000000000000000015 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* SessionDetailView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000001 /* DiveWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveWatchApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* DepthSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthSample.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* DiveSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveSession.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* DiveSessionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveSessionSummary.swift; sourceTree = "<group>"; };
+		B10000000000000000000005 /* DepthSensorProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthSensorProvider.swift; sourceTree = "<group>"; };
+		B10000000000000000000006 /* MockDepthSensorProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDepthSensorProvider.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* RealDepthSensorProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealDepthSensorProvider.swift; sourceTree = "<group>"; };
+		B10000000000000000000008 /* DiveSessionRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveSessionRecorder.swift; sourceTree = "<group>"; };
+		B10000000000000000000009 /* DiveSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveSessionStore.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* DiveFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiveFormatters.swift; sourceTree = "<group>"; };
+		B10000000000000000000011 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		B10000000000000000000013 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
+		B10000000000000000000014 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
+		B10000000000000000000015 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		B10000000000000000000016 /* DiveWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiveWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A30000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A20000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000002 /* DiveWatchApp */,
+				A20000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A20000000000000000000002 /* DiveWatchApp */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* DiveWatchApp.swift */,
+				A20000000000000000000004 /* Models */,
+				A20000000000000000000005 /* Sensors */,
+				A20000000000000000000006 /* Recording */,
+				A20000000000000000000007 /* Storage */,
+				A20000000000000000000008 /* Views */,
+			);
+			path = DiveWatchApp;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000016 /* DiveWatchApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000002 /* DepthSample.swift */,
+				B10000000000000000000003 /* DiveSession.swift */,
+				B10000000000000000000004 /* DiveSessionSummary.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000005 /* Sensors */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000005 /* DepthSensorProvider.swift */,
+				B10000000000000000000006 /* MockDepthSensorProvider.swift */,
+				B10000000000000000000007 /* RealDepthSensorProvider.swift */,
+			);
+			path = Sensors;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000006 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000008 /* DiveSessionRecorder.swift */,
+			);
+			path = Recording;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000007 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000009 /* DiveSessionStore.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		A20000000000000000000008 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000010 /* DiveFormatters.swift */,
+				B10000000000000000000011 /* HomeView.swift */,
+				B10000000000000000000012 /* RecordingView.swift */,
+				B10000000000000000000013 /* SummaryView.swift */,
+				B10000000000000000000014 /* SessionListView.swift */,
+				B10000000000000000000015 /* SessionDetailView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000001 /* DiveWatchApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A60000000000000000000003 /* Build configuration list for PBXNativeTarget "DiveWatchApp" */;
+			buildPhases = (
+				A30000000000000000000002 /* Sources */,
+				A30000000000000000000001 /* Frameworks */,
+				A30000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DiveWatchApp;
+			productName = DiveWatchApp;
+			productReference = B10000000000000000000016 /* DiveWatchApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A40000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					A00000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+				};
+			};
+			buildConfigurationList = A60000000000000000000001 /* Build configuration list for PBXProject "DiveWatchApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A20000000000000000000001;
+			productRefGroup = A20000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000001 /* DiveWatchApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A30000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A30000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* DiveWatchApp.swift in Sources */,
+				A10000000000000000000002 /* DepthSample.swift in Sources */,
+				A10000000000000000000003 /* DiveSession.swift in Sources */,
+				A10000000000000000000004 /* DiveSessionSummary.swift in Sources */,
+				A10000000000000000000005 /* DepthSensorProvider.swift in Sources */,
+				A10000000000000000000006 /* MockDepthSensorProvider.swift in Sources */,
+				A10000000000000000000007 /* RealDepthSensorProvider.swift in Sources */,
+				A10000000000000000000008 /* DiveSessionRecorder.swift in Sources */,
+				A10000000000000000000009 /* DiveSessionStore.swift in Sources */,
+				A10000000000000000000010 /* DiveFormatters.swift in Sources */,
+				A10000000000000000000011 /* HomeView.swift in Sources */,
+				A10000000000000000000012 /* RecordingView.swift in Sources */,
+				A10000000000000000000013 /* SummaryView.swift in Sources */,
+				A10000000000000000000014 /* SessionListView.swift in Sources */,
+				A10000000000000000000015 /* SessionDetailView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A50000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = watchos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A50000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = watchos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A50000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dive Watch";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DiveWatchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		A50000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dive Watch";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DiveWatchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A60000000000000000000001 /* Build configuration list for PBXProject "DiveWatchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A50000000000000000000001 /* Debug */,
+				A50000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A60000000000000000000003 /* Build configuration list for PBXNativeTarget "DiveWatchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A50000000000000000000003 /* Debug */,
+				A50000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A40000000000000000000001 /* Project object */;
+}

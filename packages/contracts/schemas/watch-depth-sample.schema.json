@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.dive-app.local/watch-depth-sample.schema.json",
+  "title": "WatchDepthSample",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "localSessionId": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Unix timestamp in seconds"
+    },
+    "depthMeters": {
+      "type": "number"
+    },
+    "pressureKPa": {
+      "type": "number"
+    },
+    "waterTemperatureCelsius": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "localSessionId",
+    "timestamp",
+    "depthMeters"
+  ]
+}

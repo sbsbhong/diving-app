@@ -1,0 +1,23 @@
+{
+  "name": "dive-app",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "check:quick": "yarn generate",
+    "codex:check": "yarn check:quick && yarn mobile:typecheck && yarn watch:build",
+    "generate": "turbo run generate",
+    "ios:build": "yarn workspace @repo/mobile ios:build",
+    "lint": "turbo run lint",
+    "mobile:typecheck": "yarn workspace @repo/mobile typecheck",
+    "test": "turbo run test",
+    "watch:build": "yarn workspace @repo/watch-ios xcode:build"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.12"
+  }
+}
