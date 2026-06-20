@@ -12,15 +12,15 @@ type StatusPillProps = {
 };
 
 const pillStyles = tva({
-  base: 'self-start overflow-hidden rounded-full border px-2 py-1 font-mono text-xs font-extrabold uppercase',
+  base: 'self-start overflow-hidden rounded-full px-3 py-1 text-xs font-semibold uppercase',
   variants: {
     tone: {
-      primary: 'border-primary bg-primary/15 text-primary',
-      secondary: 'border-secondary bg-secondary/15 text-secondary',
-      success: 'border-primary bg-primary/15 text-primary',
-      warning: 'border-accent bg-accent/15 text-accent-foreground',
-      danger: 'border-destructive bg-destructive/15 text-destructive',
-      muted: 'border-border bg-muted text-muted-foreground',
+      primary: 'bg-primary text-primary-foreground',
+      secondary: 'bg-secondary text-secondary-foreground',
+      success: 'bg-primary text-primary-foreground',
+      warning: 'bg-secondary text-primary',
+      danger: 'bg-destructive/10 text-destructive',
+      muted: 'bg-muted text-muted-foreground',
     },
   },
   defaultVariants: {
@@ -44,12 +44,12 @@ type InstrumentButtonProps = Omit<PressableProps, 'style'> & {
 };
 
 const buttonStyles = tva({
-  base: 'min-h-12 items-center justify-center rounded-lg border px-4 py-3',
+  base: 'min-h-12 items-center justify-center rounded-full px-5 py-3',
   variants: {
     variant: {
-      primary: 'border-primary bg-primary',
-      secondary: 'border-primary bg-card',
-      danger: 'border-destructive bg-destructive/10',
+      primary: 'bg-primary',
+      secondary: 'bg-secondary',
+      danger: 'bg-destructive/10',
     },
   },
   defaultVariants: {
@@ -58,7 +58,7 @@ const buttonStyles = tva({
 });
 
 const buttonTextStyles = tva({
-  base: 'text-center text-sm font-black',
+  base: 'text-center text-base font-normal',
   variants: {
     variant: {
       primary: 'text-primary-foreground',
@@ -82,8 +82,58 @@ export function InstrumentButton({
     <Pressable
       {...pressableProps}
       className={buttonStyles({ variant, class: className })}
-      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }, style]}>
       <Text className={buttonTextStyles({ variant })}>{label}</Text>
+    </Pressable>
+  );
+}
+
+type SelectorPillProps = Omit<PressableProps, 'style'> & {
+  label: string;
+  selected: boolean;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
+};
+
+const selectorPillStyles = tva({
+  base: 'min-h-10 items-center justify-center rounded-full px-3 py-2',
+  variants: {
+    selected: {
+      true: 'bg-card',
+      false: 'bg-transparent',
+    },
+  },
+  defaultVariants: {
+    selected: false,
+  },
+});
+
+const selectorPillTextStyles = tva({
+  base: 'text-xs font-semibold uppercase',
+  variants: {
+    selected: {
+      true: 'text-foreground',
+      false: 'text-muted-foreground',
+    },
+  },
+  defaultVariants: {
+    selected: false,
+  },
+});
+
+export function SelectorPill({
+  label,
+  selected,
+  className,
+  style,
+  ...pressableProps
+}: SelectorPillProps): React.JSX.Element {
+  return (
+    <Pressable
+      {...pressableProps}
+      className={selectorPillStyles({ selected, class: className })}
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }, style]}>
+      <Text className={selectorPillTextStyles({ selected })}>{label}</Text>
     </Pressable>
   );
 }
@@ -93,5 +143,5 @@ type SafetyTextProps = {
 };
 
 export function SafetyText(props: SafetyTextProps): React.JSX.Element {
-  return <Text className="text-center text-xs font-extrabold uppercase leading-4 text-muted-foreground">{props.children}</Text>;
+  return <Text className="text-center text-xs font-semibold uppercase leading-4 text-muted-foreground">{props.children}</Text>;
 }

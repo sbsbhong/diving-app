@@ -1,8 +1,8 @@
 import React from 'react';
 import { Pressable, ScrollView, TextInput } from 'react-native';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
-import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
-import { HStack, Text, VStack } from '../../components/ui/primitives';
+import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
+import { Box, HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { InstrumentTone } from '../../components/ui/theme';
 import type { DiveSessionFilter, MobileDiveSession } from '../../types/dive-session';
@@ -43,28 +43,40 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   }, [selectedSession, visibleSessions]);
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="p-4 pb-5">
-      <VStack gap={14}>
-        <DiveSummaryCard accent="primary">
-          <DiveSummaryCard.Header
-            eyebrow="Log review"
-            title="Imported Dives"
-            right={<InstrumentButton label="Import" onPress={props.onImportFixtures} className="min-h-9 px-3 py-2" />}
-          />
-          <DiveSummaryCard.Body>
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
+      <VStack gap={16}>
+        <VStack gap={12}>
+          <HStack className="items-center justify-between">
+            <VStack gap={4} className="flex-1">
+              <Text className="text-xs font-semibold uppercase text-muted-foreground">Log review</Text>
+              <Text className="text-3xl font-semibold leading-9 text-foreground">Imported Dives</Text>
+            </VStack>
+            <InstrumentButton label="Import" onPress={props.onImportFixtures} className="min-h-10 px-4 py-2" />
+          </HStack>
+          <VStack gap={12} className="rounded-2xl bg-card px-4 py-4">
             <TextInput
               placeholder="Search site, buddy, gear, tag, note"
               value={props.filter.query}
               onChangeText={query => props.onFilterChange({ ...props.filter, query })}
-              className="rounded-md border border-input bg-muted px-3.5 py-2.5 text-sm font-bold text-foreground placeholder:text-muted-foreground"
+              className="min-h-11 rounded-full bg-muted px-5 py-3 text-base font-normal text-foreground placeholder:text-muted-foreground"
             />
-            <HStack gap={8}>
-              <FilterChip label="All" selected={syncFilter === 'all'} onPress={() => setSyncFilter('all')} />
-              <FilterChip label="Synced" selected={syncFilter === 'synced'} onPress={() => setSyncFilter('synced')} />
-              <FilterChip label="Pending" selected={syncFilter === 'pending'} onPress={() => setSyncFilter('pending')} />
+            <HStack gap={4} className="rounded-full bg-muted p-1">
+              <SelectorPill className="flex-1" label="All" selected={syncFilter === 'all'} onPress={() => setSyncFilter('all')} />
+              <SelectorPill
+                className="flex-1"
+                label="Synced"
+                selected={syncFilter === 'synced'}
+                onPress={() => setSyncFilter('synced')}
+              />
+              <SelectorPill
+                className="flex-1"
+                label="Pending"
+                selected={syncFilter === 'pending'}
+                onPress={() => setSyncFilter('pending')}
+              />
             </HStack>
-          </DiveSummaryCard.Body>
-        </DiveSummaryCard>
+          </VStack>
+        </VStack>
 
         {visibleSessions.length === 0 ? (
           <EmptyLogbook />
@@ -86,20 +98,6 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
         <SafetyText>LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT.</SafetyText>
       </VStack>
     </ScrollView>
-  );
-}
-
-function FilterChip(props: { label: string; selected: boolean; onPress: () => void }): React.JSX.Element {
-  return (
-    <Pressable
-      onPress={props.onPress}
-      className={`flex-1 items-center rounded-full border px-2.5 py-2 ${
-        props.selected ? 'border-primary bg-primary/15' : 'border-border bg-muted'
-      }`}>
-      <Text className={`font-mono text-xs font-extrabold uppercase ${props.selected ? 'text-primary' : 'text-muted-foreground'}`}>
-        {props.label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -125,19 +123,23 @@ function SessionListItem(props: {
   return (
     <Pressable
       onPress={props.onPress}
-      className={`rounded-lg border p-3.5 ${props.selected ? 'border-primary bg-primary/10' : 'border-border bg-card'}`}>
+      className="rounded-2xl bg-card px-4 py-4"
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
       <VStack gap={7}>
         <HStack className="items-center justify-between">
-          <VStack gap={3} className="flex-1 pr-2.5">
-            <Text className="text-lg font-black text-card-foreground">{props.session.siteName ?? 'Untitled dive'}</Text>
-            <Text className="text-sm leading-5 text-muted-foreground">{formatDate(props.session.startedAt)}</Text>
-          </VStack>
+          <HStack gap={10} className="flex-1 items-center pr-2.5">
+            <Box className={`h-2 w-2 rounded-full ${props.selected ? 'bg-primary' : 'bg-muted'}`} />
+            <VStack gap={3} className="flex-1">
+              <Text className="text-lg font-semibold text-card-foreground">{props.session.siteName ?? 'Untitled dive'}</Text>
+              <Text className="text-sm leading-5 text-muted-foreground">{formatDate(props.session.startedAt)}</Text>
+            </VStack>
+          </HStack>
           <VStack gap={4} className="items-end">
             <StatusPill label={status} tone={syncStatusTone(status)} />
-            <Text className="font-mono text-lg font-black text-card-foreground">{formatDepth(summary.maxDepthMeters)}</Text>
+            <Text className="text-lg font-semibold text-card-foreground">{formatDepth(summary.maxDepthMeters)}</Text>
           </VStack>
         </HStack>
-        <Text className="text-sm leading-5 text-muted-foreground">
+        <Text className="pl-5 text-sm leading-5 text-muted-foreground">
           {props.session.diveMode ?? 'unknown'} · {formatDuration(summary.durationSeconds)} ·{' '}
           {props.session.tags?.join(', ') ?? 'no tags'}
         </Text>
@@ -154,7 +156,7 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
       <DiveSummaryCard.Header
         eyebrow={props.session.diveMode ?? 'unknown'}
         title={props.session.siteName ?? 'Dive detail'}
-        right={<Text className="font-mono text-sm font-black text-accent-foreground">{formatRating(props.session.rating)}</Text>}
+        right={<Text className="text-sm font-semibold text-primary">{formatRating(props.session.rating)}</Text>}
       />
       <DiveSummaryCard.Body>
         <HStack gap={10}>
@@ -181,21 +183,21 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
 
 function DetailMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={5} className="flex-1 rounded-md border border-border bg-muted p-3">
-      <Text className="font-mono text-xs font-black uppercase text-muted-foreground">{props.label}</Text>
-      <Text className="font-mono text-lg font-black text-foreground">{props.value}</Text>
+    <VStack gap={5} className="flex-1 rounded-2xl bg-muted px-4 py-4">
+      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
+      <Text className="text-lg font-semibold text-foreground">{props.value}</Text>
     </VStack>
   );
 }
 
 const syncStatusTone = (status: string): InstrumentTone => {
   if (status === 'synced') {
-    return 'success';
+    return 'primary';
   }
 
   if (status === 'failed') {
     return 'danger';
   }
 
-  return 'warning';
+  return 'secondary';
 };

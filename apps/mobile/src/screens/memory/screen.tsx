@@ -27,22 +27,22 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
         }, 0) / props.sessions.length;
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="p-4 pb-5">
-      <VStack gap={14}>
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
+      <VStack gap={16}>
         <VStack gap={7}>
           <HStack className="items-center justify-between">
             <StatusPill label="Memory" />
             <StatusPill label="Static" tone="secondary" />
           </HStack>
-          <Text className="text-3xl font-black text-foreground">Share Card Preview</Text>
+          <Text className="text-3xl font-semibold text-foreground">Share Card Preview</Text>
           <Text className="text-sm leading-5 text-muted-foreground">Preview a recreational log story from watch data.</Text>
         </VStack>
 
-        <DiveSummaryCard accent="success">
+        <DiveSummaryCard accent="primary">
           <DiveSummaryCard.Header
             eyebrow="Static preview"
             title={session?.siteName ?? 'Import a dive'}
-            right={<Text className="font-mono text-sm font-black text-muted-foreground">{formatDate(session?.startedAt)}</Text>}
+            right={<Text className="text-sm font-semibold text-muted-foreground">{formatDate(session?.startedAt)}</Text>}
           />
           <DiveSummaryCard.Body>
             <HStack gap={10}>
@@ -51,8 +51,8 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
             </HStack>
             <SessionProfile samples={session?.samples ?? []} kind="depth" title="Depth profile" />
             <HStack className="items-center justify-between">
-              <Text className="font-mono text-sm font-black text-accent-foreground">{formatRating(session?.rating)}</Text>
-              <Text className="flex-1 text-right text-xs font-extrabold leading-4 text-muted-foreground">
+              <Text className="text-sm font-semibold text-primary">{formatRating(session?.rating)}</Text>
+              <Text className="flex-1 text-right text-xs font-semibold leading-4 text-muted-foreground">
                 {session?.tags?.join(' · ') ?? 'shore · calm · training'}
               </Text>
             </HStack>
@@ -95,9 +95,9 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
 
 function ShareMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={4} className="flex-1 rounded-md border border-border bg-muted p-3">
-      <Text className="font-mono text-xs font-black uppercase text-muted-foreground">{props.label}</Text>
-      <Text className="font-mono text-2xl font-black text-foreground">{props.value}</Text>
+    <VStack gap={5} className="flex-1 rounded-2xl bg-muted px-4 py-4">
+      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
+      <Text className="text-2xl font-semibold text-foreground">{props.value}</Text>
     </VStack>
   );
 }

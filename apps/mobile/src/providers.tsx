@@ -10,8 +10,8 @@ type ProvidersProps = {
 export default function Providers(props: ProvidersProps): React.JSX.Element {
   return (
     <SafeAreaProvider>
-      <GluestackUIProvider mode="dark">
-        <StatusBar barStyle="light-content" />
+      <GluestackUIProvider mode="light">
+        <StatusBar barStyle="dark-content" />
         {props.children}
       </GluestackUIProvider>
     </SafeAreaProvider>

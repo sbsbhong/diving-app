@@ -43,20 +43,20 @@ enum DiveFormatters {
 
 enum DiveWatchTheme {
     static let background = Color(red: 0.0, green: 0.0, blue: 0.0)
-    static let surface = Color(red: 0.071, green: 0.078, blue: 0.078)
-    static let surfaceContainer = Color(red: 0.11, green: 0.118, blue: 0.118)
-    static let surfaceRaised = Color(red: 0.157, green: 0.165, blue: 0.169)
-    static let primary = Color(red: 0.0, green: 1.0, blue: 1.0)
-    static let secondary = Color(red: 0.463, green: 0.839, blue: 0.835)
-    static let success = Color(red: 0.596, green: 1.0, blue: 0.851)
-    static let warning = Color(red: 1.0, green: 0.749, blue: 0.0)
+    static let surface = Color(red: 0.153, green: 0.153, blue: 0.161)
+    static let surfaceContainer = Color(red: 0.165, green: 0.165, blue: 0.173)
+    static let surfaceRaised = Color(red: 0.145, green: 0.145, blue: 0.153)
+    static let primary = Color(red: 0.161, green: 0.592, blue: 1.0)
+    static let secondary = Color(red: 0.8, green: 0.8, blue: 0.8)
+    static let success = primary
+    static let warning = primary
     static let danger = Color(red: 1.0, green: 0.42, blue: 0.38)
     static let text = Color.white
-    static let mutedText = Color(red: 0.72, green: 0.79, blue: 0.79)
-    static let outline = Color(red: 0.231, green: 0.29, blue: 0.286)
+    static let mutedText = Color(red: 0.8, green: 0.8, blue: 0.8)
+    static let outline = Color(red: 0.251, green: 0.251, blue: 0.263)
 
     static let edgeMargin: CGFloat = 8
-    static let cardRadius: CGFloat = 16
+    static let cardRadius: CGFloat = 8
 
     static let safetyDisclaimer = "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT."
 
@@ -65,7 +65,7 @@ enum DiveWatchTheme {
     }
 
     static func labelFont() -> Font {
-        .system(size: 11, weight: .bold, design: .default)
+        .system(size: 11, weight: .semibold, design: .default)
     }
 }
 
@@ -88,17 +88,8 @@ struct InstrumentCard<Content: View>: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
-                    .stroke((accent ?? DiveWatchTheme.outline).opacity(accent == nil ? 0.55 : 0.9), lineWidth: 1)
+                    .stroke(DiveWatchTheme.outline.opacity(0.55), lineWidth: 1)
             )
-            .overlay(alignment: .leading) {
-                if let accent {
-                    Capsule()
-                        .fill(accent)
-                        .frame(width: 3)
-                        .padding(.vertical, 12)
-                        .padding(.leading, 1)
-                }
-            }
     }
 }
 
@@ -120,7 +111,7 @@ struct MetricCard: View {
                     .minimumScaleFactor(0.72)
 
                 Text(value)
-                    .font(DiveWatchTheme.metricFont(size: metricSize, weight: prominent ? .bold : .semibold))
+                    .font(DiveWatchTheme.metricFont(size: metricSize, weight: .semibold))
                     .foregroundStyle(prominent ? accent : DiveWatchTheme.text)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -221,19 +212,20 @@ struct DiveActionButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .bold))
+            .font(.system(size: 14, weight: .regular))
             .lineLimit(1)
             .minimumScaleFactor(0.72)
             .frame(maxWidth: .infinity, minHeight: 44)
             .foregroundStyle(foregroundColor)
             .background(
-                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
-                    .fill(fillColor.opacity(configuration.isPressed ? 0.76 : 1))
+                Capsule()
+                    .fill(fillColor)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
-                    .stroke(borderColor.opacity(configuration.isPressed ? 0.7 : 1), lineWidth: 1)
+                Capsule()
+                    .stroke(borderColor, lineWidth: 1)
             )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 
     private var fillColor: Color {
@@ -252,7 +244,7 @@ struct DiveActionButtonStyle: ButtonStyle {
         case .primary:
             return DiveWatchTheme.primary
         case .secondary:
-            return DiveWatchTheme.text.opacity(0.68)
+            return DiveWatchTheme.primary
         case .destructive:
             return DiveWatchTheme.danger
         }
@@ -261,9 +253,9 @@ struct DiveActionButtonStyle: ButtonStyle {
     private var foregroundColor: Color {
         switch kind {
         case .primary:
-            return Color(red: 0.0, green: 0.125, blue: 0.125)
+            return Color.white
         case .secondary:
-            return DiveWatchTheme.text
+            return DiveWatchTheme.primary
         case .destructive:
             return DiveWatchTheme.danger
         }
@@ -283,7 +275,7 @@ struct SafetyStopRing: View {
             Circle()
                 .trim(from: 0, to: clampedProgress)
                 .stroke(
-                    active ? DiveWatchTheme.success : DiveWatchTheme.secondary.opacity(0.7),
+                    active ? DiveWatchTheme.success : DiveWatchTheme.primary.opacity(0.55),
                     style: StrokeStyle(lineWidth: 7, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
@@ -297,7 +289,7 @@ struct SafetyStopRing: View {
                     .minimumScaleFactor(0.55)
 
                 Text(ringLabel)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(DiveWatchTheme.mutedText)
                     .lineLimit(1)
             }
@@ -329,7 +321,7 @@ struct DepthProfileSparkline: View {
             let points = profilePoints(in: proxy.size)
 
             ZStack {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
                     .fill(DiveWatchTheme.surfaceRaised.opacity(0.76))
 
                 Path { path in

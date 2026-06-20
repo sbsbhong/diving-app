@@ -51,16 +51,16 @@ private struct HomeHeader: View {
                     StatusPill(title: "Watch assistant")
                     Spacer(minLength: 6)
                     Text("\(sessionCount)")
-                        .font(DiveWatchTheme.metricFont(size: 18, weight: .bold))
+                        .font(DiveWatchTheme.metricFont(size: 18, weight: .semibold))
                         .foregroundStyle(DiveWatchTheme.primary)
                         .monospacedDigit()
                     Text("logs")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(DiveWatchTheme.mutedText)
                 }
 
                 Text("Dive Watch")
-                    .font(DiveWatchTheme.metricFont(size: 25, weight: .bold))
+                    .font(DiveWatchTheme.metricFont(size: 25, weight: .semibold))
                     .foregroundStyle(DiveWatchTheme.text)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -118,7 +118,7 @@ private struct LatestMetric: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title.uppercased())
-                .font(.system(size: 9, weight: .bold))
+                .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(DiveWatchTheme.mutedText)
             Text(value)
                 .font(DiveWatchTheme.metricFont(size: 17, weight: .semibold))
@@ -158,7 +158,7 @@ private struct PreDivePlanForm: View {
                 Stepper(value: $plan.plannedMaxDepthMeters, in: 3...40, step: 1) {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("PLANNED MAX")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.system(size: 9, weight: .semibold))
                             .foregroundStyle(DiveWatchTheme.mutedText)
                         Text("\(Int(plan.plannedMaxDepthMeters)) m")
                             .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
@@ -182,7 +182,7 @@ private struct DiveTextField: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
                     .fill(DiveWatchTheme.surfaceRaised.opacity(0.72))
             )
     }

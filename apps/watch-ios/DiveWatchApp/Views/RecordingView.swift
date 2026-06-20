@@ -42,7 +42,7 @@ struct RecordingView: View {
                     StatusPill(title: "Active dive")
                     Spacer(minLength: 6)
                     Text(DiveFormatters.duration(recorder.elapsedTime))
-                        .font(DiveWatchTheme.metricFont(size: 16, weight: .bold))
+                        .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
                         .foregroundStyle(DiveWatchTheme.primary)
                         .monospacedDigit()
                 }

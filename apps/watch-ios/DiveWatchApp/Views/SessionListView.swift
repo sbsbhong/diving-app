@@ -79,7 +79,7 @@ private struct SessionRow: View {
 
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(DiveFormatters.depth(summary.maxDepthMeters))
-                        .font(DiveWatchTheme.metricFont(size: 16, weight: .bold))
+                        .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
                         .foregroundStyle(profileColor)
                         .monospacedDigit()
                         .lineLimit(1)
@@ -95,13 +95,13 @@ private struct SessionRow: View {
 
     private var profileColor: Color {
         if summary.maxDepthMeters >= 20 {
-            return DiveWatchTheme.secondary
+            return DiveWatchTheme.primary
         }
 
         if summary.maxDepthMeters >= 10 {
             return DiveWatchTheme.primary
         }
 
-        return DiveWatchTheme.success
+        return DiveWatchTheme.primary.opacity(0.78)
     }
 }

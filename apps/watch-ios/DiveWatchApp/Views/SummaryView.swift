@@ -23,16 +23,16 @@ struct SummaryView: View {
                             StatusPill(title: "Dive captured", color: DiveWatchTheme.success)
                             Spacer(minLength: 6)
                             Text("\(summary.sampleCount)")
-                                .font(DiveWatchTheme.metricFont(size: 15, weight: .bold))
+                                .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
                                 .foregroundStyle(DiveWatchTheme.success)
                                 .monospacedDigit()
                             Text("samples")
-                                .font(.system(size: 9, weight: .bold))
+                                .font(.system(size: 9, weight: .semibold))
                                 .foregroundStyle(DiveWatchTheme.mutedText)
                         }
 
                         Text("Dive Summary")
-                            .font(DiveWatchTheme.metricFont(size: 24, weight: .bold))
+                            .font(DiveWatchTheme.metricFont(size: 24, weight: .semibold))
                             .foregroundStyle(DiveWatchTheme.text)
                             .lineLimit(1)
                             .minimumScaleFactor(0.62)
@@ -102,7 +102,7 @@ struct SummaryView: View {
                             .padding(.horizontal, 8)
                             .padding(.vertical, 7)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
                                     .fill(DiveWatchTheme.surfaceRaised.opacity(0.72))
                             )
                     }

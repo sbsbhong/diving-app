@@ -13,15 +13,15 @@ function SessionProfileRoot(props: SessionProfileProps): React.JSX.Element {
     props.kind === 'depth' ? sample.depthMeters : sample.waterTemperatureCelsius ?? 0,
   );
   const maxValue = Math.max(...values, 1);
-  const barClassName = props.kind === 'depth' ? 'bg-primary' : 'bg-secondary';
+  const barClassName = props.kind === 'depth' ? 'bg-primary' : 'bg-primary/70';
 
   return (
-    <VStack gap={10} className="rounded-md border border-border bg-muted p-3">
-      <Text className="font-mono text-xs font-extrabold uppercase text-muted-foreground">{props.title}</Text>
-      <HStack gap={4} className="h-20 items-end">
+    <VStack gap={10} className="rounded-2xl bg-muted px-4 py-4">
+      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.title}</Text>
+      <HStack gap={4} className="h-24 items-end">
         {values.map((value, index) => (
           <VStack key={`${props.title}-${index}`} className="flex-1 justify-end">
-            <VStack className={`w-full rounded-md ${barClassName}`} style={{ height: Math.max(4, (value / maxValue) * 76) }} />
+            <VStack className={`w-full rounded-sm ${barClassName}`} style={{ height: Math.max(4, (value / maxValue) * 88) }} />
           </VStack>
         ))}
       </HStack>
@@ -32,8 +32,8 @@ function SessionProfileRoot(props: SessionProfileProps): React.JSX.Element {
 function SessionProfileLegend(props: { label: string; value: string }): React.JSX.Element {
   return (
     <HStack className="justify-between">
-      <Text className="text-sm font-bold text-muted-foreground">{props.label}</Text>
-      <Text className="font-mono text-sm font-black text-foreground">{props.value}</Text>
+      <Text className="text-sm font-semibold text-muted-foreground">{props.label}</Text>
+      <Text className="text-sm font-semibold text-foreground">{props.value}</Text>
     </HStack>
   );
 }
