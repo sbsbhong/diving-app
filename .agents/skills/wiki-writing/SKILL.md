@@ -93,31 +93,31 @@ Update `.wiki/wiki/` when work changes:
 
 ## Page Format
 
-Use this default format for normal pages:
+Normal page는 이 형식을 기본으로 사용한다:
 
 ```md
 # Page Title
 
-## Summary
+## 요약
 
-Brief explanation.
+짧은 설명.
 
-## Current state
+## 현재 상태
 
-What is true now.
+현재 사실인 내용.
 
-## Details
+## 상세
 
-Important details.
+중요한 세부 사항.
 
-## Related pages
+## 관련 문서
 
 - [[...]]
 ```
 
 ## Decision Format
 
-Use this format for accepted decisions:
+Accepted decision은 이 형식을 사용한다:
 
 ```md
 # ADR: Decision title
@@ -128,15 +128,15 @@ Accepted
 
 ## Context
 
-Why this decision exists.
+이 결정이 필요한 이유.
 
 ## Decision
 
-What was decided.
+결정한 내용.
 
 ## Consequences
 
-Tradeoffs and implications.
+Tradeoff와 영향.
 
 ## Sources
 
@@ -147,17 +147,17 @@ Add accepted decisions to `.wiki/wiki/decisions/adr-index.md`.
 
 ## Wiki Log Format
 
-Append entries to `.wiki/wiki/log.md`:
+`.wiki/wiki/log.md`에는 다음 형식으로 entry를 추가한다:
 
 ```md
 ## YYYY-MM-DD - update type - title
 
-- Updated:
+- 수정:
   - `.wiki/wiki/...`
-- Source:
+- 근거:
   - `path/to/source`
-- Summary:
-  - Brief summary of what changed.
+- 요약:
+  - 바뀐 내용의 짧은 요약.
 ```
 
 ## Safety Boundary
@@ -184,6 +184,7 @@ If a feature approaches life-critical diving behavior, record the risk in `.wiki
 
 ## Style
 
-- 이 저장소의 `.wiki/wiki/` 문서는 기본적으로 한국어로 작성한다. 단, `url`, function name, variable name, schema name처럼 한국어가 어색하거나 보편적으로 영어를 쓰는 기술 용어와 identifier는 영어를 유지한다.
-- Prefer factual statements, clear boundaries, source paths, short sections, and durable concepts.
-- Avoid hype, vague claims, long essays, assumptions, and implementation noise.
+- 이 저장소의 `.wiki/wiki/` 문서는 설명 문장을 한국어 중심으로 작성한다. 영어는 변수명, 함수명, package name, file path, command, schema/type/field name, enum value, product name처럼 그대로 써야 정확한 identifier와, 한국어로 옮기면 의미가 흐려지는 기술 용어에만 사용한다.
+- 일반 설명에는 불필요한 영어 명사를 섞지 않는다. 예를 들어 `boundary`, `surface`, `current state`, `durable knowledge`처럼 한국어로 자연스럽게 설명할 수 있는 말은 `경계`, `화면`, `현재 상태`, `오래 유지할 지식`처럼 한국어로 쓴다.
+- 사실 중심 문장, 명확한 경계, source path, 짧은 section, 오래 유지할 개념을 선호한다.
+- 과장, 모호한 주장, 긴 에세이, 추정, 구현 소음은 피한다.
