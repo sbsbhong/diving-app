@@ -1,11 +1,13 @@
 import React from 'react';
-import { StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { StyleProp, ViewStyle } from 'react-native';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { Box, HStack, Text, VStack } from './primitives';
-import { diveTheme } from './theme';
+import type { InstrumentTone } from './theme';
 
 type DiveSummaryCardProps = {
   children?: React.ReactNode;
-  accent?: string;
+  accent?: InstrumentTone;
+  className?: string;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -21,10 +23,28 @@ type DiveSummaryCardMetricProps = {
   unit?: string;
 };
 
+const cardStyles = tva({
+  base: 'relative overflow-hidden rounded-lg border border-border bg-card p-4',
+});
+
+const accentStyles = tva({
+  base: 'absolute bottom-3 left-0 top-3 w-1 rounded-full',
+  variants: {
+    tone: {
+      primary: 'bg-primary',
+      secondary: 'bg-secondary',
+      success: 'bg-primary',
+      warning: 'bg-accent',
+      danger: 'bg-destructive',
+      muted: 'bg-muted',
+    },
+  },
+});
+
 function DiveSummaryCardRoot(props: DiveSummaryCardProps): React.JSX.Element {
   return (
-    <VStack gap={16} style={[styles.root, props.style]}>
-      {props.accent ? <Box style={[styles.accent, { backgroundColor: props.accent }]} /> : null}
+    <VStack gap={16} className={cardStyles({ class: props.className })} style={props.style}>
+      {props.accent ? <Box className={accentStyles({ tone: props.accent })} /> : null}
       {props.children}
     </VStack>
   );
@@ -32,10 +52,12 @@ function DiveSummaryCardRoot(props: DiveSummaryCardProps): React.JSX.Element {
 
 function DiveSummaryCardHeader(props: DiveSummaryCardHeaderProps): React.JSX.Element {
   return (
-    <HStack style={styles.header}>
-      <VStack gap={4} style={styles.headerText}>
-        {props.eyebrow ? <Text style={styles.eyebrow}>{props.eyebrow}</Text> : null}
-        <Text style={styles.title}>{props.title}</Text>
+    <HStack className="items-center justify-between">
+      <VStack gap={4} className="flex-1">
+        {props.eyebrow ? (
+          <Text className="font-mono text-xs font-extrabold uppercase text-muted-foreground">{props.eyebrow}</Text>
+        ) : null}
+        <Text className="text-2xl font-black text-card-foreground">{props.title}</Text>
       </VStack>
       {props.right}
     </HStack>
@@ -48,18 +70,18 @@ function DiveSummaryCardBody(props: { children?: React.ReactNode }): React.JSX.E
 
 function DiveSummaryCardMetric(props: DiveSummaryCardMetricProps): React.JSX.Element {
   return (
-    <HStack style={styles.metric}>
-      <Text style={styles.metricLabel}>{props.label}</Text>
-      <HStack gap={4} style={styles.metricValueGroup}>
-        <Text style={styles.metricValue}>{props.value}</Text>
-        {props.unit ? <Text style={styles.metricUnit}>{props.unit}</Text> : null}
+    <HStack className="min-h-9 items-center justify-between py-1">
+      <Text className="flex-1 text-xs font-extrabold uppercase text-muted-foreground">{props.label}</Text>
+      <HStack gap={4} className="items-baseline">
+        <Text className="text-right font-mono text-xl font-black text-card-foreground">{props.value}</Text>
+        {props.unit ? <Text className="font-mono text-sm font-extrabold text-muted-foreground">{props.unit}</Text> : null}
       </HStack>
     </HStack>
   );
 }
 
 function DiveSummaryCardFooter(props: { children?: React.ReactNode }): React.JSX.Element {
-  return <VStack style={styles.footer}>{props.children}</VStack>;
+  return <VStack className="border-t border-border pt-3.5">{props.children}</VStack>;
 }
 
 export const DiveSummaryCard = Object.assign(DiveSummaryCardRoot, {
@@ -67,79 +89,4 @@ export const DiveSummaryCard = Object.assign(DiveSummaryCardRoot, {
   Body: DiveSummaryCardBody,
   Metric: DiveSummaryCardMetric,
   Footer: DiveSummaryCardFooter,
-});
-
-const styles = StyleSheet.create({
-  root: {
-    position: 'relative',
-    overflow: 'hidden',
-    padding: diveTheme.spacing.card,
-    borderRadius: diveTheme.radii.card,
-    backgroundColor: diveTheme.colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-  },
-  accent: {
-    position: 'absolute',
-    left: 0,
-    top: 12,
-    bottom: 12,
-    width: 3,
-    borderRadius: 999,
-  },
-  header: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerText: {
-    flex: 1,
-  },
-  eyebrow: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  title: {
-    color: diveTheme.colors.text,
-    fontSize: 22,
-    fontWeight: '900',
-  },
-  metric: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 34,
-    paddingVertical: 5,
-  },
-  metricLabel: {
-    flex: 1,
-    color: diveTheme.colors.mutedText,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-    textTransform: 'uppercase',
-  },
-  metricValueGroup: {
-    alignItems: 'baseline',
-  },
-  metricValue: {
-    color: diveTheme.colors.text,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 20,
-    fontWeight: '900',
-    textAlign: 'right',
-  },
-  metricUnit: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: diveTheme.colors.outline,
-    paddingTop: 14,
-  },
 });

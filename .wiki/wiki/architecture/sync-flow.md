@@ -2,50 +2,50 @@
 
 ## Summary
 
-The current sync model is contract-first but not transport-complete. `packages/contracts` defines watch sync messages; the watch app can encode sync-ready JSON; the mobile app imports local fixture messages into in-memory logbook state.
+현재 sync model은 contract-first이지만 transport-complete 상태는 아니다. `packages/contracts`가 watch sync message를 정의하고, watch app은 sync-ready JSON을 encode할 수 있으며, mobile app은 local fixture message를 in-memory logbook state로 import한다.
 
 ## Current state
 
-Contract source files:
+Contract source file은 다음과 같다.
 
 - `packages/contracts/schemas/watch-sync-message.schema.json`
 - `packages/contracts/schemas/watch-session.schema.json`
 - `packages/contracts/schemas/watch-depth-sample.schema.json`
 
-Generated outputs:
+Generated output은 다음과 같다.
 
 - `packages/contracts/generated/typescript/index.ts`
 - `packages/contracts/generated/swift/WatchContracts.swift`
 
-`WatchSyncMessage` types are `sessionCreated`, `sessionUpdated`, and `sessionEnded`. A `WatchSession` requires `localSessionId`, `startedAt`, and `samples`; most metadata is optional.
+`WatchSyncMessage` type은 `sessionCreated`, `sessionUpdated`, `sessionEnded`를 지원한다. `WatchSession`은 `localSessionId`, `startedAt`, `samples`를 require하고, 대부분의 metadata는 optional이다.
 
 ## Details
 
-The session contract supports:
+Session contract가 지원하는 값은 다음과 같다.
 
 - dive mode: `scuba`, `freedive`, `snorkel`, `pool`, `unknown`
-- gas label, site id/name, buddies, gear, tags, notes
-- rating, perceived exertion, visibility rating, and water condition
+- gas label, site id/name, buddy, gear, tag, note
+- rating, perceived exertion, visibility rating, water condition
 - sync status: `pending`, `synced`, `failed`
-- entry and exit location placeholders
-- Unix-second start/end timestamps
-- max depth, average depth, water temperature, and depth samples
+- entry/exit location placeholder
+- Unix-second 기반 start/end timestamp
+- max depth, average depth, water temperature, depth sample
 
-Depth samples require `localSessionId`, Unix-second `timestamp`, and `depthMeters`; pressure and water temperature are optional.
+Depth sample은 `localSessionId`, Unix-second `timestamp`, `depthMeters`를 require한다. `pressureKPa`와 `waterTemperatureCelsius`는 optional이다.
 
-Mobile import behavior:
+Mobile import behavior는 다음과 같다.
 
-- `src/types/dive-session.ts` imports generated TypeScript contract types.
-- `useDiveLogbook` initializes from local watch fixture messages.
-- `importWatchMessages` deduplicates by `localSessionId` and `endedAt`, preserves existing import metadata, defaults missing sync status to `pending`, and sorts newest first.
+- `src/types/dive-session.ts`는 generated TypeScript contract type을 import한다.
+- `useDiveLogbook`은 local watch fixture message에서 initial state를 만든다.
+- `importWatchMessages`는 `localSessionId`와 `endedAt` 기반 key로 deduplicate하고, existing import metadata를 보존하며, missing sync status를 `pending`으로 default하고, newest first로 정렬한다.
 
-Current gaps:
+현재 gap은 다음과 같다.
 
-- No WatchConnectivity transport.
-- No background sync.
-- No Supabase upload.
-- No authenticated user association.
-- Generated Swift contracts are not currently compiled into the watch target.
+- WatchConnectivity transport 없음.
+- Background sync 없음.
+- Supabase upload 없음.
+- Authenticated user association 없음.
+- Generated Swift contract는 현재 watch target에 compile되지 않음.
 
 ## Related pages
 

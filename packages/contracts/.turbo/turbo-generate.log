@@ -13,4 +13,4 @@ warning Selected the next writable cache folder in the list, will be "/tmp/.yarn
 $ node ./scripts/generate-swift.mjs
 warning Cannot find a suitable global folder. Tried these: "/usr/local, /Users/hongseongbin/.yarn"
 Generated Swift contracts: generated/swift/WatchContracts.swift
-Done in 1.61s.
+Done in 1.76s.

@@ -2,27 +2,27 @@
 
 ## Summary
 
-The dive log domain currently models recreational watch-captured sessions for historical review, mobile import, and non-critical planning/memory surfaces.
+Dive log domain은 현재 recreational watch-captured session을 historical review, mobile import, non-critical planning/memory surface에 쓰기 위해 model한다.
 
 ## Current state
 
-The shared watch sync contract uses `WatchSession`, `WatchDepthSample`, `WatchLocation`, and `WatchSyncMessage`. The watch app has local Swift `DiveSession` and `DepthSample` models that map to sync-ready payloads. The mobile app builds `MobileDiveSession` from the generated `WatchSession` type.
+Shared watch sync contract는 `WatchSession`, `WatchDepthSample`, `WatchLocation`, `WatchSyncMessage`를 사용한다. Watch app은 sync-ready payload로 mapping되는 local Swift `DiveSession`, `DepthSample` model을 갖는다. Mobile app은 generated `WatchSession` type을 기반으로 `MobileDiveSession`을 만든다.
 
 ## Details
 
-Session identity and timing:
+Session identity와 timing은 다음과 같다.
 
-- `localSessionId` identifies the watch-side session in sync contracts.
-- `startedAt`, `endedAt`, sample timestamps, and location capture times are Unix timestamps in seconds in the shared contract.
-- Watch local models use Swift `Date`.
-- Mobile import keys combine `localSessionId` and `endedAt`; open sessions use `open` in the key.
+- `localSessionId`는 sync contract에서 watch-side session을 식별한다.
+- Shared contract의 `startedAt`, `endedAt`, sample timestamp, location capture time은 Unix timestamp seconds다.
+- Watch local model은 Swift `Date`를 사용한다.
+- Mobile import key는 `localSessionId`와 `endedAt`을 조합한다. Open session은 key에 `open`을 사용한다.
 
-Session metadata:
+Session metadata는 다음 field를 포함한다.
 
 - `schemaVersion`
 - `diveMode`
 - `gasLabel`
-- `siteId` and `siteName`
+- `siteId`, `siteName`
 - `buddyIds`
 - `gearIds`
 - `tags`
@@ -32,9 +32,9 @@ Session metadata:
 - `visibilityRating`
 - `waterCondition`
 - `syncStatus`
-- `entryLocation` and `exitLocation`
+- `entryLocation`, `exitLocation`
 
-Sample metadata:
+Sample metadata는 다음 field를 포함한다.
 
 - `localSessionId`
 - `timestamp`
@@ -42,9 +42,9 @@ Sample metadata:
 - optional `pressureKPa`
 - optional `waterTemperatureCelsius`
 
-Review summaries include duration, max depth, average depth, sample count, average water temperature, and ascent-rate reminder summaries. These are historical review values, not decompression calculations or emergency guidance.
+Review summary는 duration, max depth, average depth, sample count, average water temperature, ascent-rate reminder summary를 포함할 수 있다. 이 값들은 historical review value이며 decompression calculation이나 emergency guidance가 아니다.
 
-The mobile model adds `importKey`, `importedAt`, and `mediaPlaceholders` around the imported watch session.
+Mobile model은 imported watch session 위에 `importKey`, `importedAt`, `mediaPlaceholders`를 추가한다.
 
 ## Related pages
 

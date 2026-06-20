@@ -1,28 +1,36 @@
 import React from 'react';
-import { Pressable, PressableProps, StyleProp, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { Pressable, PressableProps, StyleProp, TextStyle, ViewStyle } from 'react-native';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { Text } from './primitives';
-import { diveTheme, InstrumentTone, toneColor } from './theme';
+import type { InstrumentTone } from './theme';
 
 type StatusPillProps = {
   label: string;
   tone?: InstrumentTone;
+  className?: string;
   style?: StyleProp<TextStyle>;
 };
 
-export function StatusPill(props: StatusPillProps): React.JSX.Element {
-  const color = toneColor(props.tone);
+const pillStyles = tva({
+  base: 'self-start overflow-hidden rounded-full border px-2 py-1 font-mono text-xs font-extrabold uppercase',
+  variants: {
+    tone: {
+      primary: 'border-primary bg-primary/15 text-primary',
+      secondary: 'border-secondary bg-secondary/15 text-secondary',
+      success: 'border-primary bg-primary/15 text-primary',
+      warning: 'border-accent bg-accent/15 text-accent-foreground',
+      danger: 'border-destructive bg-destructive/15 text-destructive',
+      muted: 'border-border bg-muted text-muted-foreground',
+    },
+  },
+  defaultVariants: {
+    tone: 'primary',
+  },
+});
 
+export function StatusPill(props: StatusPillProps): React.JSX.Element {
   return (
-    <Text
-      style={[
-        styles.pill,
-        {
-          borderColor: color,
-          backgroundColor: `${color}24`,
-          color,
-        },
-        props.style,
-      ]}>
+    <Text className={pillStyles({ tone: props.tone, class: props.className })} style={props.style}>
       {props.label.toUpperCase()}
     </Text>
   );
@@ -31,31 +39,51 @@ export function StatusPill(props: StatusPillProps): React.JSX.Element {
 type InstrumentButtonProps = Omit<PressableProps, 'style'> & {
   label: string;
   variant?: 'primary' | 'secondary' | 'danger';
+  className?: string;
   style?: StyleProp<ViewStyle>;
 };
+
+const buttonStyles = tva({
+  base: 'min-h-12 items-center justify-center rounded-lg border px-4 py-3',
+  variants: {
+    variant: {
+      primary: 'border-primary bg-primary',
+      secondary: 'border-primary bg-card',
+      danger: 'border-destructive bg-destructive/10',
+    },
+  },
+  defaultVariants: {
+    variant: 'secondary',
+  },
+});
+
+const buttonTextStyles = tva({
+  base: 'text-center text-sm font-black',
+  variants: {
+    variant: {
+      primary: 'text-primary-foreground',
+      secondary: 'text-primary',
+      danger: 'text-destructive',
+    },
+  },
+  defaultVariants: {
+    variant: 'secondary',
+  },
+});
 
 export function InstrumentButton({
   label,
   variant = 'secondary',
+  className,
   style,
   ...pressableProps
 }: InstrumentButtonProps): React.JSX.Element {
-  const isPrimary = variant === 'primary';
-  const isDanger = variant === 'danger';
-
   return (
     <Pressable
       {...pressableProps}
-      style={({ pressed }) => [
-        styles.button,
-        isPrimary && styles.buttonPrimary,
-        isDanger && styles.buttonDanger,
-        pressed && styles.buttonPressed,
-        style,
-      ]}>
-      <Text style={[styles.buttonText, isPrimary && styles.buttonTextPrimary, isDanger && styles.buttonTextDanger]}>
-        {label}
-      </Text>
+      className={buttonStyles({ variant, class: className })}
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
+      <Text className={buttonTextStyles({ variant })}>{label}</Text>
     </Pressable>
   );
 }
@@ -65,61 +93,5 @@ type SafetyTextProps = {
 };
 
 export function SafetyText(props: SafetyTextProps): React.JSX.Element {
-  return <Text style={styles.safetyText}>{props.children}</Text>;
+  return <Text className="text-center text-xs font-extrabold uppercase leading-4 text-muted-foreground">{props.children}</Text>;
 }
-
-const styles = StyleSheet.create({
-  pill: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderRadius: diveTheme.radii.pill,
-    overflow: 'hidden',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-  },
-  button: {
-    minHeight: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: diveTheme.colors.primary,
-    borderRadius: diveTheme.radii.card,
-    backgroundColor: diveTheme.colors.surfaceContainer,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonPrimary: {
-    backgroundColor: diveTheme.colors.primary,
-  },
-  buttonDanger: {
-    borderColor: diveTheme.colors.danger,
-    backgroundColor: '#2b1717',
-  },
-  buttonPressed: {
-    opacity: 0.78,
-  },
-  buttonText: {
-    color: diveTheme.colors.primary,
-    fontSize: 14,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  buttonTextPrimary: {
-    color: diveTheme.colors.primaryText,
-  },
-  buttonTextDanger: {
-    color: diveTheme.colors.danger,
-  },
-  safetyText: {
-    color: `${diveTheme.colors.mutedText}d6`,
-    fontSize: 10,
-    fontWeight: '800',
-    lineHeight: 15,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-  },
-});

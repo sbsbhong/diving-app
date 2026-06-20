@@ -1,10 +1,9 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
-import { diveTheme } from '../../components/ui/theme';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
 import { summarizeSession } from '../../utils/session-summary';
@@ -21,22 +20,24 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const recentSummary = recentSession ? summarizeSession(recentSession) : undefined;
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
-      <DiveSummaryCard accent={diveTheme.colors.primary}>
-        <HStack style={styles.headerRow}>
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="gap-3.5 px-4 pb-5 pt-3">
+      <DiveSummaryCard accent="primary">
+        <HStack className="items-center justify-between">
           <StatusPill label="Watch assistant" />
-          <HStack gap={4} style={styles.logCount}>
-            <Text style={styles.logCountValue}>{props.sessions.length}</Text>
-            <Text style={styles.logCountLabel}>logs</Text>
+          <HStack gap={4} className="items-baseline">
+            <Text className="font-mono text-2xl font-black text-primary">{props.sessions.length}</Text>
+            <Text className="text-xs font-extrabold uppercase text-muted-foreground">logs</Text>
           </HStack>
         </HStack>
         <VStack gap={6}>
-          <Text style={styles.heading}>DiveMobile</Text>
-          <Text style={styles.description}>Recreational watch log review. Non-certified assistant.</Text>
+          <Text className="text-3xl font-black text-card-foreground">DiveMobile</Text>
+          <Text className="text-sm leading-5 text-muted-foreground">
+            Recreational watch log review. Non-certified assistant.
+          </Text>
         </VStack>
       </DiveSummaryCard>
 
-      <DiveSummaryCard accent={diveTheme.colors.primary}>
+      <DiveSummaryCard accent="primary">
         <DiveSummaryCard.Header
           eyebrow="Latest watch import"
           title={recentSession?.siteName ?? 'Import a watch dive'}
@@ -53,13 +54,13 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
         <MetricTile label="Bottom time" value={formatDuration(recentSummary?.durationSeconds ?? 0)} />
       </HStack>
 
-      <DiveSummaryCard accent={diveTheme.colors.success}>
-        <HStack gap={14} style={styles.assistantLayout}>
+      <DiveSummaryCard accent="success">
+        <HStack gap={14} className="items-center">
           <AssistantRing />
-          <VStack gap={7} style={styles.assistantText}>
+          <VStack gap={7} className="flex-1">
             <StatusPill label="Assistant steady" tone="success" />
-            <Text style={styles.sectionLabel}>Safety assistant</Text>
-            <Text style={styles.description}>Monitoring reminders from watch logs.</Text>
+            <Text className="font-mono text-xs font-extrabold uppercase text-muted-foreground">Safety assistant</Text>
+            <Text className="text-sm leading-5 text-muted-foreground">Monitoring reminders from watch logs.</Text>
           </VStack>
         </HStack>
         <DiveSummaryCard.Metric label="Ascent" value="Review only" />
@@ -79,114 +80,18 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
 
 function MetricTile(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <DiveSummaryCard style={styles.metricTile}>
-      <Text style={styles.metricLabel}>{props.label}</Text>
-      <Text style={styles.metricValue}>{props.value}</Text>
+    <DiveSummaryCard className="flex-1">
+      <Text className="font-mono text-xs font-extrabold uppercase text-muted-foreground">{props.label}</Text>
+      <Text className="font-mono text-2xl font-black text-card-foreground">{props.value}</Text>
     </DiveSummaryCard>
   );
 }
 
 function AssistantRing(): React.JSX.Element {
   return (
-    <VStack style={styles.ring}>
-      <Text style={styles.ringValue}>OK</Text>
-      <Text style={styles.ringLabel}>ASSIST</Text>
+    <VStack className="h-20 w-20 items-center justify-center rounded-full border-8 border-primary bg-muted">
+      <Text className="font-mono text-xl font-black text-primary">OK</Text>
+      <Text className="text-center text-xs font-black uppercase text-muted-foreground">ASSIST</Text>
     </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: diveTheme.colors.background,
-  },
-  container: {
-    gap: 14,
-    paddingHorizontal: diveTheme.spacing.screen,
-    paddingTop: 12,
-    paddingBottom: 18,
-  },
-  headerRow: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  logCount: {
-    alignItems: 'baseline',
-  },
-  logCountValue: {
-    color: diveTheme.colors.primary,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 22,
-    fontWeight: '900',
-  },
-  logCountLabel: {
-    color: diveTheme.colors.mutedText,
-    fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-  },
-  heading: {
-    color: diveTheme.colors.text,
-    fontSize: 28,
-    fontWeight: '900',
-  },
-  description: {
-    color: diveTheme.colors.mutedText,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  metricTile: {
-    flex: 1,
-  },
-  metricLabel: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  metricValue: {
-    color: diveTheme.colors.text,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 24,
-    fontWeight: '900',
-  },
-  assistantLayout: {
-    alignItems: 'center',
-  },
-  assistantText: {
-    flex: 1,
-  },
-  sectionLabel: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  ring: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 76,
-    height: 76,
-    borderWidth: 7,
-    borderColor: diveTheme.colors.success,
-    borderRadius: 38,
-    backgroundColor: diveTheme.colors.surfaceRaised,
-  },
-  ringValue: {
-    color: diveTheme.colors.success,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 20,
-    fontWeight: '900',
-  },
-  ringLabel: {
-    color: diveTheme.colors.mutedText,
-    fontSize: 9,
-    fontWeight: '900',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-  },
-});

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { diveTheme } from './components/ui/theme';
+import { GluestackUIProvider } from '../components/ui/gluestack-ui-provider';
 
 type ProvidersProps = {
   children?: React.ReactNode;
@@ -10,8 +10,10 @@ type ProvidersProps = {
 export default function Providers(props: ProvidersProps): React.JSX.Element {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor={diveTheme.colors.background} />
-      {props.children}
+      <GluestackUIProvider mode="dark">
+        <StatusBar barStyle="light-content" />
+        {props.children}
+      </GluestackUIProvider>
     </SafeAreaProvider>
   );
 }

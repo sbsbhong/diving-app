@@ -1,10 +1,9 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
-import { diveTheme } from '../../components/ui/theme';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration, formatRating } from '../../utils/dive-formatters';
 import { summarizeSession } from '../../utils/session-summary';
@@ -28,22 +27,22 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
         }, 0) / props.sessions.length;
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="p-4 pb-5">
       <VStack gap={14}>
         <VStack gap={7}>
-          <HStack style={styles.headerRow}>
+          <HStack className="items-center justify-between">
             <StatusPill label="Memory" />
             <StatusPill label="Static" tone="secondary" />
           </HStack>
-          <Text style={styles.heading}>Share Card Preview</Text>
-          <Text style={styles.muted}>Preview a recreational log story from watch data.</Text>
+          <Text className="text-3xl font-black text-foreground">Share Card Preview</Text>
+          <Text className="text-sm leading-5 text-muted-foreground">Preview a recreational log story from watch data.</Text>
         </VStack>
 
-        <DiveSummaryCard accent={diveTheme.colors.success}>
+        <DiveSummaryCard accent="success">
           <DiveSummaryCard.Header
             eyebrow="Static preview"
             title={session?.siteName ?? 'Import a dive'}
-            right={<Text style={styles.dateText}>{formatDate(session?.startedAt)}</Text>}
+            right={<Text className="font-mono text-sm font-black text-muted-foreground">{formatDate(session?.startedAt)}</Text>}
           />
           <DiveSummaryCard.Body>
             <HStack gap={10}>
@@ -51,14 +50,16 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
               <ShareMetric label="Time" value={formatDuration(summary?.durationSeconds ?? 0)} />
             </HStack>
             <SessionProfile samples={session?.samples ?? []} kind="depth" title="Depth profile" />
-            <HStack style={styles.shareFooter}>
-              <Text style={styles.rating}>{formatRating(session?.rating)}</Text>
-              <Text style={styles.tags}>{session?.tags?.join(' · ') ?? 'shore · calm · training'}</Text>
+            <HStack className="items-center justify-between">
+              <Text className="font-mono text-sm font-black text-accent-foreground">{formatRating(session?.rating)}</Text>
+              <Text className="flex-1 text-right text-xs font-extrabold leading-4 text-muted-foreground">
+                {session?.tags?.join(' · ') ?? 'shore · calm · training'}
+              </Text>
             </HStack>
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
 
-        <DiveSummaryCard accent={diveTheme.colors.secondary}>
+        <DiveSummaryCard accent="secondary">
           <DiveSummaryCard.Header eyebrow="Export status" title="Future workflow" />
           <DiveSummaryCard.Body>
             <DiveSummaryCard.Metric label="Image render" value="Placeholder" />
@@ -68,7 +69,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
 
-        <DiveSummaryCard accent={diveTheme.colors.primary}>
+        <DiveSummaryCard accent="primary">
           <DiveSummaryCard.Header eyebrow="Safe analytics" title="Review summaries" />
           <DiveSummaryCard.Body>
             <DiveSummaryCard.Metric label="Logged dives" value={`${props.sessions.length}`} />
@@ -77,7 +78,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
             <DiveSummaryCard.Metric label="Favorite mode" value={session?.diveMode ?? 'Recreational'} />
           </DiveSummaryCard.Body>
           <DiveSummaryCard.Footer>
-            <Text style={styles.muted}>Review-only summaries. Non-certified assistant.</Text>
+            <Text className="text-sm leading-5 text-muted-foreground">Review-only summaries. Non-certified assistant.</Text>
           </DiveSummaryCard.Footer>
         </DiveSummaryCard>
 
@@ -94,79 +95,9 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
 
 function ShareMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={4} style={styles.shareMetric}>
-      <Text style={styles.shareMetricLabel}>{props.label}</Text>
-      <Text style={styles.shareMetricValue}>{props.value}</Text>
+    <VStack gap={4} className="flex-1 rounded-md border border-border bg-muted p-3">
+      <Text className="font-mono text-xs font-black uppercase text-muted-foreground">{props.label}</Text>
+      <Text className="font-mono text-2xl font-black text-foreground">{props.value}</Text>
     </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: diveTheme.colors.background,
-  },
-  content: {
-    padding: diveTheme.spacing.screen,
-    paddingBottom: 18,
-  },
-  headerRow: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  heading: {
-    color: diveTheme.colors.text,
-    fontSize: 26,
-    fontWeight: '900',
-  },
-  muted: {
-    color: diveTheme.colors.mutedText,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  dateText: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 12,
-    fontWeight: '900',
-  },
-  shareMetric: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-    borderRadius: diveTheme.radii.control,
-    backgroundColor: diveTheme.colors.surfaceRaised,
-    padding: 12,
-  },
-  shareMetricLabel: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-  },
-  shareMetricValue: {
-    color: diveTheme.colors.text,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 22,
-    fontWeight: '900',
-  },
-  shareFooter: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  rating: {
-    color: diveTheme.colors.warning,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  tags: {
-    flex: 1,
-    color: diveTheme.colors.mutedText,
-    fontSize: 12,
-    fontWeight: '800',
-    lineHeight: 17,
-    textAlign: 'right',
-  },
-});

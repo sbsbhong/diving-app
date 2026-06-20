@@ -1,10 +1,10 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Pressable, ScrollView, TextInput } from 'react-native';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
-import { diveTheme, InstrumentTone } from '../../components/ui/theme';
+import type { InstrumentTone } from '../../components/ui/theme';
 import type { DiveSessionFilter, MobileDiveSession } from '../../types/dive-session';
 import {
   formatDate,
@@ -43,21 +43,20 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   }, [selectedSession, visibleSessions]);
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <ScrollView className="flex-1 bg-background" contentContainerClassName="p-4 pb-5">
       <VStack gap={14}>
-        <DiveSummaryCard accent={diveTheme.colors.primary}>
+        <DiveSummaryCard accent="primary">
           <DiveSummaryCard.Header
             eyebrow="Log review"
             title="Imported Dives"
-            right={<InstrumentButton label="Import" onPress={props.onImportFixtures} style={styles.importButton} />}
+            right={<InstrumentButton label="Import" onPress={props.onImportFixtures} className="min-h-9 px-3 py-2" />}
           />
           <DiveSummaryCard.Body>
             <TextInput
               placeholder="Search site, buddy, gear, tag, note"
-              placeholderTextColor={diveTheme.colors.mutedText}
               value={props.filter.query}
               onChangeText={query => props.onFilterChange({ ...props.filter, query })}
-              style={styles.search}
+              className="rounded-md border border-input bg-muted px-3.5 py-2.5 text-sm font-bold text-foreground placeholder:text-muted-foreground"
             />
             <HStack gap={8}>
               <FilterChip label="All" selected={syncFilter === 'all'} onPress={() => setSyncFilter('all')} />
@@ -92,8 +91,14 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
 
 function FilterChip(props: { label: string; selected: boolean; onPress: () => void }): React.JSX.Element {
   return (
-    <Pressable onPress={props.onPress} style={[styles.filterChip, props.selected && styles.filterChipSelected]}>
-      <Text style={[styles.filterChipText, props.selected && styles.filterChipTextSelected]}>{props.label}</Text>
+    <Pressable
+      onPress={props.onPress}
+      className={`flex-1 items-center rounded-full border px-2.5 py-2 ${
+        props.selected ? 'border-primary bg-primary/15' : 'border-border bg-muted'
+      }`}>
+      <Text className={`font-mono text-xs font-extrabold uppercase ${props.selected ? 'text-primary' : 'text-muted-foreground'}`}>
+        {props.label}
+      </Text>
     </Pressable>
   );
 }
@@ -103,7 +108,7 @@ function EmptyLogbook(): React.JSX.Element {
     <DiveSummaryCard>
       <DiveSummaryCard.Header eyebrow="Empty" title="No imported dives yet" />
       <DiveSummaryCard.Footer>
-        <Text style={styles.muted}>Import a watch sync fixture to preview the logbook flow.</Text>
+        <Text className="text-sm leading-5 text-muted-foreground">Import a watch sync fixture to preview the logbook flow.</Text>
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
   );
@@ -118,19 +123,21 @@ function SessionListItem(props: {
   const status = props.session.syncStatus ?? 'pending';
 
   return (
-    <Pressable onPress={props.onPress} style={[styles.listItem, props.selected && styles.listItemSelected]}>
+    <Pressable
+      onPress={props.onPress}
+      className={`rounded-lg border p-3.5 ${props.selected ? 'border-primary bg-primary/10' : 'border-border bg-card'}`}>
       <VStack gap={7}>
-        <HStack style={styles.row}>
-          <VStack gap={3} style={styles.listTitleGroup}>
-            <Text style={styles.listTitle}>{props.session.siteName ?? 'Untitled dive'}</Text>
-            <Text style={styles.muted}>{formatDate(props.session.startedAt)}</Text>
+        <HStack className="items-center justify-between">
+          <VStack gap={3} className="flex-1 pr-2.5">
+            <Text className="text-lg font-black text-card-foreground">{props.session.siteName ?? 'Untitled dive'}</Text>
+            <Text className="text-sm leading-5 text-muted-foreground">{formatDate(props.session.startedAt)}</Text>
           </VStack>
-          <VStack gap={4} style={styles.listMetricGroup}>
+          <VStack gap={4} className="items-end">
             <StatusPill label={status} tone={syncStatusTone(status)} />
-            <Text style={styles.listMetric}>{formatDepth(summary.maxDepthMeters)}</Text>
+            <Text className="font-mono text-lg font-black text-card-foreground">{formatDepth(summary.maxDepthMeters)}</Text>
           </VStack>
         </HStack>
-        <Text style={styles.muted}>
+        <Text className="text-sm leading-5 text-muted-foreground">
           {props.session.diveMode ?? 'unknown'} · {formatDuration(summary.durationSeconds)} ·{' '}
           {props.session.tags?.join(', ') ?? 'no tags'}
         </Text>
@@ -143,11 +150,11 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
   const summary = summarizeSession(props.session);
 
   return (
-    <DiveSummaryCard accent={diveTheme.colors.primary}>
+    <DiveSummaryCard accent="primary">
       <DiveSummaryCard.Header
         eyebrow={props.session.diveMode ?? 'unknown'}
         title={props.session.siteName ?? 'Dive detail'}
-        right={<Text style={styles.rating}>{formatRating(props.session.rating)}</Text>}
+        right={<Text className="font-mono text-sm font-black text-accent-foreground">{formatRating(props.session.rating)}</Text>}
       />
       <DiveSummaryCard.Body>
         <HStack gap={10}>
@@ -163,9 +170,9 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
       </DiveSummaryCard.Body>
       <DiveSummaryCard.Footer>
         <VStack gap={8}>
-          <Text style={styles.note}>{props.session.notes ?? 'No notes yet.'}</Text>
-          <Text style={styles.muted}>Tags: {(props.session.tags ?? ['none']).join(', ')}</Text>
-          <Text style={styles.muted}>Media: {props.session.mediaPlaceholders.join(', ')}</Text>
+          <Text className="text-sm leading-5 text-card-foreground">{props.session.notes ?? 'No notes yet.'}</Text>
+          <Text className="text-sm leading-5 text-muted-foreground">Tags: {(props.session.tags ?? ['none']).join(', ')}</Text>
+          <Text className="text-sm leading-5 text-muted-foreground">Media: {props.session.mediaPlaceholders.join(', ')}</Text>
         </VStack>
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
@@ -174,9 +181,9 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
 
 function DetailMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={5} style={styles.detailMetric}>
-      <Text style={styles.detailMetricLabel}>{props.label}</Text>
-      <Text style={styles.detailMetricValue}>{props.value}</Text>
+    <VStack gap={5} className="flex-1 rounded-md border border-border bg-muted p-3">
+      <Text className="font-mono text-xs font-black uppercase text-muted-foreground">{props.label}</Text>
+      <Text className="font-mono text-lg font-black text-foreground">{props.value}</Text>
     </VStack>
   );
 }
@@ -192,125 +199,3 @@ const syncStatusTone = (status: string): InstrumentTone => {
 
   return 'warning';
 };
-
-const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: diveTheme.colors.background,
-  },
-  content: {
-    padding: diveTheme.spacing.screen,
-    paddingBottom: 18,
-  },
-  importButton: {
-    minHeight: 34,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  search: {
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-    borderRadius: diveTheme.radii.control,
-    backgroundColor: diveTheme.colors.surfaceRaised,
-    color: diveTheme.colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  filterChip: {
-    flex: 1,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-    borderRadius: diveTheme.radii.pill,
-    backgroundColor: diveTheme.colors.surfaceRaised,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  filterChipSelected: {
-    borderColor: diveTheme.colors.primary,
-    backgroundColor: `${diveTheme.colors.primary}1f`,
-  },
-  filterChipText: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-  },
-  filterChipTextSelected: {
-    color: diveTheme.colors.primary,
-  },
-  listItem: {
-    borderRadius: diveTheme.radii.card,
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-    backgroundColor: diveTheme.colors.surfaceContainer,
-    padding: 13,
-  },
-  listItemSelected: {
-    borderColor: diveTheme.colors.primary,
-    backgroundColor: `${diveTheme.colors.primary}12`,
-  },
-  row: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  listTitleGroup: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  listTitle: {
-    color: diveTheme.colors.text,
-    fontSize: 17,
-    fontWeight: '900',
-  },
-  listMetricGroup: {
-    alignItems: 'flex-end',
-  },
-  listMetric: {
-    color: diveTheme.colors.text,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 17,
-    fontWeight: '900',
-  },
-  muted: {
-    color: diveTheme.colors.mutedText,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  rating: {
-    color: diveTheme.colors.warning,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  detailMetric: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: diveTheme.colors.outline,
-    borderRadius: diveTheme.radii.control,
-    backgroundColor: diveTheme.colors.surfaceRaised,
-    padding: 12,
-  },
-  detailMetricLabel: {
-    color: diveTheme.colors.mutedText,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  detailMetricValue: {
-    color: diveTheme.colors.text,
-    fontFamily: diveTheme.fonts.metric,
-    fontSize: 18,
-    fontWeight: '900',
-  },
-  note: {
-    color: diveTheme.colors.text,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});

@@ -2,39 +2,39 @@
 
 ## Summary
 
-This app is a recreational dive logging and companion app. It is not a certified dive computer, decompression computer, medical device, emergency system, or replacement for certified dive equipment.
+이 app은 recreational dive logging companion app이다. Certified dive computer, decompression computer, medical device, emergency system, certified dive equipment replacement가 아니다.
 
 ## Current state
 
-Current app surfaces may record and review dive logs, display historical summaries, import watch-captured activity data, and show non-critical planning reminders. They must not present sensor data or derived summaries as safety-critical truth.
+현재 app surface는 dive log 기록과 review, historical summary display, watch-captured activity data import, non-critical planning reminder를 제공할 수 있다. Sensor data나 derived summary를 safety-critical truth로 표시하면 안 된다.
 
 ## Details
 
-Do not describe the app as:
+이 app을 다음처럼 설명하지 않는다.
 
-- calculating decompression obligations
-- calculating tissue loading
-- making gas switching safety decisions
-- giving life-critical underwater instructions
-- replacing a certified dive computer or certified dive equipment
-- providing medical, legal, or emergency recommendations
-- treating unverified Apple Watch sensor data as authoritative safety data
+- decompression obligation 계산
+- tissue loading 계산
+- gas switching safety decision 제공
+- life-critical underwater instruction 제공
+- certified dive computer 또는 certified dive equipment 대체
+- medical, legal, emergency recommendation 제공
+- 검증되지 않은 Apple Watch sensor data를 authoritative safety data로 취급
 
-Allowed framing:
+허용되는 framing은 다음과 같다.
 
 - recreational dive logging
 - companion recording
 - post-dive review
-- historical summaries
+- historical summary
 - watch-captured activity sync
-- non-certified planning reminders
-- non-certified ascent and safety-stop assistant status
+- non-certified planning reminder
+- non-certified ascent/safety-stop assistant status
 
-Current watch and mobile surfaces mention ascent, safety stop, surface interval, and no-fly concepts only as assistants, review states, or manual planning reminders. This boundary must stay explicit in UI copy and documentation.
+현재 watch/mobile surface는 ascent, safety stop, surface interval, no-fly concept을 assistant, review state, manual planning reminder로만 언급한다. 이 boundary는 UI copy와 documentation에서 명시적으로 유지해야 한다.
 
-Real underwater Apple Watch sensor behavior must be validated manually on supported hardware before public release. Simulator or mock sensor behavior is not evidence of real underwater correctness.
+Real underwater Apple Watch sensor behavior는 public release 전에 supported hardware에서 manual validation해야 한다. Simulator나 mock sensor behavior는 real underwater correctness의 증거가 아니다.
 
-Features involving decompression planning, air integration, tank pressure, emergency decisions, or certified dive-computer behavior are separate high-risk work and require explicit product, validation, and liability decisions before implementation.
+Decompression planning, air integration, tank pressure, emergency decision, certified dive-computer behavior는 별도 high-risk work다. 구현 전 explicit product, validation, liability decision이 필요하다.
 
 ## Related pages
 

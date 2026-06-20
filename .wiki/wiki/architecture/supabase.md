@@ -2,22 +2,22 @@
 
 ## Summary
 
-There is no implemented Supabase surface in the current repository.
+현재 repository에는 구현된 Supabase surface가 없다.
 
 ## Current state
 
-The repository does not contain a root `supabase/` directory or a `packages/supabase` workspace. Current code has no Supabase client initialization, generated database types, migrations, RLS policies, repository layer, edge functions, or auth flow.
+Repository에는 root `supabase/` directory나 `packages/supabase` workspace가 없다. Current code에는 Supabase client initialization, generated database type, migration, RLS policy, repository layer, edge function, auth flow가 없다.
 
 ## Details
 
-When Supabase is introduced, intended responsibilities are:
+Supabase가 도입될 때 의도된 responsibility는 다음과 같다.
 
-- `supabase/`: migrations, RLS policies, seed data, database functions, and edge functions if needed.
-- `packages/supabase`: Supabase client initialization, generated database types, repository/query functions, and Supabase-specific mapping logic.
+- `supabase/`: migration, RLS policy, seed data, database function, 필요 시 edge function.
+- `packages/supabase`: Supabase client initialization, generated database type, repository/query function, Supabase-specific mapping logic.
 
-Schema changes should be migration-driven. New or changed tables should be paired with RLS policies, generated type updates where supported, repository updates, and wiki updates for Supabase architecture and dive-log domain meaning.
+Schema change는 migration-driven이어야 한다. 새 table이나 변경된 table은 RLS policy, 지원되는 경우 generated type update, repository update, Supabase architecture와 dive-log domain wiki update와 함께 다룬다.
 
-The watch sync contract currently omits `userId`. User ownership should be attached later through authenticated mobile/server context rather than by watch-side capture.
+Watch sync contract는 현재 `userId`를 생략한다. User ownership은 watch-side capture가 아니라 authenticated mobile/server context에서 붙여야 한다.
 
 ## Related pages
 

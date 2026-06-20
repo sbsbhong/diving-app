@@ -2,28 +2,28 @@
 
 ## Summary
 
-`diving-app` is a Yarn 1 and Turborepo monorepo for a recreational dive logging companion. The current implementation combines a bare React Native mobile app, a SwiftUI watchOS app, shared watch sync contracts, and an unused shared utilities package.
+`diving-app`은 recreational dive logging companion을 위한 Yarn 1/Turborepo monorepo다. 현재 구현은 bare React Native mobile app, SwiftUI watchOS app, shared watch sync contract, 비어 있는 shared utility package를 함께 관리한다.
 
 ## Current state
 
-The app is not a certified dive computer, decompression computer, medical device, or life-support system. Current product surfaces focus on watch-captured session recording, local review, mobile logbook previews, planning reminders, and memory/share previews.
+이 앱은 certified dive computer, decompression computer, medical device, life-support system이 아니다. 현재 product surface는 watch-captured session recording, local review, mobile logbook preview, planning reminder, memory/share preview에 집중한다.
 
-The active workspaces are:
+Active workspace는 다음과 같다.
 
-- `apps/mobile`: React Native `0.85.3` app with custom tab navigation, local in-memory logbook state, watch fixture import, planning reminders, and memory preview screens.
-- `apps/watch-ios`: SwiftUI watchOS app in `DiveWatchApp.xcodeproj` with target and scheme `DiveWatchApp`.
-- `packages/contracts`: JSON Schema source of truth for watch sync messages, with generated TypeScript and Swift outputs.
-- `packages/shared-utils`: reserved empty shared workspace.
+- `apps/mobile`: React Native `0.85.3` app. Custom tab navigation, local in-memory logbook state, watch fixture import, planning reminder, memory preview screen을 포함한다.
+- `apps/watch-ios`: `DiveWatchApp.xcodeproj`를 사용하는 SwiftUI watchOS app. Target과 scheme은 `DiveWatchApp`이다.
+- `packages/contracts`: watch sync message의 JSON Schema source of truth와 generated TypeScript/Swift output을 관리한다.
+- `packages/shared-utils`: 현재 source implementation이 없는 reserved shared workspace다.
 
-There is no implemented Supabase layer, authentication flow, cloud backup, production persistence on mobile, or WatchConnectivity bridge in the current code.
+현재 code에는 Supabase layer, authentication flow, cloud backup, mobile production persistence, WatchConnectivity bridge가 구현되어 있지 않다.
 
 ## Details
 
-The watch app currently records with `MockDepthSensorProvider`. `RealDepthSensorProvider` is a placeholder for future `CMWaterSubmersionManager` work that must be manually validated on supported Apple Watch hardware before public release.
+watch app recording flow는 현재 `MockDepthSensorProvider`를 사용한다. `RealDepthSensorProvider`는 future `CMWaterSubmersionManager` 연동을 위한 placeholder이며, public release 전에 supported Apple Watch hardware에서 manual validation이 필요하다.
 
-The mobile app imports generated TypeScript watch contract types and local watch fixture messages. Imported sessions stay in React state for the running app process; they are not persisted to a device database or server.
+mobile app은 generated TypeScript watch contract type과 local watch fixture message를 import한다. Imported session은 실행 중인 React state에만 보관되며 device database나 server에 persist되지 않는다.
 
-The contracts intentionally omit `userId`. User association is expected to happen later on the mobile/server side after the mobile app owns authentication.
+sync contract는 의도적으로 `userId`를 포함하지 않는다. User association은 이후 mobile/server side에서 authentication이 생긴 뒤 붙이는 responsibility다.
 
 ## Related pages
 

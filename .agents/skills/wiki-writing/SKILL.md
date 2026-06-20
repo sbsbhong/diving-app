@@ -184,6 +184,6 @@ If a feature approaches life-critical diving behavior, record the risk in `.wiki
 
 ## Style
 
-- Write concise technical English unless the surrounding repository page uses Korean.
+- 이 저장소의 `.wiki/wiki/` 문서는 기본적으로 한국어로 작성한다. 단, `url`, function name, variable name, schema name처럼 한국어가 어색하거나 보편적으로 영어를 쓰는 기술 용어와 identifier는 영어를 유지한다.
 - Prefer factual statements, clear boundaries, source paths, short sections, and durable concepts.
 - Avoid hype, vague claims, long essays, assumptions, and implementation noise.
