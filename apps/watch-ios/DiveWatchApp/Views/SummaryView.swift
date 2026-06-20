@@ -20,7 +20,7 @@ struct SummaryView: View {
                 InstrumentCard(accent: DiveWatchTheme.primary) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            StatusPill(title: "Dive captured")
+                            StatusPill(title: String(localized: "Dive captured"))
                             Spacer(minLength: 6)
                             Text("\(summary.sampleCount)")
                                 .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
@@ -43,16 +43,16 @@ struct SummaryView: View {
                 }
 
                 HStack(spacing: 8) {
-                    MetricCard(title: "Duration", value: DiveFormatters.duration(summary.durationSeconds), compact: true)
-                    MetricCard(title: "Max Depth", value: DiveFormatters.depth(summary.maxDepthMeters), compact: true)
+                    MetricCard(title: String(localized: "Duration"), value: DiveFormatters.duration(summary.durationSeconds), compact: true)
+                    MetricCard(title: String(localized: "Max Depth"), value: DiveFormatters.depth(summary.maxDepthMeters), compact: true)
                 }
 
                 InstrumentCard {
                     VStack(spacing: 6) {
-                        SummaryRow(title: "Average depth", value: DiveFormatters.depth(summary.averageDepthMeters))
-                        SummaryRow(title: "Average temp", value: DiveFormatters.temperature(summary.averageWaterTemperatureCelsius))
+                        SummaryRow(title: String(localized: "Average depth"), value: DiveFormatters.depth(summary.averageDepthMeters))
+                        SummaryRow(title: String(localized: "Average temp"), value: DiveFormatters.temperature(summary.averageWaterTemperatureCelsius))
                         SummaryRow(
-                            title: "Ascent reminder max",
+                            title: String(localized: "Ascent reminder max"),
                             value: DiveFormatters.ascentRate(summary.maxAscentRateMetersPerMinute)
                         )
                     }
@@ -74,7 +74,7 @@ struct SummaryView: View {
 
                         Picker("Exertion", selection: $perceivedExertion) {
                             ForEach(1...5, id: \.self) { value in
-                                Text("Effort \(value)").tag(value)
+                                Text("\(String(localized: "Effort")) \(value)").tag(value)
                             }
                         }
                         .labelsHidden()
@@ -82,7 +82,7 @@ struct SummaryView: View {
 
                         Picker("Visibility", selection: $visibilityRating) {
                             ForEach(1...5, id: \.self) { value in
-                                Text("Vis \(value)").tag(value)
+                                Text("\(String(localized: "Vis")) \(value)").tag(value)
                             }
                         }
                         .labelsHidden()
@@ -130,7 +130,7 @@ struct SummaryView: View {
                 }
                 .buttonStyle(DiveActionButtonStyle(kind: .secondary))
 
-                DiveDisclaimer(text: "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT.")
+                DiveDisclaimer(text: String(localized: "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT."))
             }
             .padding(.horizontal, DiveWatchTheme.edgeMargin)
             .padding(.vertical, 10)

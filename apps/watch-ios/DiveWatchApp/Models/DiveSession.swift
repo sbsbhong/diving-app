@@ -12,15 +12,15 @@ enum DiveMode: String, Codable, CaseIterable, Identifiable {
     var label: String {
         switch self {
         case .scuba:
-            return "Scuba"
+            return String(localized: "Scuba")
         case .freedive:
-            return "Freedive"
+            return String(localized: "Freedive")
         case .snorkel:
-            return "Snorkel"
+            return String(localized: "Snorkel")
         case .pool:
-            return "Pool"
+            return String(localized: "Pool")
         case .unknown:
-            return "Unknown"
+            return String(localized: "Unknown")
         }
     }
 }
@@ -38,17 +38,17 @@ enum WaterCondition: String, Codable, CaseIterable, Identifiable {
     var label: String {
         switch self {
         case .calm:
-            return "Calm"
+            return String(localized: "Calm")
         case .mild:
-            return "Mild"
+            return String(localized: "Mild")
         case .choppy:
-            return "Choppy"
+            return String(localized: "Choppy")
         case .surge:
-            return "Surge"
+            return String(localized: "Surge")
         case .current:
-            return "Current"
+            return String(localized: "Current")
         case .unknown:
-            return "Unknown"
+            return String(localized: "Unknown")
         }
     }
 }
@@ -61,11 +61,11 @@ enum DiveSyncStatus: String, Codable {
     var label: String {
         switch self {
         case .pending:
-            return "Pending sync"
+            return String(localized: "Pending sync")
         case .synced:
-            return "Synced"
+            return String(localized: "Synced")
         case .failed:
-            return "Sync failed"
+            return String(localized: "Sync failed")
         }
     }
 }
@@ -79,7 +79,7 @@ struct WatchLocation: Codable, Equatable {
 
 struct PreDivePlan: Codable, Equatable {
     var diveMode: DiveMode = .scuba
-    var gasLabel: String = "Air"
+    var gasLabel: String = String(localized: "Air")
     var siteName: String = ""
     var buddyName: String = ""
     var quickNote: String = ""

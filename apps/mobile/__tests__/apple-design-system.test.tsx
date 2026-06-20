@@ -3,7 +3,7 @@ import Providers from '../src/providers';
 import { colors } from '../components/ui/gluestack-ui-provider/config';
 
 const readSource = (...segments: string[]) => {
-  const nodeRequire = eval('require') as (moduleName: string) => {
+  const nodeRequire = require as (moduleName: string) => {
     readFileSync: (filePath: string, encoding: 'utf8') => string;
   };
   const fs = nodeRequire('fs');

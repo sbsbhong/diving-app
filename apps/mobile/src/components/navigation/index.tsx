@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { DiveLogbookSection } from '../../types/dive-session';
@@ -21,6 +22,7 @@ export default function RootNavigation(): React.JSX.Element {
   const [section, setSection] = React.useState<DiveLogbookSection>('home');
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
+  const { t } = useTranslation();
 
   return (
     <VStack
@@ -57,10 +59,10 @@ export default function RootNavigation(): React.JSX.Element {
         gap={0}
         className="bg-card px-2 pt-1"
         style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
-        <NavTab label="Home" selected={section === 'home'} onPress={() => setSection('home')} />
-        <NavTab label="Logbook" selected={section === 'logbook'} onPress={() => setSection('logbook')} />
-        <NavTab label="Plan" selected={section === 'planning'} onPress={() => setSection('planning')} />
-        <NavTab label="Memory" selected={section === 'memory'} onPress={() => setSection('memory')} />
+        <NavTab label={t('navigation.home')} selected={section === 'home'} onPress={() => setSection('home')} />
+        <NavTab label={t('navigation.logbook')} selected={section === 'logbook'} onPress={() => setSection('logbook')} />
+        <NavTab label={t('navigation.planning')} selected={section === 'planning'} onPress={() => setSection('planning')} />
+        <NavTab label={t('navigation.memory')} selected={section === 'memory'} onPress={() => setSection('memory')} />
       </HStack>
     </VStack>
   );

@@ -34,26 +34,29 @@ struct SessionDetailView: View {
                 }
 
                 HStack(spacing: 8) {
-                    MetricCard(title: "Max Depth", value: DiveFormatters.depth(summary.maxDepthMeters), compact: true)
-                    MetricCard(title: "Duration", value: DiveFormatters.duration(summary.durationSeconds), compact: true)
+                    MetricCard(title: String(localized: "Max Depth"), value: DiveFormatters.depth(summary.maxDepthMeters), compact: true)
+                    MetricCard(title: String(localized: "Duration"), value: DiveFormatters.duration(summary.durationSeconds), compact: true)
                 }
 
                 InstrumentCard {
                     VStack(spacing: 6) {
-                        SummaryRow(title: "Average depth", value: DiveFormatters.depth(summary.averageDepthMeters))
-                        SummaryRow(title: "Average temp", value: DiveFormatters.temperature(summary.averageWaterTemperatureCelsius))
-                        SummaryRow(title: "Samples", value: "\(summary.sampleCount)")
-                        SummaryRow(title: "Ascent reminder max", value: DiveFormatters.ascentRate(summary.maxAscentRateMetersPerMinute))
+                        SummaryRow(title: String(localized: "Average depth"), value: DiveFormatters.depth(summary.averageDepthMeters))
+                        SummaryRow(title: String(localized: "Average temp"), value: DiveFormatters.temperature(summary.averageWaterTemperatureCelsius))
+                        SummaryRow(title: String(localized: "Samples"), value: "\(summary.sampleCount)")
+                        SummaryRow(
+                            title: String(localized: "Ascent reminder max"),
+                            value: DiveFormatters.ascentRate(summary.maxAscentRateMetersPerMinute)
+                        )
                     }
                 }
 
                 InstrumentCard(accent: DiveWatchTheme.secondary) {
                     VStack(spacing: 6) {
-                        SummaryRow(title: "Gas", value: session.gasLabel ?? "Not set")
-                        SummaryRow(title: "Site", value: session.siteName ?? "Not set")
-                        SummaryRow(title: "Rating", value: DiveFormatters.rating(session.rating))
-                        SummaryRow(title: "Visibility", value: session.visibilityRating.map(String.init) ?? "Not set")
-                        SummaryRow(title: "Water", value: session.waterCondition.label)
+                        SummaryRow(title: String(localized: "Gas"), value: session.gasLabel ?? String(localized: "Not set"))
+                        SummaryRow(title: String(localized: "Site"), value: session.siteName ?? String(localized: "Not set"))
+                        SummaryRow(title: String(localized: "Rating"), value: DiveFormatters.rating(session.rating))
+                        SummaryRow(title: String(localized: "Visibility"), value: session.visibilityRating.map(String.init) ?? String(localized: "Not set"))
+                        SummaryRow(title: String(localized: "Water"), value: session.waterCondition.label)
                     }
                 }
 
@@ -62,7 +65,7 @@ struct SessionDetailView: View {
                         Text("NOTE")
                             .font(DiveWatchTheme.labelFont())
                             .foregroundStyle(DiveWatchTheme.mutedText)
-                        Text(session.notes ?? "No note")
+                        Text(session.notes ?? String(localized: "No note"))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(DiveWatchTheme.text)
                             .multilineTextAlignment(.leading)
@@ -70,7 +73,7 @@ struct SessionDetailView: View {
                     }
                 }
 
-                DiveDisclaimer(text: "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT.")
+                DiveDisclaimer(text: String(localized: "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT."))
             }
             .padding(.horizontal, DiveWatchTheme.edgeMargin)
             .padding(.vertical, 10)

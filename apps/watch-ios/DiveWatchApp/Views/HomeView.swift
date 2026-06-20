@@ -48,7 +48,7 @@ private struct HomeHeader: View {
         InstrumentCard(accent: DiveWatchTheme.primary) {
             VStack(alignment: .leading, spacing: 7) {
                 HStack(alignment: .center) {
-                    StatusPill(title: "Watch assistant")
+                    StatusPill(title: String(localized: "Watch assistant"))
                     Spacer(minLength: 6)
                     Text("\(sessionCount)")
                         .font(DiveWatchTheme.metricFont(size: 18, weight: .semibold))
@@ -103,8 +103,8 @@ private struct LatestSessionCard: View {
                 }
 
                 HStack(spacing: 8) {
-                    LatestMetric(title: "Max", value: DiveFormatters.depth(summary.maxDepthMeters))
-                    LatestMetric(title: "Time", value: DiveFormatters.duration(summary.durationSeconds))
+                    LatestMetric(title: String(localized: "Max"), value: DiveFormatters.depth(summary.maxDepthMeters))
+                    LatestMetric(title: String(localized: "Time"), value: DiveFormatters.duration(summary.durationSeconds))
                 }
             }
         }
@@ -150,10 +150,10 @@ private struct PreDivePlanForm: View {
                 .labelsHidden()
                 .frame(height: 58)
 
-                DiveTextField(title: "Gas label", text: $plan.gasLabel)
-                DiveTextField(title: "Site", text: $plan.siteName)
-                DiveTextField(title: "Buddy", text: $plan.buddyName)
-                DiveTextField(title: "Quick note", text: $plan.quickNote)
+                DiveTextField(title: String(localized: "Gas label"), text: $plan.gasLabel)
+                DiveTextField(title: String(localized: "Site"), text: $plan.siteName)
+                DiveTextField(title: String(localized: "Buddy"), text: $plan.buddyName)
+                DiveTextField(title: String(localized: "Quick note"), text: $plan.quickNote)
 
                 Stepper(value: $plan.plannedMaxDepthMeters, in: 3...40, step: 1) {
                     VStack(alignment: .leading, spacing: 1) {

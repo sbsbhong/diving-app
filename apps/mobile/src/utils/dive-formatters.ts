@@ -1,9 +1,9 @@
-export const formatDate = (seconds?: number) => {
+export const formatDate = (seconds?: number, locale = 'ko', unknownLabel = '알 수 없는 날짜') => {
   if (!seconds) {
-    return 'Unknown date';
+    return unknownLabel;
   }
 
-  return new Intl.DateTimeFormat('en', {
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -40,9 +40,9 @@ export const formatTemperature = (celsius?: number) => {
   return `${celsius.toFixed(1)} °C`;
 };
 
-export const formatRating = (rating?: number) => {
+export const formatRating = (rating?: number, notRatedLabel = '평가 없음') => {
   if (!rating) {
-    return 'Not rated';
+    return notRatedLabel;
   }
 
   return '★'.repeat(Math.max(1, Math.min(5, rating)));

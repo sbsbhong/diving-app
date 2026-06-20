@@ -1,9 +1,11 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
-import { HStack, Text, VStack } from '../../components/ui/primitives';
+import { Box, HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
+import { resolveSupportedLanguage, type SupportedLanguage } from '../../i18n';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
 import { summarizeSession } from '../../utils/session-summary';
@@ -15,37 +17,49 @@ type HomeScreenProps = {
   onOpenMemory: () => void;
 };
 
+const languageOptions = [
+  { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
+] as const satisfies ReadonlyArray<{ code: SupportedLanguage; label: string }>;
+
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
+  const { i18n, t } = useTranslation();
   const recentSession = props.sessions[0];
   const recentSummary = recentSession ? summarizeSession(recentSession) : undefined;
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const syncStatus = recentSession?.syncStatus ?? 'pending';
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
       <VStack gap={16}>
         <VStack gap={10} className="pt-2">
-          <StatusPill label="Watch assistant" />
+          <HStack className="items-start justify-between">
+            <StatusPill label={t('status.watchAssistant')} />
+            <LanguageMenu />
+          </HStack>
           <Text className="text-4xl font-semibold leading-10 text-foreground">DiveMobile</Text>
-          <Text className="text-base leading-6 text-muted-foreground">
-            Review recreational watch logs. Non-certified assistant.
-          </Text>
+          <Text className="text-base leading-6 text-muted-foreground">{t('home.subtitle')}</Text>
           <HStack gap={5} className="items-baseline">
             <Text className="text-2xl font-semibold text-primary">{props.sessions.length}</Text>
-            <Text className="text-sm font-semibold text-muted-foreground">logs imported</Text>
+            <Text className="text-sm font-semibold text-muted-foreground">{t('home.logsImported')}</Text>
           </HStack>
         </VStack>
 
         <DiveSummaryCard>
           <DiveSummaryCard.Header
-            eyebrow="Latest watch import"
-            title={recentSession?.siteName ?? 'Import a watch dive'}
-            right={<StatusPill label={recentSession?.syncStatus ?? 'pending'} tone="secondary" />}
+            eyebrow={t('home.latestWatchImport')}
+            title={recentSession?.siteName ?? t('home.importWatchDive')}
+            right={<StatusPill label={t(`status.${syncStatus}`, { defaultValue: syncStatus })} tone="secondary" />}
           />
           <DiveSummaryCard.Body>
-            <DiveSummaryCard.Metric label="Date" value={formatDate(recentSession?.startedAt)} />
-            <SessionProfile samples={recentSession?.samples ?? []} kind="depth" title="Depth profile" />
+            <DiveSummaryCard.Metric
+              label={t('home.date')}
+              value={formatDate(recentSession?.startedAt, locale, t('formatters.unknownDate'))}
+            />
+            <SessionProfile samples={recentSession?.samples ?? []} kind="depth" title={t('home.depthProfile')} />
             <HStack gap={10}>
-              <MetricTile label="Max depth" value={formatDepth(recentSummary?.maxDepthMeters)} />
-              <MetricTile label="Bottom time" value={formatDuration(recentSummary?.durationSeconds ?? 0)} />
+              <MetricTile label={t('home.maxDepth')} value={formatDepth(recentSummary?.maxDepthMeters)} />
+              <MetricTile label={t('home.bottomTime')} value={formatDuration(recentSummary?.durationSeconds ?? 0)} />
             </HStack>
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
@@ -54,23 +68,107 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
           <HStack gap={12} className="items-center">
             <AssistantMark />
             <VStack gap={4} className="flex-1">
-              <Text className="text-base font-semibold text-card-foreground">Assistant steady</Text>
-              <Text className="text-sm leading-5 text-muted-foreground">Reminder review from watch logs only.</Text>
+              <Text className="text-base font-semibold text-card-foreground">{t('home.assistantSteady')}</Text>
+              <Text className="text-sm leading-5 text-muted-foreground">{t('home.reminderReview')}</Text>
             </VStack>
           </HStack>
-          <DiveSummaryCard.Metric label="Ascent" value="Review only" />
-          <DiveSummaryCard.Metric label="Safety stop" value="Planning reminder" />
+          <DiveSummaryCard.Metric label={t('home.ascent')} value={t('home.reviewOnly')} />
+          <DiveSummaryCard.Metric label={t('home.safetyStop')} value={t('home.planningReminder')} />
         </DiveSummaryCard>
 
         <VStack gap={10}>
-          <InstrumentButton label="Open Logbook" variant="primary" onPress={props.onOpenLogbook} />
-          <InstrumentButton label="Plan Next Dive" onPress={props.onOpenPlanning} />
-          <InstrumentButton label="Preview Memory" onPress={props.onOpenMemory} />
+          <InstrumentButton label={t('home.openLogbook')} variant="primary" onPress={props.onOpenLogbook} />
+          <InstrumentButton label={t('home.planNextDive')} onPress={props.onOpenPlanning} />
+          <InstrumentButton label={t('home.previewMemory')} onPress={props.onOpenMemory} />
         </VStack>
 
-        <SafetyText>RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT.</SafetyText>
+        <SafetyText>{t('home.safetyText')}</SafetyText>
       </VStack>
     </ScrollView>
+  );
+}
+
+function LanguageMenu(): React.JSX.Element {
+  const { i18n, t } = useTranslation();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const activeLanguage = resolveSupportedLanguage(i18n.resolvedLanguage ?? i18n.language);
+  const activeLanguageLabel = languageOptions.find(option => option.code === activeLanguage)?.label ?? '한국어';
+
+  const handleSelect = React.useCallback(
+    async (language: SupportedLanguage) => {
+      await i18n.changeLanguage(language);
+      setMenuOpen(false);
+    },
+    [i18n],
+  );
+
+  return (
+    <VStack gap={6} className="min-w-[136px] items-end">
+      <Pressable
+        accessibilityLabel={t(menuOpen ? 'language.closeMenu' : 'language.openMenu')}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: menuOpen }}
+        className="min-h-10 rounded-full bg-card px-3 py-2"
+        testID="language-menu-trigger"
+        onPress={() => setMenuOpen(open => !open)}
+        style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.96 : 1 }] }]}>
+        <HStack gap={7} className="items-center">
+          <LanguageMark selected={menuOpen} />
+          <Text className="text-xs font-semibold text-card-foreground">{activeLanguageLabel}</Text>
+        </HStack>
+      </Pressable>
+
+      {menuOpen ? (
+        <VStack accessibilityRole="menu" className="w-full rounded-2xl bg-card p-1">
+          {languageOptions.map(option => {
+            const selected = option.code === activeLanguage;
+
+            return (
+              <Pressable
+                accessibilityLabel={t('language.switchTo', { language: option.label })}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                className={selected ? 'min-h-10 rounded-xl bg-primary/10 px-3 py-2' : 'min-h-10 rounded-xl px-3 py-2'}
+                key={option.code}
+                testID={`language-option-${option.code}`}
+                onPress={() => handleSelect(option.code)}
+                style={({ pressed }) => [{ opacity: pressed ? 0.68 : 1 }]}>
+                <HStack className="items-center justify-between">
+                  <HStack gap={8} className="items-center">
+                    <LanguageMark selected={selected} />
+                    <Text
+                      className={
+                        selected ? 'text-sm font-semibold text-primary' : 'text-sm font-semibold text-card-foreground'
+                      }>
+                      {option.label}
+                    </Text>
+                  </HStack>
+                  <Box className={selected ? 'h-2 w-2 rounded-full bg-primary' : 'h-2 w-2 rounded-full bg-muted'} />
+                </HStack>
+              </Pressable>
+            );
+          })}
+        </VStack>
+      ) : null}
+    </VStack>
+  );
+}
+
+function LanguageMark(props: { selected: boolean }): React.JSX.Element {
+  return (
+    <Box
+      className={
+        props.selected
+          ? 'h-6 w-6 items-center justify-center rounded-full bg-primary'
+          : 'h-6 w-6 items-center justify-center rounded-full bg-primary/10'
+      }>
+      <Text
+        className={
+          props.selected ? 'text-[10px] font-semibold text-primary-foreground' : 'text-[10px] font-semibold text-primary'
+        }>
+        A/가
+      </Text>
+    </Box>
   );
 }
 

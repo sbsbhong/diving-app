@@ -39,7 +39,7 @@ struct RecordingView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    StatusPill(title: "Active dive")
+                    StatusPill(title: String(localized: "Active dive"))
                     Spacer(minLength: 6)
                     Text(DiveFormatters.duration(recorder.elapsedTime))
                         .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
@@ -54,8 +54,8 @@ struct RecordingView: View {
                 )
 
                 HStack(spacing: 8) {
-                    CompactMetric(title: "Temp", value: DiveFormatters.temperature(recorder.waterTemperatureCelsius))
-                    CompactMetric(title: "Mode", value: plan.diveMode.label)
+                    CompactMetric(title: String(localized: "Temp"), value: DiveFormatters.temperature(recorder.waterTemperatureCelsius))
+                    CompactMetric(title: String(localized: "Mode"), value: plan.diveMode.label)
                 }
 
                 AssistantBlock(
@@ -72,7 +72,7 @@ struct RecordingView: View {
                 }
                 .buttonStyle(DiveActionButtonStyle(kind: .destructive))
 
-                DiveDisclaimer(text: "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER.")
+                DiveDisclaimer(text: String(localized: "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER."))
             }
             .padding(.horizontal, DiveWatchTheme.edgeMargin)
             .padding(.vertical, 10)
@@ -102,8 +102,8 @@ private struct LiveDepthPanel: View {
                     .minimumScaleFactor(0.45)
 
                 HStack(spacing: 10) {
-                    LiveDepthStat(title: "Time", value: elapsed)
-                    LiveDepthStat(title: "Max", value: maxDepth)
+                    LiveDepthStat(title: String(localized: "Time"), value: elapsed)
+                    LiveDepthStat(title: String(localized: "Max"), value: maxDepth)
                 }
             }
         }
@@ -161,11 +161,11 @@ private struct AssistantBlock: View {
         InstrumentCard {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .center, spacing: 8) {
-                    StatusPill(title: ascentWarningActive ? "Ascent reminder" : "Assistant steady")
+                    StatusPill(title: ascentWarningActive ? String(localized: "Ascent reminder") : String(localized: "Assistant steady"))
 
                     Spacer(minLength: 4)
 
-                    Text(safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : "REVIEW")
+                    Text(safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : String(localized: "REVIEW"))
                         .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
                         .foregroundStyle(DiveWatchTheme.primary)
                         .monospacedDigit()
@@ -173,20 +173,24 @@ private struct AssistantBlock: View {
                         .minimumScaleFactor(0.58)
                 }
 
-                Text(ascentWarningActive ? "Review ascent rate with certified equipment." : "Reminder review from watch logs only.")
+                Text(
+                    ascentWarningActive
+                        ? String(localized: "Review ascent rate with certified equipment.")
+                        : String(localized: "Reminder review from watch logs only.")
+                )
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(DiveWatchTheme.text)
                     .lineLimit(2)
                     .minimumScaleFactor(0.72)
 
                 SummaryRow(
-                    title: "Ascent",
-                    value: ascentWarningActive ? "Reminder active" : DiveFormatters.ascentRate(ascentRate),
+                    title: String(localized: "Ascent"),
+                    value: ascentWarningActive ? String(localized: "Reminder active") : DiveFormatters.ascentRate(ascentRate),
                     accent: ascentWarningActive ? DiveWatchTheme.primary : nil
                 )
                 SummaryRow(
-                    title: "Safety stop",
-                    value: safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : "Planning reminder",
+                    title: String(localized: "Safety stop"),
+                    value: safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : String(localized: "Planning reminder"),
                     accent: safetyStopActive ? DiveWatchTheme.primary : nil
                 )
             }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack, Text, VStack } from '../../components/ui/primitives';
@@ -14,8 +15,10 @@ type MemoryScreenProps = {
 };
 
 export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Element {
+  const { i18n, t } = useTranslation();
   const session = props.sessions[0];
   const summary = session ? summarizeSession(session) : undefined;
+  const locale = i18n.resolvedLanguage ?? i18n.language;
   const totalDuration = props.sessions.reduce((sum, currentSession) => {
     return sum + summarizeSession(currentSession).durationSeconds;
   }, 0);
@@ -31,63 +34,77 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
       <VStack gap={16}>
         <VStack gap={7}>
           <HStack className="items-center justify-between">
-            <StatusPill label="Memory" />
-            <StatusPill label="Static" tone="secondary" />
+            <StatusPill label={t('status.memory')} />
+            <StatusPill label={t('status.static')} tone="secondary" />
           </HStack>
-          <Text className="text-3xl font-semibold text-foreground">Share Card Preview</Text>
-          <Text className="text-sm leading-5 text-muted-foreground">Preview a recreational log story from watch data.</Text>
+          <Text className="text-3xl font-semibold text-foreground">{t('memory.title')}</Text>
+          <Text className="text-sm leading-5 text-muted-foreground">{t('memory.subtitle')}</Text>
         </VStack>
 
         <DiveSummaryCard accent="primary">
           <DiveSummaryCard.Header
-            eyebrow="Static preview"
-            title={session?.siteName ?? 'Import a dive'}
-            right={<Text className="text-sm font-semibold text-muted-foreground">{formatDate(session?.startedAt)}</Text>}
+            eyebrow={t('memory.staticPreview')}
+            title={session?.siteName ?? t('memory.importDive')}
+            right={
+              <Text className="text-sm font-semibold text-muted-foreground">
+                {formatDate(session?.startedAt, locale, t('formatters.unknownDate'))}
+              </Text>
+            }
           />
           <DiveSummaryCard.Body>
             <HStack gap={10}>
-              <ShareMetric label="Max" value={formatDepth(summary?.maxDepthMeters)} />
-              <ShareMetric label="Time" value={formatDuration(summary?.durationSeconds ?? 0)} />
+              <ShareMetric label={t('memory.max')} value={formatDepth(summary?.maxDepthMeters)} />
+              <ShareMetric label={t('memory.time')} value={formatDuration(summary?.durationSeconds ?? 0)} />
             </HStack>
-            <SessionProfile samples={session?.samples ?? []} kind="depth" title="Depth profile" />
+            <SessionProfile samples={session?.samples ?? []} kind="depth" title={t('logbook.depthProfile')} />
             <HStack className="items-center justify-between">
-              <Text className="text-sm font-semibold text-primary">{formatRating(session?.rating)}</Text>
+              <Text className="text-sm font-semibold text-primary">{formatRating(session?.rating, t('formatters.notRated'))}</Text>
               <Text className="flex-1 text-right text-xs font-semibold leading-4 text-muted-foreground">
-                {session?.tags?.join(' · ') ?? 'shore · calm · training'}
+                {session?.tags?.join(' · ') ?? t('memory.fallbackTags')}
               </Text>
             </HStack>
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
 
         <DiveSummaryCard accent="secondary">
-          <DiveSummaryCard.Header eyebrow="Export status" title="Future workflow" />
+          <DiveSummaryCard.Header eyebrow={t('memory.exportStatus')} title={t('memory.futureWorkflow')} />
           <DiveSummaryCard.Body>
-            <DiveSummaryCard.Metric label="Image render" value="Placeholder" />
-            <DiveSummaryCard.Metric label="Social sharing" value="Separate spec" />
-            <DiveSummaryCard.Metric label="Media workflow" value={`${session?.mediaPlaceholders.length ?? 0} placeholders`} />
-            <DiveSummaryCard.Metric label="Color correction" value="Research only" />
+            <DiveSummaryCard.Metric label={t('memory.imageRender')} value={t('memory.placeholder')} />
+            <DiveSummaryCard.Metric label={t('memory.socialSharing')} value={t('memory.separateSpec')} />
+            <DiveSummaryCard.Metric
+              label={t('memory.mediaWorkflow')}
+              value={t('memory.placeholders', { count: session?.mediaPlaceholders.length ?? 0 })}
+            />
+            <DiveSummaryCard.Metric label={t('memory.colorCorrection')} value={t('memory.researchOnly')} />
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
 
         <DiveSummaryCard accent="primary">
-          <DiveSummaryCard.Header eyebrow="Safe analytics" title="Review summaries" />
+          <DiveSummaryCard.Header eyebrow={t('memory.safeAnalytics')} title={t('memory.reviewSummaries')} />
           <DiveSummaryCard.Body>
-            <DiveSummaryCard.Metric label="Logged dives" value={`${props.sessions.length}`} />
-            <DiveSummaryCard.Metric label="Total bottom time" value={formatDuration(totalDuration)} />
-            <DiveSummaryCard.Metric label="Avg max depth" value={formatDepth(averageMaxDepth)} />
-            <DiveSummaryCard.Metric label="Favorite mode" value={session?.diveMode ?? 'Recreational'} />
+            <DiveSummaryCard.Metric label={t('memory.loggedDives')} value={`${props.sessions.length}`} />
+            <DiveSummaryCard.Metric label={t('memory.totalBottomTime')} value={formatDuration(totalDuration)} />
+            <DiveSummaryCard.Metric label={t('memory.avgMaxDepth')} value={formatDepth(averageMaxDepth)} />
+            <DiveSummaryCard.Metric
+              label={t('memory.favoriteMode')}
+              value={
+                session?.diveMode
+                  ? t(`diveModes.${session.diveMode}`, { defaultValue: session.diveMode })
+                  : t('memory.recreational')
+              }
+            />
           </DiveSummaryCard.Body>
           <DiveSummaryCard.Footer>
-            <Text className="text-sm leading-5 text-muted-foreground">Review-only summaries. Non-certified assistant.</Text>
+            <Text className="text-sm leading-5 text-muted-foreground">{t('memory.reviewOnlySummaries')}</Text>
           </DiveSummaryCard.Footer>
         </DiveSummaryCard>
 
         <VStack gap={10}>
-          <InstrumentButton label="Save Preview" variant="primary" onPress={() => undefined} />
-          <InstrumentButton label="Open Logbook" onPress={props.onOpenLogbook} />
+          <InstrumentButton label={t('memory.savePreview')} variant="primary" onPress={() => undefined} />
+          <InstrumentButton label={t('memory.openLogbook')} onPress={props.onOpenLogbook} />
         </VStack>
 
-        <SafetyText>MEMORY REVIEW ONLY. NON-CERTIFIED ASSISTANT.</SafetyText>
+        <SafetyText>{t('memory.safetyText')}</SafetyText>
       </VStack>
     </ScrollView>
   );

@@ -22,6 +22,7 @@
 		A10000000000000000000013 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* SummaryView.swift */; };
 		A10000000000000000000014 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* SessionListView.swift */; };
 		A10000000000000000000015 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* SessionDetailView.swift */; };
+		A10000000000000000000016 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000017 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 		B10000000000000000000014 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
 		B10000000000000000000015 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
 		B10000000000000000000016 /* DiveWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiveWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000017 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000001 /* DiveWatchApp.swift */,
+				B10000000000000000000017 /* Localizable.xcstrings */,
 				A20000000000000000000004 /* Models */,
 				A20000000000000000000005 /* Sensors */,
 				A20000000000000000000006 /* Recording */,
@@ -173,6 +176,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ko,
 				Base,
 			);
 			mainGroup = A20000000000000000000001;
@@ -190,6 +194,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000016 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

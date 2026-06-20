@@ -19,7 +19,7 @@ struct SessionListView: View {
                     }
                 }
 
-                DiveDisclaimer(text: "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT.")
+                DiveDisclaimer(text: String(localized: "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT."))
             }
             .padding(.horizontal, DiveWatchTheme.edgeMargin)
             .padding(.vertical, 10)
@@ -33,7 +33,7 @@ private struct EmptySessionsView: View {
     var body: some View {
         InstrumentCard(accent: DiveWatchTheme.secondary) {
             VStack(alignment: .leading, spacing: 7) {
-                StatusPill(title: "No logs", color: DiveWatchTheme.secondary)
+                StatusPill(title: String(localized: "No logs"), color: DiveWatchTheme.secondary)
                 Text("No saved sessions")
                     .font(DiveWatchTheme.metricFont(size: 20, weight: .semibold))
                     .foregroundStyle(DiveWatchTheme.text)

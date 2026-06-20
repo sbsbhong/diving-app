@@ -36,7 +36,7 @@ enum DiveFormatters {
     }
 
     static func rating(_ value: Int?) -> String {
-        guard let value else { return "Not rated" }
+        guard let value else { return String(localized: "Not rated") }
         return String(repeating: "★", count: max(1, min(5, value)))
     }
 }
@@ -55,7 +55,9 @@ enum DiveWatchTheme {
     static let edgeMargin: CGFloat = 8
     static let cardRadius: CGFloat = 8
 
-    static let safetyDisclaimer = "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT."
+    static var safetyDisclaimer: String {
+        String(localized: "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT.")
+    }
 
     static func metricFont(size: CGFloat, weight: Font.Weight = .semibold) -> Font {
         .system(size: size, weight: weight, design: .monospaced)
@@ -269,7 +271,7 @@ struct SafetyStopRing: View {
             }
         }
         .frame(width: 74, height: 74)
-        .accessibilityLabel("Safety stop planning reminder")
+        .accessibilityLabel(Text("Safety stop planning reminder"))
     }
 
     private var clampedProgress: Double {
@@ -277,12 +279,12 @@ struct SafetyStopRing: View {
     }
 
     private var ringValue: String {
-        if remainingSeconds <= 0 { return "DONE" }
+        if remainingSeconds <= 0 { return String(localized: "DONE") }
         return DiveFormatters.duration(remainingSeconds)
     }
 
     private var ringLabel: String {
-        active ? "STOP" : "ASSIST"
+        active ? String(localized: "STOP") : String(localized: "ASSIST")
     }
 }
 

@@ -19,6 +19,12 @@
       "skillPath": "skills/gluestack-ui-v4/SKILL.md",
       "computedHash": "5f00d8934fef415e31bbae36b1cb8bfe59452eeff0e48dea27172d620a00c612"
     },
+    "react-i18next": {
+      "source": "yildizberkay/skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-i18next/SKILL.md",
+      "computedHash": "2c419201047d93216faf44c2a0cce4ce86ed7ce4d1b51bc37577813069dd410d"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
