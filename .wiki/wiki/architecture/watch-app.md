@@ -37,4 +37,5 @@ watch 앱은 local Swift model과 동기화 가능한 JSON을 만들기 위한 `
 - [[architecture/sync-flow]]
 - [[domains/dive-log]]
 - [[domains/safety-rules]]
+- [[design/mobile-watch-ui-language]]
 - [[questions/open-questions]]

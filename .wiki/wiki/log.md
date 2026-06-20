@@ -1,5 +1,23 @@
 # Wiki 기록
 
+## 2026-06-20 - 디자인 - mobile/watch UI 언어
+
+- 수정:
+  - `.wiki/wiki/design/mobile-watch-ui-language.md`
+  - `.wiki/wiki/index.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - 사용자가 승인한 `iOS grouped base + dive instrument accent` 방향
+  - `DESIGN.md`
+  - `apps/mobile/src/screens/`
+  - `apps/mobile/src/components/ui/`
+  - `apps/watch-ios/DiveWatchApp/Views/`
+  - `.wiki/wiki/domains/safety-rules.md`
+- 요약:
+  - 모바일과 watchOS가 공유할 UI look and feel을 기록했다. 모바일은 iOS grouped 화면을 기본으로 하고, watchOS는 black canvas와 compact instrument card로 번역한다. 다이빙 도메인감은 수심, 시간, profile, 상태 같은 계기 요소에만 집중하며 safety copy는 review/reminder/non-certified assistant 범위에 둔다.
+
 ## 2026-06-20 - 문서화 - wiki 영어 사용 축소
 
 - 수정:

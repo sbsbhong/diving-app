@@ -56,3 +56,4 @@ iOS project는 `apps/mobile/ios/DiveMobile.xcworkspace`에 있다. Build wrapper
 - [[architecture/supabase]]
 - [[domains/dive-log]]
 - [[domains/safety-rules]]
+- [[design/mobile-watch-ui-language]]
