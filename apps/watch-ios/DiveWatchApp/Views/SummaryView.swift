@@ -17,14 +17,14 @@ struct SummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                InstrumentCard(accent: DiveWatchTheme.success) {
+                InstrumentCard(accent: DiveWatchTheme.primary) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            StatusPill(title: "Dive captured", color: DiveWatchTheme.success)
+                            StatusPill(title: "Dive captured")
                             Spacer(minLength: 6)
                             Text("\(summary.sampleCount)")
                                 .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
-                                .foregroundStyle(DiveWatchTheme.success)
+                                .foregroundStyle(DiveWatchTheme.primary)
                                 .monospacedDigit()
                             Text("samples")
                                 .font(.system(size: 9, weight: .semibold))
@@ -37,7 +37,7 @@ struct SummaryView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.62)
 
-                        DepthProfileSparkline(samples: session.samples, color: DiveWatchTheme.success)
+                        DepthProfileSparkline(samples: session.samples, color: DiveWatchTheme.primary)
                             .frame(height: 42)
                     }
                 }

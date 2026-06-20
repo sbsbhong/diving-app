@@ -47,23 +47,15 @@ struct RecordingView: View {
                         .monospacedDigit()
                 }
 
-                MetricCard(
-                    title: "Current Depth",
-                    value: DiveFormatters.depth(recorder.currentDepth),
-                    footnote: "Live mock sensor capture",
-                    prominent: true
-                )
-
-                MetricCard(
-                    title: "Bottom Time",
-                    value: DiveFormatters.duration(recorder.elapsedTime),
-                    accent: DiveWatchTheme.secondary,
-                    prominent: true
+                LiveDepthPanel(
+                    depth: DiveFormatters.depth(recorder.currentDepth),
+                    elapsed: DiveFormatters.duration(recorder.elapsedTime),
+                    maxDepth: DiveFormatters.depth(recorder.maxDepth)
                 )
 
                 HStack(spacing: 8) {
-                    MetricCard(title: "Max", value: DiveFormatters.depth(recorder.maxDepth), compact: true)
-                    MetricCard(title: "Temp", value: DiveFormatters.temperature(recorder.waterTemperatureCelsius), compact: true)
+                    CompactMetric(title: "Temp", value: DiveFormatters.temperature(recorder.waterTemperatureCelsius))
+                    CompactMetric(title: "Mode", value: plan.diveMode.label)
                 }
 
                 AssistantBlock(
@@ -90,6 +82,75 @@ struct RecordingView: View {
     }
 }
 
+private struct LiveDepthPanel: View {
+    let depth: String
+    let elapsed: String
+    let maxDepth: String
+
+    var body: some View {
+        InstrumentCard {
+            VStack(alignment: .leading, spacing: 9) {
+                Text("CURRENT DEPTH")
+                    .font(DiveWatchTheme.labelFont())
+                    .foregroundStyle(DiveWatchTheme.mutedText)
+
+                Text(depth)
+                    .font(DiveWatchTheme.metricFont(size: 40, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.primary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.45)
+
+                HStack(spacing: 10) {
+                    LiveDepthStat(title: "Time", value: elapsed)
+                    LiveDepthStat(title: "Max", value: maxDepth)
+                }
+            }
+        }
+    }
+}
+
+private struct LiveDepthStat: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title.uppercased())
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(DiveWatchTheme.mutedText)
+            Text(value)
+                .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
+                .foregroundStyle(DiveWatchTheme.text)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.58)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct CompactMetric: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        InstrumentCard {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title.uppercased())
+                    .font(DiveWatchTheme.labelFont())
+                    .foregroundStyle(DiveWatchTheme.mutedText)
+                    .lineLimit(1)
+                Text(value)
+                    .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+            }
+        }
+    }
+}
+
 private struct AssistantBlock: View {
     let ascentRate: Double
     let ascentWarningActive: Bool
@@ -97,50 +158,38 @@ private struct AssistantBlock: View {
     let safetyStopRemainingSeconds: TimeInterval
 
     var body: some View {
-        InstrumentCard(accent: ascentWarningActive ? DiveWatchTheme.warning : DiveWatchTheme.success) {
-            VStack(alignment: .leading, spacing: 9) {
-                HStack(alignment: .center, spacing: 10) {
-                    SafetyStopRing(
-                        remainingSeconds: safetyStopRemainingSeconds,
-                        progress: safetyStopProgress,
-                        active: safetyStopActive
-                    )
+        InstrumentCard {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
+                    StatusPill(title: ascentWarningActive ? "Ascent reminder" : "Assistant steady")
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        StatusPill(
-                            title: ascentWarningActive ? "Slow down" : "Assistant steady",
-                            color: ascentWarningActive ? DiveWatchTheme.warning : DiveWatchTheme.success
-                        )
+                    Spacer(minLength: 4)
 
-                        Text(ascentWarningActive ? "ASCENT REMINDER" : "SAFETY ASSISTANT")
-                            .font(DiveWatchTheme.labelFont())
-                            .foregroundStyle(DiveWatchTheme.mutedText)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-
-                        Text(ascentWarningActive ? "Reduce ascent rate" : "Monitoring reminders")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(DiveWatchTheme.text)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.72)
-                    }
+                    Text(safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : "REVIEW")
+                        .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
+                        .foregroundStyle(DiveWatchTheme.primary)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.58)
                 }
+
+                Text(ascentWarningActive ? "Review ascent rate with certified equipment." : "Reminder review from watch logs only.")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.text)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.72)
 
                 SummaryRow(
                     title: "Ascent",
                     value: ascentWarningActive ? "Reminder active" : DiveFormatters.ascentRate(ascentRate),
-                    accent: ascentWarningActive ? DiveWatchTheme.warning : nil
+                    accent: ascentWarningActive ? DiveWatchTheme.primary : nil
                 )
                 SummaryRow(
                     title: "Safety stop",
                     value: safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : "Planning reminder",
-                    accent: safetyStopActive ? DiveWatchTheme.success : nil
+                    accent: safetyStopActive ? DiveWatchTheme.primary : nil
                 )
             }
         }
-    }
-
-    private var safetyStopProgress: Double {
-        1 - max(0, min(180, safetyStopRemainingSeconds)) / 180
     }
 }

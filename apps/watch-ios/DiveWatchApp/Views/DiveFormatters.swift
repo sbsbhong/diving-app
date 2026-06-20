@@ -48,12 +48,9 @@ enum DiveWatchTheme {
     static let surfaceRaised = Color(red: 0.145, green: 0.145, blue: 0.153)
     static let primary = Color(red: 0.161, green: 0.592, blue: 1.0)
     static let secondary = Color(red: 0.8, green: 0.8, blue: 0.8)
-    static let success = primary
-    static let warning = primary
     static let danger = Color(red: 1.0, green: 0.42, blue: 0.38)
     static let text = Color.white
     static let mutedText = Color(red: 0.8, green: 0.8, blue: 0.8)
-    static let outline = Color(red: 0.251, green: 0.251, blue: 0.263)
 
     static let edgeMargin: CGFloat = 8
     static let cardRadius: CGFloat = 8
@@ -85,10 +82,6 @@ struct InstrumentCard<Content: View>: View {
             .background(
                 RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
                     .fill(DiveWatchTheme.surfaceContainer)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
-                    .stroke(DiveWatchTheme.outline.opacity(0.55), lineWidth: 1)
             )
     }
 }
@@ -179,10 +172,6 @@ struct StatusPill: View {
                 Capsule()
                     .fill(color.opacity(0.16))
             )
-            .overlay(
-                Capsule()
-                    .stroke(color.opacity(0.65), lineWidth: 1)
-            )
     }
 }
 
@@ -221,10 +210,6 @@ struct DiveActionButtonStyle: ButtonStyle {
                 Capsule()
                     .fill(fillColor)
             )
-            .overlay(
-                Capsule()
-                    .stroke(borderColor, lineWidth: 1)
-            )
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 
@@ -236,17 +221,6 @@ struct DiveActionButtonStyle: ButtonStyle {
             return DiveWatchTheme.surfaceContainer
         case .destructive:
             return DiveWatchTheme.danger.opacity(0.18)
-        }
-    }
-
-    private var borderColor: Color {
-        switch kind {
-        case .primary:
-            return DiveWatchTheme.primary
-        case .secondary:
-            return DiveWatchTheme.primary
-        case .destructive:
-            return DiveWatchTheme.danger
         }
     }
 
@@ -275,7 +249,7 @@ struct SafetyStopRing: View {
             Circle()
                 .trim(from: 0, to: clampedProgress)
                 .stroke(
-                    active ? DiveWatchTheme.success : DiveWatchTheme.primary.opacity(0.55),
+                    active ? DiveWatchTheme.primary : DiveWatchTheme.primary.opacity(0.55),
                     style: StrokeStyle(lineWidth: 7, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
@@ -283,7 +257,7 @@ struct SafetyStopRing: View {
             VStack(spacing: 1) {
                 Text(ringValue)
                     .font(DiveWatchTheme.metricFont(size: 20, weight: .semibold))
-                    .foregroundStyle(active ? DiveWatchTheme.success : DiveWatchTheme.text)
+                    .foregroundStyle(active ? DiveWatchTheme.primary : DiveWatchTheme.text)
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)

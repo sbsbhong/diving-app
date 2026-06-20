@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "ui:check": "node ./scripts/check-ui-language.mjs",
     "xcode:build": "xcodebuild -project DiveWatchApp.xcodeproj -scheme DiveWatchApp -configuration Debug -destination 'generic/platform=watchOS Simulator' -derivedDataPath /private/tmp/DiveWatchAppDerivedData CODE_SIGNING_ALLOWED=NO build",
     "xcode:list": "xcodebuild -list -project DiveWatchApp.xcodeproj"
   }
