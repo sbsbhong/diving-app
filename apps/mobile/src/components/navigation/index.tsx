@@ -1,11 +1,14 @@
 import React from 'react';
-import { Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { DiveLogbookSection } from '../../types/dive-session';
 import { useDiveLogbook } from '../../states/use-dive-logbook';
-import { Box, HStack, Text, VStack } from '../ui/primitives';
+import { Box } from '../ui/box';
+import { HStack } from '../ui/hstack';
+import { Pressable } from '../ui/pressable';
+import { Text } from '../ui/text';
+import { VStack } from '../ui/vstack';
 import HomeScreen from '../../screens/home/screen';
 import LogbookScreen from '../../screens/logbook/screen';
 import PlanningScreen from '../../screens/planning/screen';
@@ -54,10 +57,7 @@ export default function RootNavigation(): React.JSX.Element {
         {section === 'settings' ? <SettingsScreen /> : null}
       </VStack>
 
-      <HStack
-        gap={0}
-        className="bg-card px-2 pt-1"
-        style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
+      <HStack className="bg-card px-2 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
         <NavTab id="home" label={t('navigation.home')} selected={section === 'home'} onPress={() => setSection('home')} />
         <NavTab id="logbook" label={t('navigation.logbook')} selected={section === 'logbook'} onPress={() => setSection('logbook')} />
         <NavTab id="planning" label={t('navigation.planning')} selected={section === 'planning'} onPress={() => setSection('planning')} />

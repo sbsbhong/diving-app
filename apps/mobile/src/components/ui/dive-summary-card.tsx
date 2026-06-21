@@ -1,7 +1,9 @@
 import React from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
-import { HStack, Text, VStack } from './primitives';
+import { HStack } from './hstack';
+import { Text } from './text';
+import { VStack } from './vstack';
 import type { InstrumentTone } from './theme';
 
 type DiveSummaryCardProps = {
@@ -40,7 +42,7 @@ const cardStyles = tva({
 
 function DiveSummaryCardRoot(props: DiveSummaryCardProps): React.JSX.Element {
   return (
-    <VStack gap={16} className={cardStyles({ variant: props.variant, class: props.className })} style={props.style}>
+    <VStack space="lg" className={cardStyles({ variant: props.variant, class: props.className })} style={props.style}>
       {props.children}
     </VStack>
   );
@@ -49,7 +51,7 @@ function DiveSummaryCardRoot(props: DiveSummaryCardProps): React.JSX.Element {
 function DiveSummaryCardHeader(props: DiveSummaryCardHeaderProps): React.JSX.Element {
   return (
     <HStack className="items-center justify-between">
-      <VStack gap={4} className="flex-1">
+      <VStack space="xs" className="flex-1">
         {props.eyebrow ? (
           <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.eyebrow}</Text>
         ) : null}
@@ -61,14 +63,14 @@ function DiveSummaryCardHeader(props: DiveSummaryCardHeaderProps): React.JSX.Ele
 }
 
 function DiveSummaryCardBody(props: { children?: React.ReactNode }): React.JSX.Element {
-  return <VStack gap={12}>{props.children}</VStack>;
+  return <VStack space="md">{props.children}</VStack>;
 }
 
 function DiveSummaryCardMetric(props: DiveSummaryCardMetricProps): React.JSX.Element {
   return (
     <HStack className="min-h-12 items-center justify-between py-1.5">
       <Text className="flex-1 text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-      <HStack gap={4} className="items-baseline">
+      <HStack space="xs" className="items-baseline">
         <Text className="text-right text-xl font-semibold text-card-foreground">{props.value}</Text>
         {props.unit ? <Text className="text-sm font-semibold text-muted-foreground">{props.unit}</Text> : null}
       </HStack>

@@ -1892,6 +1892,14 @@
     "@swc/helpers" "^0.5.0"
     react-stately "^3.46.0"
 
+"@react-stately/radio@^3.12.1":
+  version "3.12.1"
+  resolved "https://registry.yarnpkg.com/@react-stately/radio/-/radio-3.12.1.tgz#ca6107d8000be610c47417e8f2d859bb3cf5666c"
+  integrity sha512-sx83ffwQMRhUuMbbRIS4O/FMDyp9DfY1P3bbcSdSgOfglCb6aILJj3ExRJcXSUZdzm79g7cKADNtqzIlW5n6pg==
+  dependencies:
+    "@swc/helpers" "^0.5.0"
+    react-stately "^3.46.0"
+
 "@react-stately/toggle@^3.10.1":
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/@react-stately/toggle/-/toggle-3.10.1.tgz#2e8d55cad838579334a93d0800e6a41683bcbc7f"

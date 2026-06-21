@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box } from '../../components/ui/box';
+import { Button, ButtonText } from '../../components/ui/button';
 import { HStack } from '../../components/ui/hstack';
-import { Pressable } from '../../components/ui/pressable';
+import { CircleIcon } from '../../components/ui/icon';
+import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '../../components/ui/radio';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
@@ -25,6 +27,7 @@ type OptionRowProps = {
   rowTestID: string;
   selected: boolean;
   onPress: () => void | Promise<void>;
+  value: string;
 };
 
 const themeOptions: ThemePreference[] = ['system', 'light', 'dark'];
@@ -46,7 +49,7 @@ export default function SettingsScreen(): React.JSX.Element {
           {t('settings.theme.subtitle')}
         </Text>
 
-        <OptionGroup>
+        <OptionGroup value={themePreference} onChange={nextValue => setThemePreference(nextValue as ThemePreference)}>
           {themeOptions.map(option => (
             <OptionRow
               key={option}
@@ -55,6 +58,7 @@ export default function SettingsScreen(): React.JSX.Element {
               description={t(`settings.theme.${option}Description`)}
               selected={themePreference === option}
               onPress={() => setThemePreference(option)}
+              value={option}
             />
           ))}
         </OptionGroup>
@@ -70,7 +74,11 @@ export default function SettingsScreen(): React.JSX.Element {
           {t('settings.language.subtitle')}
         </Text>
 
-        <OptionGroup>
+        <OptionGroup
+          value={language}
+          onChange={nextValue => {
+            setLanguage(nextValue as SupportedLanguage);
+          }}>
           {languageOptions.map(option => (
             <OptionRow
               key={option}
@@ -78,6 +86,7 @@ export default function SettingsScreen(): React.JSX.Element {
               label={getLanguageLabel(option, t)}
               selected={language === option}
               onPress={() => setLanguage(option)}
+              value={option}
             />
           ))}
         </OptionGroup>
@@ -138,16 +147,17 @@ function DetailHeader(props: { title: string; onBack: () => void }): React.JSX.E
 
   return (
     <VStack space="md">
-      <Pressable
+      <Button
+        variant="ghost"
+        size="sm"
         testID="settings-back"
-        accessibilityRole="button"
         onPress={props.onBack}
         className="self-start rounded-full bg-primary/10 px-3 py-2"
         style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-        <Text size="sm" className="font-semibold text-primary">
+        <ButtonText className="text-sm font-semibold text-primary">
           {`‹ ${t('settings.title')}`}
-        </Text>
-      </Pressable>
+        </ButtonText>
+      </Button>
       <Text testID="settings-detail-title" size="3xl" className="font-semibold text-foreground">
         {props.title}
       </Text>
@@ -155,67 +165,66 @@ function DetailHeader(props: { title: string; onBack: () => void }): React.JSX.E
   );
 }
 
-function OptionGroup(props: { children: React.ReactNode }): React.JSX.Element {
-  return <VStack className="overflow-hidden rounded-2xl bg-card">{props.children}</VStack>;
+function OptionGroup(props: { children: React.ReactNode; value: string; onChange: (value: string) => void }): React.JSX.Element {
+  return (
+    <RadioGroup value={props.value} onChange={props.onChange} className="overflow-hidden rounded-2xl bg-card gap-0">
+      {props.children}
+    </RadioGroup>
+  );
 }
 
 function SettingRow(props: SettingRowProps): React.JSX.Element {
   return (
-    <Pressable
+    <Button
+      variant="ghost"
       testID={props.rowTestID}
-      accessibilityRole="button"
       onPress={props.onPress}
-      className="bg-card px-4 py-4"
+      className="h-auto rounded-none bg-card px-4 py-4"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
       <HStack space="md" className="min-h-10 items-center justify-between">
-        <Text size="md" className="font-semibold text-card-foreground">
+        <ButtonText className="text-base font-semibold text-card-foreground">
           {props.label}
-        </Text>
+        </ButtonText>
         <HStack space="sm" className="items-center">
-          <Text testID={props.valueTestID} size="sm" className="text-muted-foreground">
+          <ButtonText testID={props.valueTestID} className="text-sm text-muted-foreground">
             {props.value}
-          </Text>
-          <Text size="xl" className="text-muted-foreground">
+          </ButtonText>
+          <ButtonText className="text-xl text-muted-foreground">
             ›
-          </Text>
+          </ButtonText>
         </HStack>
       </HStack>
-    </Pressable>
+    </Button>
   );
 }
 
 function OptionRow(props: OptionRowProps): React.JSX.Element {
   const labelClassName = props.selected ? 'font-semibold text-primary' : 'font-semibold text-card-foreground';
-  const markClassName = props.selected ? 'font-semibold text-primary' : 'font-semibold text-muted-foreground';
 
   return (
-    <Pressable
+    <Radio
       testID={props.rowTestID}
-      accessibilityRole="button"
       accessibilityState={{ selected: props.selected }}
       onPress={props.onPress}
+      value={props.value}
       className={props.selected ? 'bg-primary/10 px-4 py-4' : 'bg-card px-4 py-4'}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
-      <HStack space="md" className="min-h-11 items-center justify-between">
+      <HStack space="md" className="min-h-11 flex-1 items-center justify-between">
         <VStack space="xs" className="flex-1 pr-3">
-          <Text size="md" className={labelClassName}>
+          <RadioLabel className={labelClassName}>
             {props.label}
-          </Text>
+          </RadioLabel>
           {props.description ? (
             <Text size="sm" className="leading-5 text-muted-foreground">
               {props.description}
             </Text>
           ) : null}
         </VStack>
-        <Box className="w-5 items-center">
-          {props.selected ? (
-            <Text size="lg" className={markClassName}>
-              ✓
-            </Text>
-          ) : null}
-        </Box>
+        <RadioIndicator>
+          <RadioIcon as={CircleIcon} />
+        </RadioIndicator>
       </HStack>
-    </Pressable>
+    </Radio>
   );
 }
 

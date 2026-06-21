@@ -1,6 +1,8 @@
 import React from 'react';
 import type { WatchDepthSample } from '../../types/dive-session';
-import { HStack, Text, VStack } from './primitives';
+import { HStack } from './hstack';
+import { Text } from './text';
+import { VStack } from './vstack';
 
 type SessionProfileProps = {
   samples: WatchDepthSample[];
@@ -16,9 +18,9 @@ function SessionProfileRoot(props: SessionProfileProps): React.JSX.Element {
   const barClassName = props.kind === 'depth' ? 'bg-primary' : 'bg-primary/70';
 
   return (
-    <VStack gap={10} className="rounded-2xl bg-muted px-4 py-4">
+    <VStack space="md" className="rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.title}</Text>
-      <HStack gap={4} className="h-24 items-end">
+      <HStack space="xs" className="h-24 items-end">
         {values.map((value, index) => (
           <VStack key={`${props.title}-${index}`} className="flex-1 justify-end">
             <VStack className={`w-full rounded-sm ${barClassName}`} style={{ height: Math.max(4, (value / maxValue) * 88) }} />

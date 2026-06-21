@@ -1,9 +1,14 @@
 import React from 'react';
-import { Pressable, ScrollView, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
-import { Box, HStack, Text, VStack } from '../../components/ui/primitives';
+import { Box } from '../../components/ui/box';
+import { HStack } from '../../components/ui/hstack';
+import { Input, InputField } from '../../components/ui/input';
+import { Pressable } from '../../components/ui/pressable';
+import { ScrollView } from '../../components/ui/scroll-view';
+import { Text } from '../../components/ui/text';
+import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { InstrumentTone } from '../../components/ui/theme';
 import type { DiveSessionFilter, MobileDiveSession } from '../../types/dive-session';
@@ -46,23 +51,25 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
-      <VStack gap={16}>
-        <VStack gap={12}>
+      <VStack space="lg">
+        <VStack space="md">
           <HStack className="items-center justify-between">
-            <VStack gap={4} className="flex-1">
+            <VStack space="xs" className="flex-1">
               <Text className="text-xs font-semibold uppercase text-muted-foreground">{t('logbook.reviewEyebrow')}</Text>
               <Text className="text-3xl font-semibold leading-9 text-foreground">{t('logbook.title')}</Text>
             </VStack>
             <InstrumentButton label={t('logbook.import')} onPress={props.onImportFixtures} className="min-h-10 px-4 py-2" />
           </HStack>
-          <VStack gap={12} className="rounded-2xl bg-card px-4 py-4">
-            <TextInput
-              placeholder={t('logbook.searchPlaceholder')}
-              value={props.filter.query}
-              onChangeText={query => props.onFilterChange({ ...props.filter, query })}
-              className="min-h-11 rounded-full bg-muted px-5 py-3 text-base font-normal text-foreground placeholder:text-muted-foreground"
-            />
-            <HStack gap={4} className="rounded-full bg-muted p-1">
+          <VStack space="md" className="rounded-2xl bg-card px-4 py-4">
+            <Input className="h-11 rounded-full border-0 bg-muted px-5 shadow-none">
+              <InputField
+                placeholder={t('logbook.searchPlaceholder')}
+                value={props.filter.query}
+                onChangeText={query => props.onFilterChange({ ...props.filter, query })}
+                className="px-0 py-0 text-base font-normal"
+              />
+            </Input>
+            <HStack space="xs" className="rounded-full bg-muted p-1">
               <SelectorPill className="flex-1" label={t('logbook.all')} selected={syncFilter === 'all'} onPress={() => setSyncFilter('all')} />
               <SelectorPill
                 className="flex-1"
@@ -83,7 +90,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
         {visibleSessions.length === 0 ? (
           <EmptyLogbook />
         ) : (
-          <VStack gap={12}>
+          <VStack space="md">
             {visibleSessions.map(session => (
               <SessionListItem
                 key={session.importKey}
@@ -132,18 +139,18 @@ function SessionListItem(props: {
       onPress={props.onPress}
       className="rounded-2xl bg-card px-4 py-4"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
-      <VStack gap={7}>
+      <VStack space="sm">
         <HStack className="items-center justify-between">
-          <HStack gap={10} className="flex-1 items-center pr-2.5">
+          <HStack space="md" className="flex-1 items-center pr-2.5">
             <Box className={`h-2 w-2 rounded-full ${props.selected ? 'bg-primary' : 'bg-muted'}`} />
-            <VStack gap={3} className="flex-1">
+            <VStack space="xs" className="flex-1">
               <Text className="text-lg font-semibold text-card-foreground">{props.session.siteName ?? t('logbook.untitledDive')}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
                 {formatDate(props.session.startedAt, locale, t('formatters.unknownDate'))}
               </Text>
             </VStack>
           </HStack>
-          <VStack gap={4} className="items-end">
+          <VStack space="xs" className="items-end">
             <StatusPill label={t(`status.${status}`, { defaultValue: status })} tone={syncStatusTone(status)} />
             <Text className="text-lg font-semibold text-card-foreground">{formatDepth(summary.maxDepthMeters)}</Text>
           </VStack>
@@ -181,11 +188,11 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
         right={<Text className="text-sm font-semibold text-primary">{formatRating(props.session.rating, t('formatters.notRated'))}</Text>}
       />
       <DiveSummaryCard.Body>
-        <HStack gap={10}>
+        <HStack space="md">
           <DetailMetric label={t('logbook.maxDepth')} value={formatDepth(summary.maxDepthMeters)} />
           <DetailMetric label={t('logbook.avgDepth')} value={formatDepth(summary.averageDepthMeters)} />
         </HStack>
-        <HStack gap={10}>
+        <HStack space="md">
           <DetailMetric label={t('logbook.waterTemp')} value={formatTemperature(summary.waterTemperatureCelsius)} />
           <DetailMetric label={t('logbook.duration')} value={formatDuration(summary.durationSeconds)} />
         </HStack>
@@ -193,7 +200,7 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
         <SessionProfile samples={props.session.samples} kind="temperature" title={t('logbook.temperatureProfile')} />
       </DiveSummaryCard.Body>
       <DiveSummaryCard.Footer>
-        <VStack gap={8}>
+        <VStack space="sm">
           <Text className="text-sm leading-5 text-card-foreground">{props.session.notes ?? t('logbook.noNotes')}</Text>
           <Text className="text-sm leading-5 text-muted-foreground">
             {t('logbook.tags')}: {tags}
@@ -209,7 +216,7 @@ function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element
 
 function DetailMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={5} className="flex-1 rounded-2xl bg-muted px-4 py-4">
+    <VStack space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
       <Text className="text-lg font-semibold text-foreground">{props.value}</Text>
     </VStack>

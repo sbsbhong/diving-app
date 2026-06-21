@@ -1,10 +1,13 @@
 import React from 'react';
-import { Pressable, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
-import { HStack, Text, VStack } from '../../components/ui/primitives';
+import { Button, ButtonText } from '../../components/ui/button';
+import { HStack } from '../../components/ui/hstack';
+import { ScrollView } from '../../components/ui/scroll-view';
+import { Text } from '../../components/ui/text';
+import { VStack } from '../../components/ui/vstack';
 import type { DivePlanningItem, MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDuration } from '../../utils/dive-formatters';
 
@@ -26,8 +29,8 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
-      <VStack gap={16}>
-        <VStack gap={7}>
+      <VStack space="lg">
+        <VStack space="sm">
           <HStack className="items-center justify-between">
             <StatusPill label={t('status.planning')} />
             <StatusPill label={t('status.assist')} tone="secondary" />
@@ -56,18 +59,18 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
         <DiveSummaryCard accent="primary">
           <DiveSummaryCard.Header eyebrow={t('planning.planInputs')} title={t('planning.manualSetup')} />
           <DiveSummaryCard.Body>
-            <HStack gap={4} className="rounded-full bg-muted p-1">
+            <HStack space="xs" className="rounded-full bg-muted p-1">
               <ModeSegment label={t('planning.modes.shore')} selected={mode === 'shore'} onPress={() => setMode('shore')} />
               <ModeSegment label={t('planning.modes.boat')} selected={mode === 'boat'} onPress={() => setMode('boat')} />
               <ModeSegment label={t('planning.modes.pool')} selected={mode === 'pool'} onPress={() => setMode('pool')} />
             </HStack>
 
             <HStack className="items-center justify-between rounded-2xl bg-muted px-4 py-4">
-              <VStack gap={3}>
+              <VStack space="xs">
                 <Text className="text-xs font-semibold uppercase text-muted-foreground">{t('planning.plannedMax')}</Text>
                 <Text className="text-2xl font-semibold text-foreground">{plannedMaxDepthMeters} m</Text>
               </VStack>
-              <HStack gap={8}>
+              <HStack space="sm">
                 <StepperButton label="-" onPress={() => setPlannedMaxDepthMeters(value => Math.max(3, value - 1))} />
                 <StepperButton label="+" onPress={() => setPlannedMaxDepthMeters(value => Math.min(40, value + 1))} />
               </HStack>
@@ -89,9 +92,9 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
         </DiveSummaryCard>
 
         <DiveSummaryCard variant="parchment">
-          <HStack gap={14} className="items-center">
+          <HStack space="lg" className="items-center">
             <AssistantMark label={t('planning.assistantMark')} />
-            <VStack gap={8} className="flex-1">
+            <VStack space="sm" className="flex-1">
               <DiveSummaryCard.Metric label={t('planning.safetyStop')} value={t('planning.planningReminder')} />
               <DiveSummaryCard.Metric label={t('planning.ascent')} value={t('planning.reviewOnly')} />
               <DiveSummaryCard.Metric label={t('planning.noFly')} value={t('planning.manualReminder')} />
@@ -99,7 +102,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
           </HStack>
         </DiveSummaryCard>
 
-        <VStack gap={10}>
+        <VStack space="md">
           <InstrumentButton label={t('planning.savePlan')} variant="primary" onPress={() => undefined} />
           <InstrumentButton label={t('planning.openLogbook')} onPress={props.onOpenLogbook} />
         </VStack>
@@ -116,12 +119,14 @@ function ModeSegment(props: { label: string; selected: boolean; onPress: () => v
 
 function StepperButton(props: { label: string; onPress: () => void }): React.JSX.Element {
   return (
-    <Pressable
+    <Button
+      variant="secondary"
+      size="icon"
       onPress={props.onPress}
-      className="h-11 w-11 items-center justify-center rounded-full bg-card"
+      className="h-11 w-11 rounded-full bg-card p-0"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
-      <Text className="text-2xl font-semibold text-primary">{props.label}</Text>
-    </Pressable>
+      <ButtonText className="text-2xl font-semibold leading-7 text-primary">{props.label}</ButtonText>
+    </Button>
   );
 }
 

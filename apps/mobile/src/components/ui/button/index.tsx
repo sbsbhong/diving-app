@@ -9,7 +9,7 @@ import {
 } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { UIIcon } from '@gluestack-ui/core/icon/creator';
+import { UIIcon } from '../icon';
 const SCOPE = 'BUTTON';
 const Root = withStyleContext(Pressable, SCOPE);
 const UIButton = createButton({
@@ -176,7 +176,14 @@ const ButtonSpinner = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof UIButton.Spinner>
 >(({ className, size, ...props }, ref) => {
   const { size: parentSize } = useStyleContext(SCOPE);
-  return <UIButton.Spinner ref={ref} {...props} className={buttonSpinnerStyle({ parentVariants: { size: parentSize }, class: className, size })} />;
+  return (
+    <UIButton.Spinner
+      ref={ref}
+      {...props}
+      size={size}
+      className={buttonSpinnerStyle({ parentVariants: { size: parentSize }, class: className })}
+    />
+  );
 });
 type IButtonIcon = React.ComponentPropsWithoutRef<typeof UIButton.Icon> &
   VariantProps<typeof buttonIconStyle> & {

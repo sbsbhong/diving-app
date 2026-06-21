@@ -1,9 +1,11 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
-import { HStack, Text, VStack } from '../../components/ui/primitives';
+import { HStack } from '../../components/ui/hstack';
+import { ScrollView } from '../../components/ui/scroll-view';
+import { Text } from '../../components/ui/text';
+import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration, formatRating } from '../../utils/dive-formatters';
@@ -31,8 +33,8 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
-      <VStack gap={16}>
-        <VStack gap={7}>
+      <VStack space="lg">
+        <VStack space="sm">
           <HStack className="items-center justify-between">
             <StatusPill label={t('status.memory')} />
             <StatusPill label={t('status.static')} tone="secondary" />
@@ -52,7 +54,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
             }
           />
           <DiveSummaryCard.Body>
-            <HStack gap={10}>
+            <HStack space="md">
               <ShareMetric label={t('memory.max')} value={formatDepth(summary?.maxDepthMeters)} />
               <ShareMetric label={t('memory.time')} value={formatDuration(summary?.durationSeconds ?? 0)} />
             </HStack>
@@ -99,7 +101,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
           </DiveSummaryCard.Footer>
         </DiveSummaryCard>
 
-        <VStack gap={10}>
+        <VStack space="md">
           <InstrumentButton label={t('memory.savePreview')} variant="primary" onPress={() => undefined} />
           <InstrumentButton label={t('memory.openLogbook')} onPress={props.onOpenLogbook} />
         </VStack>
@@ -112,7 +114,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
 
 function ShareMetric(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={5} className="flex-1 rounded-2xl bg-muted px-4 py-4">
+    <VStack space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
       <Text className="text-2xl font-semibold text-foreground">{props.value}</Text>
     </VStack>

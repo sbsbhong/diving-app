@@ -11,12 +11,14 @@
 주요 source 경계는 다음과 같다.
 
 - `src/App.tsx`: 앱 UI entry.
-- `src/providers.tsx`: top-level `SafeAreaProvider`, `GluestackUIProvider`, `StatusBar`.
+- `src/providers.tsx`: top-level `SafeAreaProvider`, `AppPreferencesProvider`, `GluestackUIProvider`, `StatusBar`.
 - `src/components/navigation/index.tsx`: custom bottom-tab navigation state.
 - `src/components/ui/`: 재사용 UI primitive, instrument control, session card, profile chart, tone type.
 - `components/ui/gluestack-ui-provider/`: generated Gluestack provider, color-mode script, token bridge.
 - `global.css`, `tailwind.config.js`: NativeWind/Tailwind entrypoint와 semantic token configuration.
-- `src/screens/home`, `src/screens/logbook`, `src/screens/planning`, `src/screens/memory`: route-level 화면 container.
+- `src/screens/home`, `src/screens/logbook`, `src/screens/planning`, `src/screens/settings`: route-level 화면 container.
+- `src/screens/memory`: 이전 memory/share preview source가 남아 있지만 현재 bottom tab route에는 연결되어 있지 않다.
+- `src/states/app-preferences.tsx`: 앱 표시 선호를 관리하는 in-memory provider.
 - `src/states/use-dive-logbook.ts`: local logbook state, search filter, fixture import action.
 - `src/types/dive-session.ts`: generated watch contract type 기반 mobile session type.
 - `src/utils/`: formatter, watch fixture 가져오기, 세션 summary 계산.
@@ -28,7 +30,14 @@
 - Home: 가장 최근 가져온 watch 세션, 주요 지표, 안전 assistant 문구.
 - Logbook: 가져온 세션 목록, 검색, 동기화 상태 filter, 상세 지표, 수심 profile, 수온 profile, notes, tags, media placeholder.
 - Planning: 가장 최근 가져온 세션을 맥락으로 쓰는 수동 계획 알림.
-- Memory: 정적 share-card와 확인 전용 분석 미리보기.
+- Settings: 테마와 언어 같은 앱 표시 선호를 grouped list로 관리한다.
+
+Settings는 현재 다음 범위로 제한된다.
+
+- 테마 선호는 `system`, `light`, `dark`를 지원한다. `system`은 device color scheme이 `dark`일 때만 dark mode로 해석하고, 그 외에는 light mode로 해석한다.
+- `AppPreferencesProvider`가 `resolvedTheme`을 계산하고 `GluestackUIProvider` mode와 `StatusBar` style에 전달한다.
+- 언어 선호는 `ko`, `en`만 지원한다. 선택 변경은 `i18next.changeLanguage`를 사용하며, 실패하면 이전 언어 상태를 유지한다.
+- 설정 값은 현재 실행 중인 React state에만 저장된다. Production persistence와 migration behavior는 아직 없다.
 
 Styling rule은 현재 코드 기준으로 다음과 같다.
 

@@ -1,5 +1,21 @@
 # Wiki 기록
 
+## 2026-06-21 - 구조 - mobile settings tab
+
+- 수정:
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/components/navigation/index.tsx`
+  - `apps/mobile/src/providers.tsx`
+  - `apps/mobile/src/states/app-preferences.tsx`
+  - `apps/mobile/src/screens/settings/screen.tsx`
+  - `apps/mobile/src/i18n/resources.ts`
+  - `apps/mobile/src/types/dive-session.ts`
+- 요약:
+  - 모바일 앱의 활성 bottom tab이 Home, Logbook, Planning, Settings로 바뀐 사실을 기록했다. Settings는 테마와 언어 선호를 관리하지만, 현재 값은 실행 중인 React state에만 저장되고 production persistence는 아직 없다.
+
 ## 2026-06-20 - 디자인 - mobile/watch UI 언어
 
 - 수정:

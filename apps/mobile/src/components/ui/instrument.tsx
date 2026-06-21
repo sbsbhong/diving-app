@@ -1,7 +1,8 @@
 import React from 'react';
-import { Pressable, PressableProps, StyleProp, TextStyle, ViewStyle } from 'react-native';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
-import { Text } from './primitives';
+import { Button, ButtonText } from './button';
+import { Text } from './text';
 import type { InstrumentTone } from './theme';
 
 type StatusPillProps = {
@@ -36,7 +37,7 @@ export function StatusPill(props: StatusPillProps): React.JSX.Element {
   );
 }
 
-type InstrumentButtonProps = Omit<PressableProps, 'style'> & {
+type InstrumentButtonProps = Omit<React.ComponentProps<typeof Button>, 'children' | 'className' | 'style' | 'variant'> & {
   label: string;
   variant?: 'primary' | 'secondary' | 'danger';
   className?: string;
@@ -71,6 +72,12 @@ const buttonTextStyles = tva({
   },
 });
 
+const instrumentButtonVariant = {
+  primary: 'default',
+  secondary: 'secondary',
+  danger: 'ghost',
+} as const;
+
 export function InstrumentButton({
   label,
   variant = 'secondary',
@@ -79,16 +86,17 @@ export function InstrumentButton({
   ...pressableProps
 }: InstrumentButtonProps): React.JSX.Element {
   return (
-    <Pressable
+    <Button
       {...pressableProps}
+      variant={instrumentButtonVariant[variant]}
       className={buttonStyles({ variant, class: className })}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }, style]}>
-      <Text className={buttonTextStyles({ variant })}>{label}</Text>
-    </Pressable>
+      <ButtonText className={buttonTextStyles({ variant })}>{label}</ButtonText>
+    </Button>
   );
 }
 
-type SelectorPillProps = Omit<PressableProps, 'style'> & {
+type SelectorPillProps = Omit<React.ComponentProps<typeof Button>, 'children' | 'className' | 'style' | 'variant'> & {
   label: string;
   selected: boolean;
   className?: string;
@@ -129,12 +137,13 @@ export function SelectorPill({
   ...pressableProps
 }: SelectorPillProps): React.JSX.Element {
   return (
-    <Pressable
+    <Button
       {...pressableProps}
+      variant="ghost"
       className={selectorPillStyles({ selected, class: className })}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }, style]}>
-      <Text className={selectorPillTextStyles({ selected })}>{label}</Text>
-    </Pressable>
+      <ButtonText className={selectorPillTextStyles({ selected })}>{label}</ButtonText>
+    </Button>
   );
 }
 

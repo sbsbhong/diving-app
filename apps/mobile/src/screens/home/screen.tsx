@@ -1,9 +1,11 @@
 import React from 'react';
-import { ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
-import { HStack, Text, VStack } from '../../components/ui/primitives';
+import { HStack } from '../../components/ui/hstack';
+import { ScrollView } from '../../components/ui/scroll-view';
+import { Text } from '../../components/ui/text';
+import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
@@ -24,12 +26,12 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
-      <VStack gap={16}>
-        <VStack gap={10} className="pt-2">
+      <VStack space="lg">
+        <VStack space="md" className="pt-2">
           <StatusPill label={t('status.watchAssistant')} />
           <Text className="text-4xl font-semibold leading-10 text-foreground">DiveMobile</Text>
           <Text className="text-base leading-6 text-muted-foreground">{t('home.subtitle')}</Text>
-          <HStack gap={5} className="items-baseline">
+          <HStack space="xs" className="items-baseline">
             <Text className="text-2xl font-semibold text-primary">{props.sessions.length}</Text>
             <Text className="text-sm font-semibold text-muted-foreground">{t('home.logsImported')}</Text>
           </HStack>
@@ -47,7 +49,7 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
               value={formatDate(recentSession?.startedAt, locale, t('formatters.unknownDate'))}
             />
             <SessionProfile samples={recentSession?.samples ?? []} kind="depth" title={t('home.depthProfile')} />
-            <HStack gap={10}>
+            <HStack space="md">
               <MetricTile label={t('home.maxDepth')} value={formatDepth(recentSummary?.maxDepthMeters)} />
               <MetricTile label={t('home.bottomTime')} value={formatDuration(recentSummary?.durationSeconds ?? 0)} />
             </HStack>
@@ -55,9 +57,9 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
         </DiveSummaryCard>
 
         <DiveSummaryCard>
-          <HStack gap={12} className="items-center">
+          <HStack space="md" className="items-center">
             <AssistantMark />
-            <VStack gap={4} className="flex-1">
+            <VStack space="xs" className="flex-1">
               <Text className="text-base font-semibold text-card-foreground">{t('home.assistantSteady')}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">{t('home.reminderReview')}</Text>
             </VStack>
@@ -66,7 +68,7 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
           <DiveSummaryCard.Metric label={t('home.safetyStop')} value={t('home.planningReminder')} />
         </DiveSummaryCard>
 
-        <VStack gap={10}>
+        <VStack space="md">
           <InstrumentButton label={t('home.openLogbook')} variant="primary" onPress={props.onOpenLogbook} />
           <InstrumentButton label={t('home.planNextDive')} onPress={props.onOpenPlanning} />
         </VStack>
@@ -79,7 +81,7 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
 
 function MetricTile(props: { label: string; value: string }): React.JSX.Element {
   return (
-    <VStack gap={5} className="flex-1 rounded-2xl bg-muted px-4 py-4">
+    <VStack space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
       <Text className="text-2xl font-semibold text-card-foreground">{props.value}</Text>
     </VStack>
