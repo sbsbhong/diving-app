@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GluestackUIProvider } from '../components/ui/gluestack-ui-provider';
+import { GluestackUIProvider } from './components/ui/gluestack-ui-provider';
 
 type ProvidersProps = {
   children?: React.ReactNode;

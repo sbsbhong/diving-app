@@ -1,6 +1,6 @@
 import React from 'react';
 import Providers from '../src/providers';
-import { colors } from '../components/ui/gluestack-ui-provider/config';
+import { colors } from '../src/components/ui/gluestack-ui-provider/config';
 
 const readSource = (...segments: string[]) => {
   const nodeRequire = require as (moduleName: string) => {
