@@ -41,7 +41,7 @@ describe('LocalDiveLogRepository', () => {
       syncStatus: 'synced',
       manual: {
         site: {
-          name: 'Updated Repository Reef',
+          name: 'Repository Reef',
         },
       },
     });
@@ -62,5 +62,112 @@ describe('LocalDiveLogRepository', () => {
     expect(firstRepository.listSync()[0].watchCapture?.importedAt).toBe(secondRepository.listSync()[0].watchCapture?.importedAt);
 
     dateNow.mockRestore();
+  });
+
+  it('preserves manual and mobile edits when re-importing an existing watch entry', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781354000 });
+    const [importedEntry] = await repository.importWatchMessages([watchMessage]);
+
+    await repository.save({
+      ...importedEntry,
+      manual: {
+        site: { siteId: 'manual-site', name: 'Manual Reef' },
+        buddyIds: ['manual-buddy'],
+        gearIds: ['manual-gear'],
+        tags: ['manual-tag'],
+        observedMarineLife: ['nudibranch'],
+        notes: 'Edited after review.',
+        rating: 5,
+        measuredValues: {
+          startedAt: 1781351999,
+          endedAt: 1781352601,
+          durationSeconds: 602,
+          maxDepthMeters: 11,
+          averageDepthMeters: 6.2,
+          waterTemperatureCelsius: 23.8,
+          diveMode: 'scuba',
+          gasLabel: 'Nitrox note',
+        },
+      },
+      mobile: {
+        mediaPlaceholders: ['edited-photo-placeholder'],
+      },
+      provenance: {
+        ...importedEntry.provenance,
+        site: 'manual',
+        buddyIds: 'manual',
+        gearIds: 'manual',
+        tags: 'manual',
+        observedMarineLife: 'manual',
+        notes: 'manual',
+        rating: 'manual',
+        measuredValues: 'manual',
+        mediaPlaceholders: 'mobile',
+      },
+    });
+
+    const [reimportedEntry] = await repository.importWatchMessages([
+      {
+        ...watchMessage,
+        session: {
+          ...watchMessage.session,
+          syncStatus: 'synced',
+          siteName: 'Watch Updated Reef',
+          notes: 'Watch context should not overwrite manual edit.',
+          rating: 2,
+          tags: ['watch-tag'],
+          maxDepthMeters: 14,
+          averageDepthMeters: 8,
+        },
+      },
+    ]);
+
+    expect(reimportedEntry).toMatchObject({
+      localId: importedEntry.localId,
+      createdAt: importedEntry.createdAt,
+      updatedAt: 1781354000,
+      syncStatus: 'synced',
+      manual: {
+        site: { siteId: 'manual-site', name: 'Manual Reef' },
+        buddyIds: ['manual-buddy'],
+        gearIds: ['manual-gear'],
+        tags: ['manual-tag'],
+        observedMarineLife: ['nudibranch'],
+        notes: 'Edited after review.',
+        rating: 5,
+        measuredValues: {
+          startedAt: 1781351999,
+          endedAt: 1781352601,
+          durationSeconds: 602,
+          maxDepthMeters: 11,
+          averageDepthMeters: 6.2,
+          waterTemperatureCelsius: 23.8,
+          diveMode: 'scuba',
+          gasLabel: 'Nitrox note',
+        },
+      },
+      mobile: {
+        mediaPlaceholders: ['edited-photo-placeholder'],
+      },
+      provenance: {
+        site: 'manual',
+        buddyIds: 'manual',
+        gearIds: 'manual',
+        tags: 'manual',
+        observedMarineLife: 'manual',
+        notes: 'manual',
+        rating: 'manual',
+        measuredValues: 'manual',
+        mediaPlaceholders: 'mobile',
+        maxDepthMeters: 'watch',
+        averageDepthMeters: 'watch',
+      },
+    });
+    expect(reimportedEntry.watchCapture?.session.siteName).toBe('Watch Updated Reef');
+    expect(reimportedEntry.watchCapture?.session.notes).toBe('Watch context should not overwrite manual edit.');
+    expect(reimportedEntry.watchCapture?.measuredValues).toMatchObject({
+      maxDepthMeters: 14,
+      averageDepthMeters: 8,
+    });
   });
 });

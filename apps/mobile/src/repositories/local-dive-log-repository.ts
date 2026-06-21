@@ -43,18 +43,7 @@ export class LocalDiveLogRepository implements DiveLogRepository {
       const nextEntry = watchSessionToDiveLogEntry({ session: message.session, now });
       const currentEntry = this.findByImportKey(nextEntry.watchCapture?.importKey);
 
-      this.entriesByLocalId.set(currentEntry?.localId ?? nextEntry.localId, {
-        ...nextEntry,
-        localId: currentEntry?.localId ?? nextEntry.localId,
-        createdAt: currentEntry?.createdAt ?? nextEntry.createdAt,
-        mobile: currentEntry?.mobile ?? nextEntry.mobile,
-        watchCapture: nextEntry.watchCapture
-          ? {
-              ...nextEntry.watchCapture,
-              importedAt: currentEntry?.watchCapture?.importedAt ?? nextEntry.watchCapture.importedAt,
-            }
-          : undefined,
-      });
+      this.entriesByLocalId.set(currentEntry?.localId ?? nextEntry.localId, mergeWatchImport(currentEntry, nextEntry));
     }
 
     return this.listSync();
@@ -96,6 +85,40 @@ function getCurrentTimestampSeconds(): number {
 
 function cloneEntry(entry: DiveLogEntry): DiveLogEntry {
   return JSON.parse(JSON.stringify(entry)) as DiveLogEntry;
+}
+
+function mergeWatchImport(currentEntry: DiveLogEntry | undefined, nextEntry: DiveLogEntry): DiveLogEntry {
+  if (!currentEntry) {
+    return nextEntry;
+  }
+
+  return {
+    ...nextEntry,
+    localId: currentEntry.localId,
+    remoteId: currentEntry.remoteId,
+    ownerUserId: currentEntry.ownerUserId,
+    createdAt: currentEntry.createdAt,
+    manual: currentEntry.manual,
+    mobile: currentEntry.mobile,
+    watchCapture: nextEntry.watchCapture
+      ? {
+          ...nextEntry.watchCapture,
+          importedAt: currentEntry.watchCapture?.importedAt ?? nextEntry.watchCapture.importedAt,
+        }
+      : undefined,
+    provenance: {
+      ...nextEntry.provenance,
+      site: currentEntry.provenance.site,
+      buddyIds: currentEntry.provenance.buddyIds,
+      gearIds: currentEntry.provenance.gearIds,
+      tags: currentEntry.provenance.tags,
+      observedMarineLife: currentEntry.provenance.observedMarineLife,
+      notes: currentEntry.provenance.notes,
+      rating: currentEntry.provenance.rating,
+      measuredValues: currentEntry.provenance.measuredValues,
+      mediaPlaceholders: currentEntry.provenance.mediaPlaceholders,
+    },
+  };
 }
 
 function compareEntries(left: DiveLogEntry, right: DiveLogEntry): number {
