@@ -105,6 +105,7 @@ describe('Apple design system mapping', () => {
       readSource('src', 'screens', 'logbook', 'screen.tsx'),
       readSource('src', 'screens', 'planning', 'screen.tsx'),
       readSource('src', 'screens', 'memory', 'screen.tsx'),
+      readSource('src', 'screens', 'settings', 'screen.tsx'),
       readSource('src', 'components', 'navigation', 'index.tsx'),
       readSource('src', 'components', 'ui', 'dive-summary-card.tsx'),
       readSource('src', 'components', 'ui', 'instrument.tsx'),
