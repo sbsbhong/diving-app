@@ -4,10 +4,16 @@ import { watchFixtureMessages } from '../utils/watch-fixtures';
 import { watchSessionToDiveLogEntry } from '../utils/watch-session-to-dive-log-entry';
 import type { DiveLogRepository } from './dive-log-repository';
 
+export type LocalDiveLogRepositoryOptions = {
+  now?: () => number;
+};
+
 export class LocalDiveLogRepository implements DiveLogRepository {
   private entriesByLocalId = new Map<string, DiveLogEntry>();
+  private readonly now: () => number;
 
-  constructor(initialEntries: DiveLogEntry[] = []) {
+  constructor(initialEntries: DiveLogEntry[] = [], options: LocalDiveLogRepositoryOptions = {}) {
+    this.now = options.now ?? getCurrentTimestampSeconds;
     for (const entry of initialEntries) {
       this.entriesByLocalId.set(entry.localId, cloneEntry(entry));
     }
@@ -31,7 +37,7 @@ export class LocalDiveLogRepository implements DiveLogRepository {
   }
 
   async importWatchMessages(messages: WatchSyncMessage[]): Promise<DiveLogEntry[]> {
-    const now = Date.now() / 1000;
+    const now = this.now();
 
     for (const message of messages) {
       const nextEntry = watchSessionToDiveLogEntry({ session: message.session, now });
@@ -72,21 +78,30 @@ export class LocalDiveLogRepository implements DiveLogRepository {
   }
 }
 
-export const createDefaultDiveLogRepository = (): LocalDiveLogRepository => {
-  const now = Date.now() / 1000;
-  const entries = watchFixtureMessages.map(message => watchSessionToDiveLogEntry({ session: message.session, now }));
+export const DEFAULT_FIXTURE_IMPORTED_AT = 0;
 
-  return new LocalDiveLogRepository(entries);
+export const createDefaultDiveLogRepository = (options: LocalDiveLogRepositoryOptions = {}): LocalDiveLogRepository => {
+  const entries = watchFixtureMessages.map(message =>
+    watchSessionToDiveLogEntry({ session: message.session, now: DEFAULT_FIXTURE_IMPORTED_AT }),
+  );
+
+  return new LocalDiveLogRepository(entries, options);
 };
 
 export const defaultDiveLogRepository = createDefaultDiveLogRepository();
 
-const cloneEntry = (entry: DiveLogEntry): DiveLogEntry => JSON.parse(JSON.stringify(entry)) as DiveLogEntry;
+function getCurrentTimestampSeconds(): number {
+  return Date.now() / 1000;
+}
 
-const compareEntries = (left: DiveLogEntry, right: DiveLogEntry) => {
+function cloneEntry(entry: DiveLogEntry): DiveLogEntry {
+  return JSON.parse(JSON.stringify(entry)) as DiveLogEntry;
+}
+
+function compareEntries(left: DiveLogEntry, right: DiveLogEntry): number {
   return getEntrySortTimestamp(right) - getEntrySortTimestamp(left);
-};
+}
 
-const getEntrySortTimestamp = (entry: DiveLogEntry) => {
+function getEntrySortTimestamp(entry: DiveLogEntry): number {
   return entry.watchCapture?.session.startedAt ?? entry.manual.measuredValues.startedAt ?? entry.createdAt;
-};
+}
