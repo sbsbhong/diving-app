@@ -64,12 +64,35 @@ describe('App navigation', () => {
     expect(root.findByProps({ testID: 'nav-tab-planning' })).toBeTruthy();
     expect(root.findByProps({ testID: 'nav-tab-settings' })).toBeTruthy();
     expect(() => root.findByProps({ testID: 'nav-tab-memory' })).toThrow();
-    expect(() => root.findByProps({ testID: 'language-menu-trigger' })).toThrow();
+    expect(root.findByProps({ testID: 'language-menu-trigger' })).toBeTruthy();
 
     await ReactTestRenderer.act(async () => {
       root.findByProps({ testID: 'nav-tab-settings' }).props.onPress();
     });
 
     expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
+  });
+
+  test('switches language from the restored Home language menu', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+    });
+
+    const root = renderer!.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'language-menu-trigger' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'language-menu-option-en' })).toBeTruthy();
+
+    await ReactTestRenderer.act(async () => {
+      await root.findByProps({ testID: 'language-menu-option-en' }).props.onPress();
+    });
+
+    expect(i18n.language).toBe('en');
+    expect(root.findByProps({ testID: 'nav-tab-home' }).props.children[1].props.children).toBe('Home');
   });
 });

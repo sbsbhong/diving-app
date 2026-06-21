@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
+import { HStack } from '../src/components/ui/hstack';
 import { AppPreferencesProvider } from '../src/states/app-preferences';
 import SettingsScreen from '../src/screens/settings/screen';
 
@@ -32,6 +33,20 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
     expect(root.findByProps({ testID: 'settings-current-theme' }).props.children).toBe('시스템 기본값');
     expect(root.findByProps({ testID: 'settings-current-language' }).props.children).toBe('한국어');
+  });
+
+  test('stretches index row content so labels and values sit at opposite edges', async () => {
+    const renderer = await renderSettings();
+    const root = renderer.root;
+
+    const indexRows = root
+      .findAllByType(HStack)
+      .filter(node => typeof node.props.className === 'string' && node.props.className.includes('justify-between'));
+
+    expect(indexRows).toHaveLength(2);
+    indexRows.forEach(row => {
+      expect(row.props.className).toEqual(expect.stringContaining('flex-1'));
+    });
   });
 
   test('opens theme detail and applies the selected theme in memory', async () => {

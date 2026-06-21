@@ -179,13 +179,13 @@ function SettingRow(props: SettingRowProps): React.JSX.Element {
       variant="ghost"
       testID={props.rowTestID}
       onPress={props.onPress}
-      className="h-auto rounded-none bg-card px-4 py-4"
+      className="h-auto w-full rounded-none bg-card px-4 py-4"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
-      <HStack space="md" className="min-h-10 items-center justify-between">
-        <ButtonText className="text-base font-semibold text-card-foreground">
+      <HStack space="md" className="min-h-10 flex-1 items-center justify-between">
+        <ButtonText className="flex-1 text-base font-semibold text-card-foreground">
           {props.label}
         </ButtonText>
-        <HStack space="sm" className="items-center">
+        <HStack space="sm" className="shrink-0 items-center">
           <ButtonText testID={props.valueTestID} className="text-sm text-muted-foreground">
             {props.value}
           </ButtonText>
