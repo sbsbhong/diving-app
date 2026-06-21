@@ -10,7 +10,7 @@ export type AppPreferences = {
   resolvedTheme: ResolvedTheme;
   language: SupportedLanguage;
   setThemePreference: (themePreference: ThemePreference) => void;
-  setLanguage: (language: string) => Promise<void>;
+  setLanguage: (language: SupportedLanguage) => Promise<void>;
 };
 
 type AppPreferencesProviderProps = {
@@ -55,7 +55,7 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
     setThemePreferenceState(nextThemePreference);
   }, []);
 
-  const setLanguage = React.useCallback(async (nextLanguage: string) => {
+  const setLanguage = React.useCallback(async (nextLanguage: SupportedLanguage) => {
     const supportedLanguage = resolveSupportedLanguage(nextLanguage);
 
     await i18n.changeLanguage(supportedLanguage);

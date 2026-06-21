@@ -23,6 +23,13 @@ function Probe(props: { onValue: (value: AppPreferences) => void }): React.JSX.E
   );
 }
 
+const expectSupportedLanguageSetter = (preferences: AppPreferences) => {
+  // @ts-expect-error setLanguage must only accept supported language values.
+  void preferences.setLanguage('ja');
+};
+
+void expectSupportedLanguageSetter;
+
 describe('app preferences', () => {
   beforeEach(async () => {
     await ReactTestRenderer.act(async () => {
@@ -31,8 +38,14 @@ describe('app preferences', () => {
   });
 
   test('resolves theme preferences with a light fallback for system mode', () => {
+    expect(resolveThemePreference('light', 'light')).toBe('light');
     expect(resolveThemePreference('light', 'dark')).toBe('light');
+    expect(resolveThemePreference('light', null)).toBe('light');
+    expect(resolveThemePreference('light', undefined)).toBe('light');
+    expect(resolveThemePreference('dark', 'dark')).toBe('dark');
     expect(resolveThemePreference('dark', 'light')).toBe('dark');
+    expect(resolveThemePreference('dark', null)).toBe('dark');
+    expect(resolveThemePreference('dark', undefined)).toBe('dark');
     expect(resolveThemePreference('system', 'dark')).toBe('dark');
     expect(resolveThemePreference('system', 'light')).toBe('light');
     expect(resolveThemePreference('system', null)).toBe('light');
