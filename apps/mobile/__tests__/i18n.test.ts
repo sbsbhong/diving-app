@@ -12,6 +12,11 @@ describe('mobile i18n', () => {
 
     expect(i18n.t('navigation.logbook')).toBe('로그북');
     expect(i18n.getResource('en', 'translation', 'navigation.logbook')).toBe('Logbook');
+    expect(i18n.t('navigation.settings')).toBe('설정');
+    expect(i18n.getResource('en', 'translation', 'navigation.settings')).toBe('Settings');
+    expect(i18n.t('settings.theme.system')).toBe('시스템 기본값');
+    expect(i18n.getResource('en', 'translation', 'settings.theme.system')).toBe('System default');
+    expect(i18n.t('settings.language.english')).toBe('English');
   });
 
   test('resolves only supported device language codes', () => {
