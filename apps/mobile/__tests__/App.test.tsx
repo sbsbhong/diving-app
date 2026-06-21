@@ -5,7 +5,31 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../src/App';
+import { Menu } from '../src/components/ui/menu';
 import i18n from '../src/i18n';
+
+jest.mock('react-native-reanimated', () => {
+  const createAnimation = () => {
+    const animation = {} as {
+      duration: jest.Mock;
+      withInitialValues: jest.Mock;
+    };
+
+    animation.duration = jest.fn(() => animation);
+    animation.withInitialValues = jest.fn(() => animation);
+
+    return animation;
+  };
+
+  return {
+    __esModule: true,
+    default: {
+      createAnimatedComponent: (component: React.ComponentType) => component,
+    },
+    FadeOut: createAnimation(),
+    ZoomIn: createAnimation(),
+  };
+});
 
 jest.mock('react-native-safe-area-context', () => {
   const ReactModule = require('react') as typeof import('react');
@@ -94,5 +118,15 @@ describe('App navigation', () => {
 
     expect(i18n.language).toBe('en');
     expect(root.findByProps({ testID: 'nav-tab-home' }).props.children[1].props.children).toBe('Home');
+  });
+
+  test('renders the Home language selector with the gluestack Menu component', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+    });
+
+    expect(renderer!.root.findByType(Menu)).toBeTruthy();
   });
 });

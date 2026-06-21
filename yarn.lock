@@ -1908,6 +1908,14 @@
     "@swc/helpers" "^0.5.0"
     react-stately "^3.46.0"
 
+"@react-stately/utils@^3.12.1":
+  version "3.12.1"
+  resolved "https://registry.yarnpkg.com/@react-stately/utils/-/utils-3.12.1.tgz#1c7f3980ec00f428023a7320e8882b8449530779"
+  integrity sha512-NqKfzrknpfwiewx7R2vk1P+CneClInPDsIhw15+jOcUYSEfej0nta4cJywuKQJ2gsPwqX/ojDNixedCve9FWGw==
+  dependencies:
+    "@swc/helpers" "^0.5.0"
+    react-stately "^3.46.0"
+
 "@react-types/shared@^3.34.0", "@react-types/shared@^3.36.0":
   version "3.36.0"
   resolved "https://registry.yarnpkg.com/@react-types/shared/-/shared-3.36.0.tgz#52e713c6bae8e117967bf1d19d89db3a56219037"

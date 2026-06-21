@@ -28,6 +28,7 @@
     "@react-stately/overlays": "^3.7.1",
     "@react-stately/radio": "^3.12.1",
     "@react-stately/toggle": "^3.10.1",
+    "@react-stately/utils": "^3.12.1",
     "i18next": "^26.3.1",
     "nativewind": "^4.1.23",
     "react": "19.2.3",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-class-static-block": "^7.29.7",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "20.1.0",

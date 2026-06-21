@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button, ButtonText } from '../../components/ui/button';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
-import { Pressable } from '../../components/ui/pressable';
+import { Menu, MenuItem, MenuItemLabel } from '../../components/ui/menu';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
@@ -100,45 +101,43 @@ function LanguageMenu(): React.JSX.Element {
   );
 
   return (
-    <VStack space="xs" className="items-end">
-      <Pressable
-        testID="language-menu-trigger"
-        accessibilityRole="button"
-        accessibilityLabel={t(isOpen ? 'language.closeMenu' : 'language.openMenu')}
-        className="min-h-9 items-center justify-center rounded-full bg-secondary px-3 py-2"
-        onPress={() => setIsOpen(current => !current)}
-        style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
-        <Text className="text-sm font-semibold text-primary">{activeLabel}</Text>
-      </Pressable>
-      {isOpen ? (
-        <VStack className="min-w-32 overflow-hidden rounded-2xl bg-popover p-1">
-          {supportedLanguages.map(option => {
-            const isSelected = language === option;
-            const optionLabel = getLanguageLabel(option, t);
+    <Menu
+      placement="bottom right"
+      offset={4}
+      closeOnSelect
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
+      trigger={({ ...triggerProps }) => (
+        <Button
+          {...triggerProps}
+          testID="language-menu-trigger"
+          accessibilityLabel={t(isOpen ? 'language.closeMenu' : 'language.openMenu')}
+          variant="secondary"
+          size="sm"
+          className="rounded-full">
+          <ButtonText className="text-sm font-semibold text-primary">{activeLabel}</ButtonText>
+        </Button>
+      )}>
+      {supportedLanguages.map(option => {
+        const isSelected = language === option;
+        const optionLabel = getLanguageLabel(option, t);
 
-            return (
-              <Pressable
-                key={option}
-                testID={`language-menu-option-${option}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={t('language.switchTo', { language: optionLabel })}
-                className={
-                  isSelected
-                    ? 'min-h-10 w-full items-center rounded-xl bg-primary px-4 py-2'
-                    : 'min-h-10 w-full items-center rounded-xl bg-transparent px-4 py-2'
-                }
-                onPress={() => handleSelectLanguage(option)}
-                style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
-                <Text className={isSelected ? 'text-sm font-semibold text-primary-foreground' : 'text-sm font-semibold text-popover-foreground'}>
-                  {optionLabel}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </VStack>
-      ) : null}
-    </VStack>
+        return (
+          <MenuItem
+            key={option}
+            testID={`language-menu-option-${option}`}
+            textValue={optionLabel}
+            accessibilityState={{ selected: isSelected }}
+            accessibilityLabel={t('language.switchTo', { language: optionLabel })}
+            className={isSelected ? 'bg-primary' : 'bg-transparent'}
+            onPress={() => handleSelectLanguage(option)}>
+            <MenuItemLabel className={isSelected ? 'font-semibold text-primary-foreground' : 'font-semibold text-popover-foreground'}>
+              {optionLabel}
+            </MenuItemLabel>
+          </MenuItem>
+        );
+      })}
+    </Menu>
   );
 }
 
