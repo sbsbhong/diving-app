@@ -18,6 +18,8 @@ Settings should initially manage only local display preferences:
 - Theme: System default, Light, Dark
 - Language: Korean, English
 
+The Settings tab, its detail screens, runtime theme switching, and runtime language switching are all in scope for the implementation. Only preference persistence is deferred.
+
 This feature must stay within the current mobile app boundaries. It should not introduce authentication, Supabase, production persistence, cloud backup, or new safety-critical behavior.
 
 ## Goals
@@ -152,7 +154,9 @@ Language should reuse the existing `SupportedLanguage` type and `resolveSupporte
 
 Initial implementation intentionally does not persist theme or language preferences.
 
-This should be recorded in code and handoff notes as an explicit deferred task, not an accidental omission. The reason is that the mobile app currently has no production persistence boundary for logbook data, sessions, auth, or user settings. Adding settings-only persistence now would force an isolated storage decision before the app has decided how local mobile persistence should work.
+This deferred work applies only to persistence. Settings UI, in-memory preference state, runtime theme switching, and runtime language switching should be implemented now.
+
+The persistence gap should be recorded in code and handoff notes as an explicit deferred task, not an accidental omission. The reason is that the mobile app currently has no production persistence boundary for logbook data, sessions, auth, or user settings. Adding settings-only persistence now would force an isolated storage decision before the app has decided how local mobile persistence should work.
 
 Future persistence should be added behind the `AppPreferencesProvider` boundary, so screens do not change when storage is introduced. Candidate future work:
 
