@@ -6,26 +6,57 @@ import { defaultDiveLogRepository } from '../repositories/local-dive-log-reposit
 
 export type DiveLogbookQueryOptions = {
   queryScope?: string;
+  initialData?: DiveLogEntry[];
+  staleTime?: number;
 };
 
 const DEFAULT_QUERY_SCOPE = 'default';
+const repositoryScopes = new WeakMap<DiveLogRepository, string>();
+let nextRepositoryScopeId = 1;
+
+export const getDiveLogbookQueryScope = (
+  repository: DiveLogRepository = defaultDiveLogRepository,
+  queryScope?: string,
+): string => {
+  if (queryScope) {
+    return queryScope;
+  }
+
+  if (repository === defaultDiveLogRepository) {
+    return DEFAULT_QUERY_SCOPE;
+  }
+
+  const currentScope = repositoryScopes.get(repository);
+
+  if (currentScope) {
+    return currentScope;
+  }
+
+  const nextScope = `repository:${nextRepositoryScopeId}`;
+  nextRepositoryScopeId += 1;
+  repositoryScopes.set(repository, nextScope);
+
+  return nextScope;
+};
 
 export const diveLogbookQueryKeys = {
-  all: (queryScope: string = DEFAULT_QUERY_SCOPE) => ['diveLogbook', queryScope] as const,
-  list: (queryScope: string = DEFAULT_QUERY_SCOPE) => [...diveLogbookQueryKeys.all(queryScope), 'list'] as const,
-  detail: (localId: string, queryScope: string = DEFAULT_QUERY_SCOPE) =>
-    [...diveLogbookQueryKeys.all(queryScope), 'detail', localId] as const,
+  all: (repository: DiveLogRepository = defaultDiveLogRepository, queryScope?: string) =>
+    ['diveLogbook', getDiveLogbookQueryScope(repository, queryScope)] as const,
+  list: (repository: DiveLogRepository = defaultDiveLogRepository, queryScope?: string) =>
+    [...diveLogbookQueryKeys.all(repository, queryScope), 'list'] as const,
+  detail: (localId: string, repository: DiveLogRepository = defaultDiveLogRepository, queryScope?: string) =>
+    [...diveLogbookQueryKeys.all(repository, queryScope), 'detail', localId] as const,
 };
 
 export const useDiveLogEntriesQuery = (
   repository: DiveLogRepository = defaultDiveLogRepository,
   options: DiveLogbookQueryOptions = {},
 ) => {
-  const queryScope = options.queryScope ?? DEFAULT_QUERY_SCOPE;
-
   return useQuery({
-    queryKey: diveLogbookQueryKeys.list(queryScope),
+    queryKey: diveLogbookQueryKeys.list(repository, options.queryScope),
     queryFn: () => repository.list(),
+    initialData: options.initialData,
+    staleTime: options.staleTime,
   });
 };
 
@@ -34,10 +65,8 @@ export const useDiveLogEntryQuery = (
   repository: DiveLogRepository = defaultDiveLogRepository,
   options: DiveLogbookQueryOptions = {},
 ) => {
-  const queryScope = options.queryScope ?? DEFAULT_QUERY_SCOPE;
-
   return useQuery({
-    queryKey: diveLogbookQueryKeys.detail(localId, queryScope),
+    queryKey: diveLogbookQueryKeys.detail(localId, repository, options.queryScope),
     queryFn: () => repository.get(localId),
   });
 };
@@ -47,13 +76,12 @@ export const useSaveDiveLogEntryMutation = (
   options: DiveLogbookQueryOptions = {},
 ) => {
   const queryClient = useQueryClient();
-  const queryScope = options.queryScope ?? DEFAULT_QUERY_SCOPE;
 
   return useMutation({
     mutationFn: (entry: DiveLogEntry) => repository.save(entry),
     onSuccess: entry => {
-      queryClient.setQueryData(diveLogbookQueryKeys.detail(entry.localId, queryScope), entry);
-      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.list(queryScope) });
+      queryClient.setQueryData(diveLogbookQueryKeys.detail(entry.localId, repository, options.queryScope), entry);
+      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.list(repository, options.queryScope) });
     },
   });
 };
@@ -63,12 +91,11 @@ export const useDeleteDiveLogEntryMutation = (
   options: DiveLogbookQueryOptions = {},
 ) => {
   const queryClient = useQueryClient();
-  const queryScope = options.queryScope ?? DEFAULT_QUERY_SCOPE;
 
   return useMutation({
     mutationFn: (localId: string) => repository.delete(localId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(queryScope) });
+      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, options.queryScope) });
     },
   });
 };
@@ -78,13 +105,12 @@ export const useImportWatchMessagesMutation = (
   options: DiveLogbookQueryOptions = {},
 ) => {
   const queryClient = useQueryClient();
-  const queryScope = options.queryScope ?? DEFAULT_QUERY_SCOPE;
 
   return useMutation({
     mutationFn: (messages: WatchSyncMessage[]) => repository.importWatchMessages(messages),
     onSuccess: entries => {
-      queryClient.setQueryData(diveLogbookQueryKeys.list(queryScope), entries);
-      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(queryScope) });
+      queryClient.setQueryData(diveLogbookQueryKeys.list(repository, options.queryScope), entries);
+      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, options.queryScope) });
     },
   });
 };

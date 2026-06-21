@@ -7,9 +7,13 @@ import { watchFixtureMessages } from '../utils/watch-fixtures';
 
 export const useDiveLogbook = () => {
   const [filter, setFilter] = React.useState<DiveSessionFilter>({ query: '' });
-  const entriesQuery = useDiveLogEntriesQuery();
+  const initialEntries = React.useMemo(() => defaultDiveLogRepository.listSync(), []);
+  const entriesQuery = useDiveLogEntriesQuery(defaultDiveLogRepository, {
+    initialData: initialEntries,
+    staleTime: Infinity,
+  });
   const importWatchMessages = useImportWatchMessagesMutation();
-  const entries = entriesQuery.data ?? defaultDiveLogRepository.listSync();
+  const entries = entriesQuery.data ?? initialEntries;
   const sessions = React.useMemo(() => entries.map(diveLogEntryToMobileSession), [entries]);
 
   const filteredSessions = React.useMemo(() => {
@@ -49,10 +53,19 @@ export const useDiveLogbook = () => {
   };
 };
 
-const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSession => {
+export const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSession => {
   if (entry.watchCapture) {
     return {
       ...entry.watchCapture.session,
+      siteId: entry.manual.site.siteId ?? entry.watchCapture.session.siteId,
+      siteName: entry.manual.site.name ?? entry.watchCapture.session.siteName,
+      buddyIds: entry.manual.buddyIds,
+      gearIds: entry.manual.gearIds,
+      tags: entry.manual.tags,
+      notes: entry.manual.notes,
+      rating: entry.manual.rating,
+      diveMode: entry.manual.measuredValues.diveMode ?? entry.watchCapture.session.diveMode,
+      gasLabel: entry.manual.measuredValues.gasLabel ?? entry.watchCapture.session.gasLabel,
       syncStatus: toWatchSyncStatus(entry.syncStatus),
       importKey: entry.watchCapture.importKey,
       importedAt: entry.watchCapture.importedAt,
