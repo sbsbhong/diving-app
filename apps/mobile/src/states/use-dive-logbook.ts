@@ -1,13 +1,16 @@
 import React from 'react';
+import { defaultDiveLogRepository } from '../repositories/local-dive-log-repository';
+import { useDiveLogEntriesQuery, useImportWatchMessagesMutation } from './use-dive-logbook-queries';
+import type { DiveLogEntry, DiveLogSyncStatus } from '../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../types/dive-session';
-import { importWatchMessages } from '../utils/import-watch-session';
 import { watchFixtureMessages } from '../utils/watch-fixtures';
 
-const initialSessions = importWatchMessages([], watchFixtureMessages);
-
 export const useDiveLogbook = () => {
-  const [sessions, setSessions] = React.useState<MobileDiveSession[]>(initialSessions);
   const [filter, setFilter] = React.useState<DiveSessionFilter>({ query: '' });
+  const entriesQuery = useDiveLogEntriesQuery();
+  const importWatchMessages = useImportWatchMessagesMutation();
+  const entries = entriesQuery.data ?? defaultDiveLogRepository.listSync();
+  const sessions = React.useMemo(() => entries.map(diveLogEntryToMobileSession), [entries]);
 
   const filteredSessions = React.useMemo(() => {
     const query = filter.query.trim().toLowerCase();
@@ -33,10 +36,11 @@ export const useDiveLogbook = () => {
   }, [filter, sessions]);
 
   const importFixtures = React.useCallback(() => {
-    setSessions(currentSessions => importWatchMessages(currentSessions, watchFixtureMessages));
-  }, []);
+    importWatchMessages.mutate(watchFixtureMessages);
+  }, [importWatchMessages]);
 
   return {
+    entries,
     sessions,
     filteredSessions,
     filter,
@@ -45,3 +49,41 @@ export const useDiveLogbook = () => {
   };
 };
 
+const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSession => {
+  if (entry.watchCapture) {
+    return {
+      ...entry.watchCapture.session,
+      syncStatus: toWatchSyncStatus(entry.syncStatus),
+      importKey: entry.watchCapture.importKey,
+      importedAt: entry.watchCapture.importedAt,
+      mediaPlaceholders: entry.mobile.mediaPlaceholders,
+    };
+  }
+
+  return {
+    localSessionId: entry.localId,
+    startedAt: entry.manual.measuredValues.startedAt ?? entry.createdAt,
+    endedAt: entry.manual.measuredValues.endedAt,
+    maxDepthMeters: entry.manual.measuredValues.maxDepthMeters,
+    averageDepthMeters: entry.manual.measuredValues.averageDepthMeters,
+    waterTemperatureCelsius: entry.manual.measuredValues.waterTemperatureCelsius,
+    diveMode: entry.manual.measuredValues.diveMode,
+    gasLabel: entry.manual.measuredValues.gasLabel,
+    siteId: entry.manual.site.siteId,
+    siteName: entry.manual.site.name,
+    buddyIds: entry.manual.buddyIds,
+    gearIds: entry.manual.gearIds,
+    tags: entry.manual.tags,
+    notes: entry.manual.notes,
+    rating: entry.manual.rating,
+    syncStatus: toWatchSyncStatus(entry.syncStatus),
+    samples: [],
+    importKey: entry.localId,
+    importedAt: entry.createdAt,
+    mediaPlaceholders: entry.mobile.mediaPlaceholders,
+  };
+};
+
+const toWatchSyncStatus = (syncStatus: DiveLogSyncStatus): MobileDiveSession['syncStatus'] => {
+  return syncStatus === 'localOnly' ? undefined : syncStatus;
+};

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GluestackUIProvider } from './components/ui/gluestack-ui-provider';
 import { AppPreferencesProvider, useAppPreferences } from './states/app-preferences';
 
@@ -9,12 +10,16 @@ type ProvidersProps = {
 };
 
 export default function Providers(props: ProvidersProps): React.JSX.Element {
+  const [queryClient] = React.useState(() => new QueryClient());
+
   return (
-    <SafeAreaProvider>
-      <AppPreferencesProvider>
-        <ThemedProviders>{props.children}</ThemedProviders>
-      </AppPreferencesProvider>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <AppPreferencesProvider>
+          <ThemedProviders>{props.children}</ThemedProviders>
+        </AppPreferencesProvider>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
 
