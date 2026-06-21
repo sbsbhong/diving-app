@@ -8,7 +8,7 @@ import App from '../src/App';
 import i18n from '../src/i18n';
 
 jest.mock('react-native-safe-area-context', () => {
-  const React = require('react') as typeof import('react');
+  const ReactModule = require('react') as typeof import('react');
   const actual = jest.requireActual('react-native-safe-area-context');
   const metrics = {
     frame: { width: 320, height: 640, x: 0, y: 0 },
@@ -21,7 +21,7 @@ jest.mock('react-native-safe-area-context', () => {
     useSafeAreaFrame: jest.fn(() => metrics.frame),
     useSafeAreaInsets: jest.fn(() => metrics.insets),
     SafeAreaProvider: ({ children }: { children?: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
+      ReactModule.createElement(ReactModule.Fragment, null, children),
   };
 });
 

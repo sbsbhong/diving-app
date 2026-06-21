@@ -3,7 +3,7 @@ import { ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
-import { Box, HStack, Text, VStack } from '../../components/ui/primitives';
+import { HStack, Text, VStack } from '../../components/ui/primitives';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';

@@ -58,8 +58,12 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
   const setLanguage = React.useCallback(async (nextLanguage: SupportedLanguage) => {
     const supportedLanguage = resolveSupportedLanguage(nextLanguage);
 
-    await i18n.changeLanguage(supportedLanguage);
-    setLanguageState(supportedLanguage);
+    try {
+      await i18n.changeLanguage(supportedLanguage);
+      setLanguageState(supportedLanguage);
+    } catch {
+      // Keep the previous language selection when i18next rejects the change.
+    }
   }, []);
 
   const resolvedTheme = React.useMemo(

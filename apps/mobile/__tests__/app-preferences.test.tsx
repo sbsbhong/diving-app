@@ -101,6 +101,38 @@ describe('app preferences', () => {
     expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:en');
   });
 
+  test('keeps the current language when a language change rejects', async () => {
+    const snapshots: AppPreferences[] = [];
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider>
+          <Probe onValue={value => snapshots.push(value)} />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+
+    const changeLanguageSpy = jest
+      .spyOn(i18n, 'changeLanguage')
+      .mockRejectedValueOnce(new Error('language change failed'));
+
+    try {
+      await expect(
+        ReactTestRenderer.act(async () => {
+          await snapshots[snapshots.length - 1].setLanguage('en');
+        }),
+      ).resolves.toBeUndefined();
+
+      expect(i18n.language).toBe('ko');
+      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+    } finally {
+      changeLanguageSpy.mockRestore();
+    }
+  });
+
   test('requires the preferences provider', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
