@@ -29,6 +29,9 @@ web_modules/
 # Superpowers browser brainstorming companion output
 .superpowers/
 
+# Local implementation worktrees
+.worktrees/
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
