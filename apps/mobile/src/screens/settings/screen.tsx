@@ -100,7 +100,7 @@ export default function SettingsScreen(): React.JSX.Element {
         <Text size="xs" className="font-semibold uppercase text-muted-foreground">
           {t('settings.appearance')}
         </Text>
-        <VStack className="overflow-hidden rounded-2xl border border-border bg-card">
+        <VStack className="overflow-hidden rounded-2xl bg-card">
           <SettingRow
             rowTestID="settings-row-theme"
             label={t('settings.theme.title')}
@@ -156,7 +156,7 @@ function DetailHeader(props: { title: string; onBack: () => void }): React.JSX.E
 }
 
 function OptionGroup(props: { children: React.ReactNode }): React.JSX.Element {
-  return <VStack className="overflow-hidden rounded-2xl border border-border bg-card">{props.children}</VStack>;
+  return <VStack className="overflow-hidden rounded-2xl bg-card">{props.children}</VStack>;
 }
 
 function SettingRow(props: SettingRowProps): React.JSX.Element {
@@ -207,9 +207,13 @@ function OptionRow(props: OptionRowProps): React.JSX.Element {
             </Text>
           ) : null}
         </VStack>
-        <Text size="lg" className={markClassName}>
-          {props.selected ? '✓' : ''}
-        </Text>
+        <Box className="w-5 items-center">
+          {props.selected ? (
+            <Text size="lg" className={markClassName}>
+              ✓
+            </Text>
+          ) : null}
+        </Box>
       </HStack>
     </Pressable>
   );
