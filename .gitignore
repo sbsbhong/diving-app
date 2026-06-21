@@ -26,6 +26,9 @@ web_modules/
 # Optional eslint cache
 .eslintcache
 
+# Superpowers browser brainstorming companion output
+.superpowers/
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
