@@ -23,12 +23,11 @@ function Probe(props: { onValue: (value: AppPreferences) => void }): React.JSX.E
   );
 }
 
-const expectSupportedLanguageSetter = (preferences: AppPreferences) => {
-  // @ts-expect-error setLanguage must only accept supported language values.
-  void preferences.setLanguage('ja');
-};
+function OutsideProviderProbe(): React.JSX.Element {
+  useAppPreferences();
 
-void expectSupportedLanguageSetter;
+  return <Text testID="outside-provider-probe">outside provider</Text>;
+}
 
 describe('app preferences', () => {
   beforeEach(async () => {
@@ -80,5 +79,41 @@ describe('app preferences', () => {
 
     expect(i18n.language).toBe('en');
     expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+  });
+
+  test('tracks language changes emitted outside the preferences setter', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider>
+          <Probe onValue={jest.fn()} />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+
+    await ReactTestRenderer.act(async () => {
+      await i18n.changeLanguage('en');
+    });
+
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:en');
+  });
+
+  test('requires the preferences provider', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    try {
+      expect(() => {
+        ReactTestRenderer.act(() => {
+          ReactTestRenderer.create(<OutsideProviderProbe />);
+        });
+      }).toThrow('useAppPreferences must be used within AppPreferencesProvider');
+    } finally {
+      consoleErrorSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    }
   });
 });
