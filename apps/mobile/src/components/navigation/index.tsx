@@ -8,14 +8,14 @@ import { useDiveLogbook } from '../../states/use-dive-logbook';
 import { Box, HStack, Text, VStack } from '../ui/primitives';
 import HomeScreen from '../../screens/home/screen';
 import LogbookScreen from '../../screens/logbook/screen';
-import MemoryScreen from '../../screens/memory/screen';
 import PlanningScreen from '../../screens/planning/screen';
+import SettingsScreen from '../../screens/settings/screen';
 
 export type RootStackParamList = {
   home: undefined;
   logbook: undefined;
   planning: undefined;
-  memory: undefined;
+  settings: undefined;
 };
 
 export default function RootNavigation(): React.JSX.Element {
@@ -38,7 +38,6 @@ export default function RootNavigation(): React.JSX.Element {
             sessions={logbook.sessions}
             onOpenLogbook={() => setSection('logbook')}
             onOpenPlanning={() => setSection('planning')}
-            onOpenMemory={() => setSection('memory')}
           />
         ) : null}
         {section === 'logbook' ? (
@@ -52,17 +51,17 @@ export default function RootNavigation(): React.JSX.Element {
         {section === 'planning' ? (
           <PlanningScreen sessions={logbook.sessions} onOpenLogbook={() => setSection('logbook')} />
         ) : null}
-        {section === 'memory' ? <MemoryScreen sessions={logbook.sessions} onOpenLogbook={() => setSection('logbook')} /> : null}
+        {section === 'settings' ? <SettingsScreen /> : null}
       </VStack>
 
       <HStack
         gap={0}
         className="bg-card px-2 pt-1"
         style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
-        <NavTab label={t('navigation.home')} selected={section === 'home'} onPress={() => setSection('home')} />
-        <NavTab label={t('navigation.logbook')} selected={section === 'logbook'} onPress={() => setSection('logbook')} />
-        <NavTab label={t('navigation.planning')} selected={section === 'planning'} onPress={() => setSection('planning')} />
-        <NavTab label={t('navigation.memory')} selected={section === 'memory'} onPress={() => setSection('memory')} />
+        <NavTab id="home" label={t('navigation.home')} selected={section === 'home'} onPress={() => setSection('home')} />
+        <NavTab id="logbook" label={t('navigation.logbook')} selected={section === 'logbook'} onPress={() => setSection('logbook')} />
+        <NavTab id="planning" label={t('navigation.planning')} selected={section === 'planning'} onPress={() => setSection('planning')} />
+        <NavTab id="settings" label={t('navigation.settings')} selected={section === 'settings'} onPress={() => setSection('settings')} />
       </HStack>
     </VStack>
   );
@@ -107,10 +106,11 @@ const navTabTextStyles = tva({
   },
 });
 
-function NavTab(props: { label: string; selected: boolean; onPress: () => void }): React.JSX.Element {
+function NavTab(props: { id: DiveLogbookSection; label: string; selected: boolean; onPress: () => void }): React.JSX.Element {
   return (
     <Pressable
       onPress={props.onPress}
+      testID={`nav-tab-${props.id}`}
       className={navTabStyles({ selected: props.selected })}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
       <Box className={navTabIndicatorStyles({ selected: props.selected })} />

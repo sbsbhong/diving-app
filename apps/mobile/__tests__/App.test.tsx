@@ -5,9 +5,71 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../src/App';
+import i18n from '../src/i18n';
 
-test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react') as typeof import('react');
+  const actual = jest.requireActual('react-native-safe-area-context');
+  const metrics = {
+    frame: { width: 320, height: 640, x: 0, y: 0 },
+    insets: { left: 0, right: 0, bottom: 0, top: 0 },
+  };
+
+  return {
+    ...actual,
+    initialWindowMetrics: metrics,
+    useSafeAreaFrame: jest.fn(() => metrics.frame),
+    useSafeAreaInsets: jest.fn(() => metrics.insets),
+    SafeAreaProvider: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+jest.mock('nativewind', () => {
+  const actual = jest.requireActual('nativewind');
+
+  return {
+    ...actual,
+    useColorScheme: jest.fn(() => ({
+      colorScheme: 'light',
+      setColorScheme: jest.fn(),
+    })),
+  };
+});
+
+describe('App navigation', () => {
+  beforeEach(async () => {
+    await ReactTestRenderer.act(async () => {
+      await i18n.changeLanguage('ko');
+    });
+  });
+
+  test('renders correctly', async () => {
+    await ReactTestRenderer.act(async () => {
+      ReactTestRenderer.create(<App />);
+    });
+  });
+
+  test('keeps four top-level tabs and opens Settings', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+    });
+
+    const root = renderer!.root;
+
+    expect(root.findByProps({ testID: 'nav-tab-home' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'nav-tab-logbook' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'nav-tab-planning' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'nav-tab-settings' })).toBeTruthy();
+    expect(() => root.findByProps({ testID: 'nav-tab-memory' })).toThrow();
+    expect(() => root.findByProps({ testID: 'language-menu-trigger' })).toThrow();
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'nav-tab-settings' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
   });
 });

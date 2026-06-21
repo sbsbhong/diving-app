@@ -4,7 +4,7 @@ import type {
   WatchSyncMessage,
 } from '../../../../packages/contracts/generated/typescript';
 
-export type DiveLogbookSection = 'home' | 'logbook' | 'planning' | 'memory';
+export type DiveLogbookSection = 'home' | 'logbook' | 'planning' | 'settings';
 
 export type MobileDiveSession = WatchSession & {
   importKey: string;
@@ -32,4 +32,3 @@ export type DiveSessionFilter = {
 };
 
 export type { WatchDepthSample, WatchSession, WatchSyncMessage };
-
