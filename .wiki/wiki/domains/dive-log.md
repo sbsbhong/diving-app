@@ -44,12 +44,27 @@ Sample metadata는 다음 field를 포함한다.
 
 Review summary는 duration, max depth, average depth, sample count, average water temperature, ascent-rate reminder summary를 포함할 수 있다. 이 값들은 과거 기록 확인용 값이며 감압 계산이나 비상 지침이 아니다.
 
-Mobile model은 가져온 watch session 위에 `importKey`, `importedAt`, `mediaPlaceholders`를 추가한다.
+Mobile model은 현재 가져온 watch session 위에 `importKey`, `importedAt`, `mediaPlaceholders`를 추가한다.
+
+승인된 다음 모델 방향은 `WatchSession`과 모바일 최종 로그 항목을 분리하는 것이다. `WatchSession`은 watch-to-mobile sync contract로 유지하고, 모바일 로그북은 별도 `DiveLogEntry`를 사용한다.
+
+`DiveLogEntry`는 다음 개념을 보존해야 한다.
+
+- `source`: `manual` 또는 `watch`.
+- `fieldSource`: `manual`, `mobile`, `watch` provenance.
+- `syncStatus`: `localOnly`, `pending`, `synced`, `failed`.
+- `localId`: 로컬 저장 기준 식별자.
+- `remoteId`: future Supabase row와 연결하는 선택 식별자.
+- `ownerUserId`: future authenticated user 연결.
+
+Watch-captured 측정값은 원본 출처를 보존하고 모바일 편집 화면에서 잠금 값으로 다룬다. Manual field와 mobile-assisted field는 사용자가 수정할 수 있다.
 
 ## 관련 문서
 
 - [[architecture/sync-flow]]
 - [[architecture/mobile]]
+- [[architecture/mobile-logbook-roadmap]]
 - [[architecture/watch-app]]
+- [[decisions/adr-local-first-mobile-logbook]]
 - [[domains/diving-glossary]]
 - [[domains/safety-rules]]

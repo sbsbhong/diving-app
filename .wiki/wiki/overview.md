@@ -17,6 +17,8 @@
 
 현재 코드에는 Supabase layer, 인증 흐름, cloud backup, 모바일 production 저장, WatchConnectivity bridge가 구현되어 있지 않다.
 
+모바일 로그북의 승인된 다음 방향은 local-first다. 먼저 로그인 없이 수동 로그 등록과 로컬 저장소 경계를 만들고, 이후 watch 기반 로그 작성, 인증, Supabase sync를 같은 로그 모델 위에 붙인다.
+
 ## 상세
 
 watch 앱의 기록 흐름은 현재 `MockDepthSensorProvider`를 사용한다. `RealDepthSensorProvider`는 향후 `CMWaterSubmersionManager` 연동을 위한 자리 표시자이며, 공개 배포 전 지원되는 Apple Watch hardware에서 수동 검증이 필요하다.
@@ -31,6 +33,7 @@ watch 앱의 기록 흐름은 현재 `MockDepthSensorProvider`를 사용한다. 
 
 - [[architecture/monorepo]]
 - [[architecture/mobile]]
+- [[architecture/mobile-logbook-roadmap]]
 - [[architecture/watch-app]]
 - [[architecture/sync-flow]]
 - [[domains/safety-rules]]

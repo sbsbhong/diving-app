@@ -1,5 +1,29 @@
 # Wiki 기록
 
+## 2026-06-21 - 결정 - local-first mobile logbook roadmap
+
+- 수정:
+  - `.wiki/wiki/index.md`
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/architecture/supabase.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/decisions/adr-index.md`
+  - `.wiki/wiki/decisions/adr-local-first-mobile-logbook.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - 사용자 승인: local-first 모바일 로그북을 먼저 만들고 Supabase sync를 나중에 붙이는 방향
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/src/types/dive-session.ts`
+  - `apps/mobile/src/utils/import-watch-session.ts`
+  - `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
+  - `packages/contracts/schemas/watch-session.schema.json`
+  - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
+  - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`
+- 요약:
+  - 모바일 로그북을 local-first로 만들고, 수동 로그와 watch 기반 로그를 모두 `DiveLogEntry`로 다루며, 이후 로그인과 Supabase sync를 저장소 경계 뒤에 붙이는 승인된 방향을 기록했다.
+
 ## 2026-06-21 - 구조 - mobile settings tab
 
 - 수정:
