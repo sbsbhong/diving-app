@@ -69,7 +69,7 @@ Use a layered mobile model:
 
 ```txt
 Screens
-  -> useDiveLogbook / useDiveLogEditor
+  -> React Query logbook hooks
     -> DiveLogRepository interface
       -> LocalDiveLogRepository now
       -> SyncingDiveLogRepository later
@@ -77,6 +77,17 @@ Screens
 ```
 
 Screens should call app-level hooks and actions. They should not know whether persistence is local-only, local plus sync, or Supabase-backed.
+
+React Query should be the async query and mutation orchestration layer for logbook data. It can call local repositories and future remote/syncing repositories through the same interface:
+
+- `useQuery` for logbook list/detail reads.
+- `useMutation` for save, delete, manual log creation, and watch import.
+- Query invalidation after mutations.
+- Loading, empty, and error states around repository calls.
+
+React Query cache is not the source of truth. Local storage and future Supabase rows remain the durable stores. The repository layer owns persistence; React Query owns read/mutation cache behavior.
+
+Zustand is not part of the first logbook implementation. Revisit it only if editor state becomes complex enough to justify a separate client-state store, such as multi-step draft state, selected log UI state, or unsaved form state that should not live in React Query cache.
 
 ### Core Types
 
@@ -129,6 +140,8 @@ type DiveLogRepository = {
 ```
 
 The initial local engine is intentionally not fixed in this design. Phase 0 should select the smallest local persistence option that fits the current app and future migration needs.
+
+Phase 1 should add the React Query provider and logbook query/mutation hooks if `@tanstack/react-query` is not already present in the mobile workspace.
 
 ## Manual Log Creation
 

@@ -1,5 +1,18 @@
 # Wiki 기록
 
+## 2026-06-21 - 결정 - React Query for mobile logbook data access
+
+- 수정:
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/decisions/adr-local-first-mobile-logbook.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - 사용자 승인: React Query는 사용하는 방향으로 잡고, Zustand는 당장 불필요하다는 판단
+  - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
+  - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`
+- 요약:
+  - 모바일 로그북 조회와 변경은 React Query cache/mutation 계층으로 다루고, 실제 저장 책임은 local repository와 future Supabase repository에 둔다. Zustand는 첫 구현 범위에서 제외하고 편집 상태가 복잡해질 때 재검토한다.
+
 ## 2026-06-21 - 결정 - local-first mobile logbook roadmap
 
 - 수정:

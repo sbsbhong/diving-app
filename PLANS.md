@@ -78,6 +78,7 @@ Every phase must have a verification gate. If the same gate fails three times wi
   - `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
 - Implementation notes:
   - Compare a simple key-value JSON local store against a structured local database before adding dependencies.
+  - Confirm whether `@tanstack/react-query` is present in the mobile workspace and plan the smallest provider/dependency addition if absent.
   - Confirm the first manual-log field set.
   - Confirm whether watch fixture import should become a repository action in the same phase.
   - Write the exact touched-file list for Phase 1 before coding.
@@ -91,6 +92,8 @@ Every phase must have a verification gate. If the same gate fails three times wi
   - `apps/mobile/src/types/dive-log-entry.ts`
   - `apps/mobile/src/repositories/dive-log-repository.ts`
   - `apps/mobile/src/repositories/local-dive-log-repository.ts`
+  - `apps/mobile/src/states/use-dive-logbook-queries.ts`
+  - `apps/mobile/src/providers.tsx`
   - `apps/mobile/src/utils/create-dive-log-entry.ts`
   - `apps/mobile/src/utils/watch-session-to-dive-log-entry.ts`
   - `apps/mobile/src/states/use-dive-logbook.ts`
@@ -100,6 +103,9 @@ Every phase must have a verification gate. If the same gate fails three times wi
   - Keep `WatchSession` as the watch sync contract, not the final mobile logbook item.
   - Preserve watch-captured values and provenance.
   - Add repository methods for list/get/save/delete/import watch session.
+  - Use React Query for logbook reads, mutations, invalidation, loading states, and errors.
+  - Keep React Query cache as cache only; local storage and future Supabase remain durable stores.
+  - Do not add Zustand in the first pass unless editor state complexity proves it is needed.
 - Verification gate: `yarn workspace @repo/mobile test` for touched tests, then `yarn mobile:typecheck`
 - Risk: Over-modeling future Supabase tables at this stage can make the local app harder to ship.
 
@@ -114,6 +120,7 @@ Every phase must have a verification gate. If the same gate fails three times wi
   - relevant mobile tests
 - Implementation notes:
   - Add a Logbook create action and manual editor.
+  - Use React Query mutations for save/delete/import and invalidate relevant logbook queries.
   - Save manual logs with `source: 'manual'` and `syncStatus: 'localOnly'`.
   - Display manual and watch-sourced entries in one logbook.
   - Keep mobile-assisted location optional and editable.

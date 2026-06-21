@@ -14,6 +14,10 @@ Accepted
 
 모바일 로그에는 `manual`과 `watch` source를 둘 다 허용한다. `WatchSession`은 watch 동기화 계약이고, 모바일 사용자가 보는 최종 로그 항목은 별도 `DiveLogEntry`로 둔다. Watch에서 가져온 측정값은 원본 출처를 보존하고 모바일 편집 화면에서 잠금 값으로 표시한다. 사용자가 입력하거나 모바일이 제안한 값은 별도 provenance로 구분한다.
 
+React Query는 모바일 로그북의 조회와 변경을 다루는 cache/mutation 계층으로 사용한다. `useQuery`와 `useMutation`은 `DiveLogRepository`를 호출한다. React Query cache는 실제 저장소가 아니며, local storage와 future Supabase row가 durable store다.
+
+Zustand는 첫 구현 범위에서 제외한다. 추후 로그 편집 화면의 draft, step, 선택 상태가 복잡해질 때 client-state store로 재검토한다.
+
 로그인 기능이 추가된 뒤에는 비로그인 사용자는 `localOnly` 저장을 유지하고, 로그인 사용자는 local write 후 Supabase sync를 수행한다. 기존 local-only 로그를 계정에 업로드할 때는 사용자 동의를 받는다.
 
 ## Consequences
@@ -21,6 +25,8 @@ Accepted
 - 수동 로그 등록을 Supabase 없이 먼저 구현할 수 있다.
 - 로컬 저장소는 임시 코드가 아니라 guest mode와 future offline cache의 기반이 된다.
 - 화면 코드는 저장소 구현을 직접 알지 않게 된다.
+- React Query를 사용해 local repository와 future syncing repository의 loading/error/mutation 처리를 같은 방식으로 다룰 수 있다.
+- Zustand를 미리 도입하지 않아 첫 구현의 상태 관리 범위를 줄인다.
 - Supabase schema와 RLS는 로그 모델이 안정된 뒤 설계한다.
 - Watch-captured 값은 출처 표시가 가능하지만, certified dive computer처럼 표현하지 않는다.
 - 첫 구현 전 local storage engine 선택은 별도 Phase 0 조사에서 결정한다.

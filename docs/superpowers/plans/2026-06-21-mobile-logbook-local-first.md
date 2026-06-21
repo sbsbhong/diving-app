@@ -6,7 +6,7 @@
 
 **Final Goal:** Mobile owns the logbook. Watch contributes measured capture data. Guest users keep data on-device. Signed-in users eventually sync the same log model to Supabase.
 
-**Architecture:** Screens call mobile app hooks. Hooks call a `DiveLogRepository` interface. The first implementation uses `LocalDiveLogRepository`. Future authenticated mode adds a syncing repository that writes locally first and pushes to Supabase through a Supabase-specific repository layer.
+**Architecture:** Screens call React Query-backed mobile hooks. Those hooks call a `DiveLogRepository` interface. The first implementation uses `LocalDiveLogRepository`. Future authenticated mode adds a syncing repository that writes locally first and pushes to Supabase through a Supabase-specific repository layer. React Query handles async cache, mutations, invalidation, loading states, and errors; repositories remain the durable data access boundary.
 
 **Verification Stop Rule:** If the same gate fails three times with the same root cause, stop and report the failing command, error summary, attempted fixes, suspected owner or environment dependency, and safest human next action.
 
@@ -37,6 +37,7 @@
   - Simple key-value JSON storage for the first logbook version.
   - SQLite-style structured storage if query or migration needs are already real.
 - [ ] Confirm whether current fixture import should become a repository-level watch import action.
+- [ ] Confirm `@tanstack/react-query` is absent or present in `apps/mobile/package.json`, then plan the smallest dependency/provider addition if absent.
 - [ ] Confirm the first manual-log field set and which fields can be deferred.
 - [ ] Identify all current tests that assume `MobileDiveSession` equals the logbook item.
 - [ ] Write the exact first-phase file list before implementation starts.
@@ -62,6 +63,8 @@ Choosing a local storage library too early can add native setup and migration wo
 - `apps/mobile/src/types/dive-log-entry.ts`
 - `apps/mobile/src/repositories/dive-log-repository.ts`
 - `apps/mobile/src/repositories/local-dive-log-repository.ts`
+- `apps/mobile/src/states/use-dive-logbook-queries.ts`
+- `apps/mobile/src/providers.tsx`
 - `apps/mobile/src/utils/create-dive-log-entry.ts`
 - `apps/mobile/src/utils/watch-session-to-dive-log-entry.ts`
 - `apps/mobile/src/states/use-dive-logbook.ts`
@@ -82,8 +85,13 @@ Choosing a local storage library too early can add native setup and migration wo
 - [ ] Ensure watch-captured measured fields are represented as locked/provenance `watch`.
 - [ ] Keep generated `packages/contracts/generated/typescript` untouched.
 - [ ] Create a repository interface with list/get/save/delete/import watch methods.
+- [ ] Add React Query provider wiring at the app provider layer if not already present.
+- [ ] Add query keys for logbook list/detail reads.
+- [ ] Add React Query hooks for list, detail, save, delete, and watch import mutation.
+- [ ] Keep React Query cache as a cache only; local storage and future Supabase remain the durable source of truth.
 - [ ] Implement an in-memory or local adapter only as far as needed to preserve current app behavior in tests.
 - [ ] Adjust `useDiveLogbook` to consume repository-shaped actions without changing all screens in one pass.
+- [ ] Do not add Zustand in this phase; revisit only if editor UI state becomes too complex for local component state.
 
 **Gate:**
 
@@ -117,6 +125,7 @@ If `DiveLogEntry` tries to model every future Supabase table now, it will become
 
 - [ ] Add a Logbook create action that starts a manual draft.
 - [ ] Add a manual editor using existing UI primitives and semantic token styling.
+- [ ] Use React Query mutations for save and delete, then invalidate relevant logbook queries.
 - [ ] Keep the first editor field set focused:
   - date/time
   - dive mode

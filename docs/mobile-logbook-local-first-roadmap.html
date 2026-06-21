@@ -312,6 +312,10 @@
             <span><code>useDiveLogbook</code>, future <code>useDiveLogEditor</code>. 화면 이벤트를 도메인 action으로 바꾼다.</span>
           </div>
           <div class="layer">
+            <strong>React Query</strong>
+            <span><code>useQuery</code>와 <code>useMutation</code>으로 로그 조회, 저장, 삭제, watch import를 다룬다. Cache일 뿐 저장소는 아니다.</span>
+          </div>
+          <div class="layer">
             <strong>Repository Interface</strong>
             <span><code>DiveLogRepository</code>. list/get/save/delete/import watch session을 제공한다.</span>
           </div>
@@ -447,15 +451,19 @@ type DiveLogEntry = {
             <span>화면이 저장 엔진을 모르게 만드는 <code>DiveLogRepository</code>를 추가한다.</span>
           </div>
           <div class="task">
-            <strong>4. Watch mapper</strong>
+            <strong>4. React Query hooks</strong>
+            <span>조회는 <code>useQuery</code>, 저장/삭제/import는 <code>useMutation</code>으로 repository를 호출한다.</span>
+          </div>
+          <div class="task">
+            <strong>5. Watch mapper</strong>
             <span><code>WatchSession</code>을 locked watch-sourced <code>DiveLogEntry</code>로 변환한다.</span>
           </div>
           <div class="task">
-            <strong>5. Manual editor</strong>
+            <strong>6. Manual editor</strong>
             <span>site, time, duration, max depth, buddy, tags, marine life, notes, rating을 먼저 지원한다.</span>
           </div>
           <div class="task">
-            <strong>6. List/detail integration</strong>
+            <strong>7. List/detail integration</strong>
             <span>manual log와 watch log가 같은 로그북에 보이되 provenance와 편집 가능 여부를 다르게 보여준다.</span>
           </div>
         </div>
