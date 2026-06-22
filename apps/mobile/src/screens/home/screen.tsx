@@ -13,7 +13,7 @@ import { supportedLanguages, type SupportedLanguage } from '../../i18n';
 import { useAppPreferences } from '../../states/app-preferences';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
-import { summarizeSession } from '../../utils/session-summary';
+import { getSessionDurationSeconds, getSessionMaxDepthMeters } from '../../utils/session-summary';
 
 type HomeScreenProps = {
   sessions: MobileDiveSession[];
@@ -24,7 +24,8 @@ type HomeScreenProps = {
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const { i18n, t } = useTranslation();
   const recentSession = props.sessions[0];
-  const recentSummary = recentSession ? summarizeSession(recentSession) : undefined;
+  const recentMaxDepthMeters = recentSession ? getSessionMaxDepthMeters(recentSession) : undefined;
+  const recentDurationSeconds = recentSession ? getSessionDurationSeconds(recentSession) : undefined;
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const syncStatus = recentSession?.syncStatus ?? 'pending';
 
@@ -57,8 +58,8 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
             />
             <SessionProfile samples={recentSession?.samples ?? []} kind="depth" title={t('home.depthProfile')} />
             <HStack space="md">
-              <MetricTile label={t('home.maxDepth')} value={formatDepth(recentSummary?.maxDepthMeters)} />
-              <MetricTile label={t('home.bottomTime')} value={formatDuration(recentSummary?.durationSeconds ?? 0)} />
+              <MetricTile label={t('home.maxDepth')} value={formatDepth(recentMaxDepthMeters)} />
+              <MetricTile label={t('home.bottomTime')} value={formatOptionalDuration(recentDurationSeconds)} />
             </HStack>
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
@@ -152,6 +153,10 @@ function MetricTile(props: { label: string; value: string }): React.JSX.Element 
       <Text className="text-2xl font-semibold text-card-foreground">{props.value}</Text>
     </VStack>
   );
+}
+
+function formatOptionalDuration(seconds: number | undefined): string {
+  return seconds === undefined ? '--:--' : formatDuration(seconds);
 }
 
 function AssistantMark(): React.JSX.Element {

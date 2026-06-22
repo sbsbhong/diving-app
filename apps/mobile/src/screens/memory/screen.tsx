@@ -9,7 +9,7 @@ import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
 import type { MobileDiveSession } from '../../types/dive-session';
 import { formatDate, formatDepth, formatDuration, formatRating } from '../../utils/dive-formatters';
-import { summarizeSession } from '../../utils/session-summary';
+import { getSessionDurationSeconds, getSessionMaxDepthMeters } from '../../utils/session-summary';
 
 type MemoryScreenProps = {
   sessions: MobileDiveSession[];
@@ -19,17 +19,13 @@ type MemoryScreenProps = {
 export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Element {
   const { i18n, t } = useTranslation();
   const session = props.sessions[0];
-  const summary = session ? summarizeSession(session) : undefined;
+  const maxDepthMeters = session ? getSessionMaxDepthMeters(session) : undefined;
+  const durationSeconds = session ? getSessionDurationSeconds(session) : undefined;
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const totalDuration = props.sessions.reduce((sum, currentSession) => {
-    return sum + summarizeSession(currentSession).durationSeconds;
-  }, 0);
-  const averageMaxDepth =
-    props.sessions.length === 0
-      ? undefined
-      : props.sessions.reduce((sum, currentSession) => {
-          return sum + summarizeSession(currentSession).maxDepthMeters;
-        }, 0) / props.sessions.length;
+  const knownDurations = props.sessions.map(getSessionDurationSeconds).filter(isNumber);
+  const totalDuration = knownDurations.length ? knownDurations.reduce((sum, value) => sum + value, 0) : undefined;
+  const knownMaxDepths = props.sessions.map(getSessionMaxDepthMeters).filter(isNumber);
+  const averageMaxDepth = knownMaxDepths.length ? knownMaxDepths.reduce((sum, value) => sum + value, 0) / knownMaxDepths.length : undefined;
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
@@ -55,8 +51,8 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
           />
           <DiveSummaryCard.Body>
             <HStack space="md">
-              <ShareMetric label={t('memory.max')} value={formatDepth(summary?.maxDepthMeters)} />
-              <ShareMetric label={t('memory.time')} value={formatDuration(summary?.durationSeconds ?? 0)} />
+              <ShareMetric label={t('memory.max')} value={formatDepth(maxDepthMeters)} />
+              <ShareMetric label={t('memory.time')} value={formatOptionalDuration(durationSeconds)} />
             </HStack>
             <SessionProfile samples={session?.samples ?? []} kind="depth" title={t('logbook.depthProfile')} />
             <HStack className="items-center justify-between">
@@ -85,7 +81,7 @@ export default function MemoryScreen(props: MemoryScreenProps): React.JSX.Elemen
           <DiveSummaryCard.Header eyebrow={t('memory.safeAnalytics')} title={t('memory.reviewSummaries')} />
           <DiveSummaryCard.Body>
             <DiveSummaryCard.Metric label={t('memory.loggedDives')} value={`${props.sessions.length}`} />
-            <DiveSummaryCard.Metric label={t('memory.totalBottomTime')} value={formatDuration(totalDuration)} />
+            <DiveSummaryCard.Metric label={t('memory.totalBottomTime')} value={formatOptionalDuration(totalDuration)} />
             <DiveSummaryCard.Metric label={t('memory.avgMaxDepth')} value={formatDepth(averageMaxDepth)} />
             <DiveSummaryCard.Metric
               label={t('memory.favoriteMode')}
@@ -119,4 +115,12 @@ function ShareMetric(props: { label: string; value: string }): React.JSX.Element
       <Text className="text-2xl font-semibold text-foreground">{props.value}</Text>
     </VStack>
   );
+}
+
+function formatOptionalDuration(seconds: number | undefined): string {
+  return seconds === undefined ? '--:--' : formatDuration(seconds);
+}
+
+function isNumber(value: number | undefined): value is number {
+  return value !== undefined;
 }

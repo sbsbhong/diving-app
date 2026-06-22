@@ -1,5 +1,6 @@
 import { diveLogEntryToMobileSession } from '../src/states/use-dive-logbook';
 import type { DiveLogEntry } from '../src/types/dive-log-entry';
+import { createBlankDiveLogEntry } from '../src/utils/create-dive-log-entry';
 
 describe('diveLogEntryToMobileSession', () => {
   it('overlays manual context onto watch-backed compatibility sessions', () => {
@@ -71,6 +72,25 @@ describe('diveLogEntryToMobileSession', () => {
       maxDepthMeters: 12,
       averageDepthMeters: 7,
       mediaPlaceholders: ['manual-photo'],
+    });
+  });
+
+  it('derives a manual compatibility session end time from manual duration', () => {
+    const entry = createBlankDiveLogEntry({
+      localId: 'manual-entry-1',
+      now: 1781351000,
+    });
+
+    entry.manual.measuredValues = {
+      startedAt: 1781352000,
+      durationSeconds: 600,
+      maxDepthMeters: 12,
+    };
+
+    expect(diveLogEntryToMobileSession(entry)).toMatchObject({
+      startedAt: 1781352000,
+      endedAt: 1781352600,
+      maxDepthMeters: 12,
     });
   });
 });

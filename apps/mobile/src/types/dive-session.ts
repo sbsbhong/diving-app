@@ -19,9 +19,9 @@ export type DivePlanningItem = {
 };
 
 export type DiveSessionSummary = {
-  durationSeconds: number;
-  maxDepthMeters: number;
-  averageDepthMeters: number;
+  durationSeconds?: number;
+  maxDepthMeters?: number;
+  averageDepthMeters?: number;
   waterTemperatureCelsius?: number;
   sampleCount: number;
 };

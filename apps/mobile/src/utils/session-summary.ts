@@ -6,10 +6,10 @@ export const getSessionImportKey = (session: Pick<WatchSession, 'localSessionId'
 
 export const summarizeSession = (session: WatchSession): DiveSessionSummary => {
   const sampleCount = session.samples.length;
-  const maxDepthMeters = session.maxDepthMeters ?? maxDepth(session.samples);
-  const averageDepthMeters = session.averageDepthMeters ?? averageDepth(session.samples);
+  const maxDepthMeters = getSessionMaxDepthMeters(session);
+  const averageDepthMeters = getSessionAverageDepthMeters(session);
   const waterTemperatureCelsius = session.waterTemperatureCelsius ?? averageTemperature(session.samples);
-  const durationSeconds = session.endedAt ? Math.max(0, session.endedAt - session.startedAt) : 0;
+  const durationSeconds = getSessionDurationSeconds(session);
 
   return {
     durationSeconds,
@@ -20,13 +20,29 @@ export const summarizeSession = (session: WatchSession): DiveSessionSummary => {
   };
 };
 
-const maxDepth = (samples: WatchDepthSample[]) => {
-  return samples.reduce((maxValue, sample) => Math.max(maxValue, sample.depthMeters), 0);
+export const getSessionDurationSeconds = (session: Pick<WatchSession, 'endedAt' | 'startedAt'>): number | undefined => {
+  return session.endedAt === undefined ? undefined : Math.max(0, session.endedAt - session.startedAt);
 };
 
-const averageDepth = (samples: WatchDepthSample[]) => {
+export const getSessionMaxDepthMeters = (session: Pick<WatchSession, 'maxDepthMeters' | 'samples'>): number | undefined => {
+  return session.maxDepthMeters ?? maxDepth(session.samples);
+};
+
+export const getSessionAverageDepthMeters = (session: Pick<WatchSession, 'averageDepthMeters' | 'samples'>): number | undefined => {
+  return session.averageDepthMeters ?? averageDepth(session.samples);
+};
+
+const maxDepth = (samples: WatchDepthSample[]): number | undefined => {
   if (samples.length === 0) {
-    return 0;
+    return undefined;
+  }
+
+  return samples.reduce((maxValue, sample) => Math.max(maxValue, sample.depthMeters), samples[0].depthMeters);
+};
+
+const averageDepth = (samples: WatchDepthSample[]): number | undefined => {
+  if (samples.length === 0) {
+    return undefined;
   }
 
   return samples.reduce((sum, sample) => sum + sample.depthMeters, 0) / samples.length;
@@ -43,4 +59,3 @@ const averageTemperature = (samples: WatchDepthSample[]) => {
 
   return temperatures.reduce((sum, value) => sum + value, 0) / temperatures.length;
 };
-

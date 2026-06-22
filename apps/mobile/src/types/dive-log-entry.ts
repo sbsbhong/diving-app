@@ -41,9 +41,9 @@ export type DiveLogMobileFields = {
 export type DiveLogWatchMeasuredValues = {
   startedAt: number;
   endedAt?: number;
-  durationSeconds: number;
-  maxDepthMeters: number;
-  averageDepthMeters: number;
+  durationSeconds?: number;
+  maxDepthMeters?: number;
+  averageDepthMeters?: number;
   waterTemperatureCelsius?: number;
 };
 

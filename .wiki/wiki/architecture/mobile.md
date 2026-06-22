@@ -51,7 +51,9 @@ Styling rule은 현재 코드 기준으로 다음과 같다.
 
 `LocalDiveLogRepository`는 `DiveLogEntry`를 in-memory map에 저장한다. Watch import는 `localSessionId`와 `endedAt` 기반 `importKey`로 deduplicate하고, 기존 manual/mobile field와 `importedAt`을 보존하며, watch capture와 sync status를 최신 payload로 갱신한다. 결과는 watch 시작 시간, 수동 입력 시작 시간, 생성 시간 기준으로 최신 항목이 먼저 오도록 정렬한다.
 
-수동 로그 작성은 `LogbookScreen`의 create action에서 시작한다. 첫 editor는 date/time, dive mode, site name, duration, max depth, buddy names, tags, observed marine life, notes, rating을 다룬다. 저장된 수동 로그는 `source: 'manual'`, `syncStatus: 'localOnly'`이며, 비어 있는 수치 field는 `0`이 아니라 `undefined`로 유지한다.
+수동 로그 작성은 `LogbookScreen`의 create action에서 시작한다. 첫 editor는 date/time, dive mode, site name, duration, max depth, buddy names, tags, observed marine life, notes, rating을 다룬다. 저장된 수동 로그는 `source: 'manual'`, `syncStatus: 'localOnly'`이며, 비어 있거나 유효하지 않은 수치 field는 `0`이 아니라 `undefined`로 유지한다.
+
+Home/Memory 같은 preview surface와 summary helper도 알 수 없는 duration/depth를 실제 `0`으로 집계하지 않는다. Manual log에 duration만 있고 `endedAt`이 없으면 compatibility `MobileDiveSession`에서 `endedAt`을 파생해 기존 preview가 입력된 duration을 표시할 수 있게 한다.
 
 상세 화면은 manual value와 watch-captured value의 provenance를 표시한다. Watch 측정값은 raw `WatchSession`과 별도로 보존되며, 사용자가 수동으로 입력한 값과 같은 방식으로 보이지 않게 한다. 문구는 review/logging 범위에 머물고 인증된 dive computer 표현을 쓰지 않는다.
 

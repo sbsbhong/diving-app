@@ -112,10 +112,15 @@ export const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSess
     };
   }
 
+  const startedAt = entry.manual.measuredValues.startedAt ?? entry.createdAt;
+  const endedAt =
+    entry.manual.measuredValues.endedAt ??
+    (entry.manual.measuredValues.durationSeconds === undefined ? undefined : startedAt + entry.manual.measuredValues.durationSeconds);
+
   return {
     localSessionId: entry.localId,
-    startedAt: entry.manual.measuredValues.startedAt ?? entry.createdAt,
-    endedAt: entry.manual.measuredValues.endedAt,
+    startedAt,
+    endedAt,
     maxDepthMeters: entry.manual.measuredValues.maxDepthMeters,
     averageDepthMeters: entry.manual.measuredValues.averageDepthMeters,
     waterTemperatureCelsius: entry.manual.measuredValues.waterTemperatureCelsius,
