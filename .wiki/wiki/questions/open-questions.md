@@ -9,7 +9,7 @@
 - 실제 Apple Watch underwater sensor behavior는 구현되거나 검증되지 않았다. `RealDepthSensorProvider`는 자리 표시자이고, 현재 기록 흐름은 mock sample을 사용한다.
 - WatchConnectivity pairing, entitlement setup, phone transport는 구현되지 않았다.
 - Supabase schema, RLS policy, auth, repository, cloud backup은 구현되지 않았다.
-- 모바일로 가져온 세션은 React state에만 보관된다. 승인된 방향은 local-first 저장소 인터페이스를 먼저 만드는 것이지만, 실제 local storage engine과 migration behavior는 아직 결정되지 않았다.
+- 모바일 로그북은 `DiveLogEntry`와 `DiveLogRepository` 경계를 사용하지만, 현재 구현은 in-memory `LocalDiveLogRepository`다. 앱 재시작 뒤 유지되는 실제 mobile storage engine, migration behavior, guest data retention 정책은 아직 결정되지 않았다.
 - Generated Swift contract는 존재하지만 현재 watch Xcode project에서 참조되지 않는다.
 - `apps/watch-ios/Sources`에는 이전 standalone Swift file이 남아 있으나 현재 Xcode project에서 참조되지 않는다. 향후 cleanup 또는 migration ownership은 결정되지 않았다.
 - `apps/mobile/AGENTS.md`의 stack 설명은 별도 UI/styling framework가 없다고 쓰지만, 현재 mobile code는 Gluestack UI v4/NativeWind stack을 사용한다. 이 guide 불일치의 정리 방식은 아직 결정되지 않았다.

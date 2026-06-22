@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-현재 모바일 로그북은 `WatchSession` 기반 `MobileDiveSession`을 React state에 보관한다. Fixture import는 가능하지만 production mobile persistence, 실제 WatchConnectivity, 인증, Supabase sync는 구현되어 있지 않다.
+현재 모바일 로그북은 `DiveLogEntry`를 `DiveLogRepository` 경계 뒤에서 다룬다. 첫 구현은 in-memory `LocalDiveLogRepository`와 React Query hook을 사용한다. 수동 로그 작성과 watch fixture import는 같은 목록에 표시되지만 production mobile persistence, 실제 WatchConnectivity, 인증, Supabase sync는 구현되어 있지 않다.
 
 승인된 방향은 다음과 같다.
 
@@ -22,9 +22,9 @@
 
 이 TODO는 단기 작업 메모가 아니라 승인된 구현 순서다. 각 단계는 관련 spec과 plan을 확인하고 진행한다.
 
-- [ ] Phase 0: 현재 모바일 로그북, watch payload, local storage 후보를 조사하고 첫 구현 file list를 확정한다.
-- [ ] Phase 1: `DiveLogEntry`, field provenance, sync status, `DiveLogRepository` 인터페이스를 만든다.
-- [ ] Phase 2: React Query mutation을 통해 로그인 없이 모바일에서 수동 로그를 만들고 로컬 저장소에 저장한다.
+- [x] Phase 0: 현재 모바일 로그북, watch payload, local storage 후보를 조사하고 첫 구현 file list를 확정한다.
+- [x] Phase 1: `DiveLogEntry`, field provenance, sync status, `DiveLogRepository` 인터페이스를 만든다.
+- [x] Phase 2: React Query mutation을 통해 로그인 없이 모바일에서 수동 로그를 만들고 repository에 저장한다.
 - [ ] Phase 3: Watch에서 만든 contract-valid payload가 모바일로 들어올 수 있는지 검증한다.
 - [ ] Phase 4: Watch 기반 로그 작성 화면에서 측정값을 잠금 처리하고 누락된 맥락을 모바일에서 채운다.
 - [ ] Phase 5: Supabase Auth, user-owned table, RLS, generated type, remote repository를 추가한다.
@@ -50,6 +50,8 @@ Watch-captured field는 원본을 덮어쓰지 않는다. 사용자가 틀렸다
 Supabase는 모델과 로컬 저장이 안정된 뒤 도입한다. Mobile code는 direct SQL을 사용하지 않고 repository 함수를 통해 접근한다. Public schema table을 만들 경우 RLS와 user ownership policy가 함께 필요하다.
 
 React Query는 durable store가 아니다. `useQuery`와 `useMutation`은 `DiveLogRepository`를 호출하고 cache invalidation, loading state, error state를 관리한다. 로컬 저장소와 future Supabase row가 실제 데이터 보관 책임을 갖는다.
+
+현재 완료된 Phase 2의 저장소는 production mobile persistence가 아니라 in-memory `LocalDiveLogRepository`다. 따라서 수동 로그 작성 흐름과 repository 경계는 검증됐지만, 앱 재시작 뒤 유지되는 storage engine, migration behavior, guest data retention 정책은 아직 다음 단계의 결정 사항이다.
 
 ## 관련 문서
 

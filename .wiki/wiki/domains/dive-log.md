@@ -2,11 +2,11 @@
 
 ## 요약
 
-Dive log domain은 현재 watch에서 기록한 레크리에이션 세션을 과거 기록 확인, 모바일 import, 비중요 계획/기억 화면에 쓰기 위해 model한다.
+Dive log domain은 현재 watch에서 기록한 레크리에이션 세션과 모바일에서 직접 작성한 수동 로그를 과거 기록 확인, 모바일 import, 비중요 계획/기억 화면에 쓰기 위해 model한다.
 
 ## 현재 상태
 
-Shared watch sync contract는 `WatchSession`, `WatchDepthSample`, `WatchLocation`, `WatchSyncMessage`를 사용한다. Watch 앱은 동기화 가능한 payload로 mapping되는 local Swift `DiveSession`, `DepthSample` model을 갖는다. 모바일 앱은 generated `WatchSession` type을 기반으로 `MobileDiveSession`을 만든다.
+Shared watch sync contract는 `WatchSession`, `WatchDepthSample`, `WatchLocation`, `WatchSyncMessage`를 사용한다. Watch 앱은 동기화 가능한 payload로 mapping되는 local Swift `DiveSession`, `DepthSample` model을 갖는다. 모바일 앱의 최종 로그북 항목은 `DiveLogEntry`이며, 기존 Home/Planning 화면을 위해 `MobileDiveSession` compatibility view를 만든다.
 
 ## 상세
 
@@ -44,11 +44,9 @@ Sample metadata는 다음 field를 포함한다.
 
 Review summary는 duration, max depth, average depth, sample count, average water temperature, ascent-rate reminder summary를 포함할 수 있다. 이 값들은 과거 기록 확인용 값이며 감압 계산이나 비상 지침이 아니다.
 
-Mobile model은 현재 가져온 watch session 위에 `importKey`, `importedAt`, `mediaPlaceholders`를 추가한다.
+Mobile model은 `WatchSession`과 모바일 최종 로그 항목을 분리한다. `WatchSession`은 watch-to-mobile sync contract로 유지하고, 모바일 로그북은 별도 `DiveLogEntry`를 사용한다.
 
-승인된 다음 모델 방향은 `WatchSession`과 모바일 최종 로그 항목을 분리하는 것이다. `WatchSession`은 watch-to-mobile sync contract로 유지하고, 모바일 로그북은 별도 `DiveLogEntry`를 사용한다.
-
-`DiveLogEntry`는 다음 개념을 보존해야 한다.
+`DiveLogEntry`는 다음 개념을 보존한다.
 
 - `source`: `manual` 또는 `watch`.
 - `fieldSource`: `manual`, `mobile`, `watch` provenance.
@@ -58,6 +56,12 @@ Mobile model은 현재 가져온 watch session 위에 `importKey`, `importedAt`,
 - `ownerUserId`: future authenticated user 연결.
 
 Watch-captured 측정값은 원본 출처를 보존하고 모바일 편집 화면에서 잠금 값으로 다룬다. Manual field와 mobile-assisted field는 사용자가 수정할 수 있다.
+
+현재 수동 로그 field는 site, startedAt, dive mode, duration, max depth, buddy, tags, observed marine life, notes, rating을 다룬다. 비어 있는 수치 field는 `0`으로 저장하지 않고 `undefined`로 유지해 알 수 없는 값과 실제 0 값을 구분한다.
+
+Watch import는 raw `WatchSession`을 `watchCapture.session`에 보존한다. 같은 watch import key가 다시 들어오면 manual/mobile field는 유지하고 watch capture와 sync status만 최신 payload로 갱신한다. 이렇게 해야 사용자가 모바일에서 보완한 site, notes, tags, rating 같은 맥락이 watch 재가져오기로 사라지지 않는다.
+
+현재 `LocalDiveLogRepository`는 in-memory 저장소다. 로컬 로그 작성과 repository boundary는 구현됐지만, 앱 재시작 뒤 유지되는 device storage engine은 아직 구현되지 않았다.
 
 ## 관련 문서
 

@@ -1,5 +1,27 @@
 # Wiki 기록
 
+## 2026-06-22 - 구조 - mobile local-first logbook Phase 2
+
+- 수정:
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/types/dive-log-entry.ts`
+  - `apps/mobile/src/repositories/dive-log-repository.ts`
+  - `apps/mobile/src/repositories/local-dive-log-repository.ts`
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/src/states/use-dive-logbook-queries.ts`
+  - `apps/mobile/src/screens/logbook/screen.tsx`
+  - `apps/mobile/src/screens/logbook/log-entry-editor.tsx`
+  - `apps/mobile/src/screens/logbook/log-entry-detail.tsx`
+- 요약:
+  - 모바일 로그북이 `DiveLogEntry`, `DiveLogRepository`, React Query hook을 사용하고, 로그인 없이 수동 로그를 작성해 watch import와 같은 목록에 표시하는 현재 구현 사실을 기록했다. 현재 저장소는 production persistence가 아니라 in-memory `LocalDiveLogRepository`라는 제한도 함께 명시했다.
+
 ## 2026-06-21 - 결정 - React Query for mobile logbook data access
 
 - 수정:
