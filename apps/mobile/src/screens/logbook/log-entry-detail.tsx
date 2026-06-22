@@ -6,7 +6,7 @@ import { HStack } from '../../components/ui/hstack';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
-import type { DiveFieldSource, DiveLogEntry } from '../../types/dive-log-entry';
+import type { DiveFieldSource, DiveLogEntry, DiveLogManualMeasuredValues, DiveLogWatchMeasuredValues } from '../../types/dive-log-entry';
 import {
   formatDate,
   formatDepth,
@@ -24,7 +24,11 @@ type LogEntryDetailProps = {
 export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
   const { i18n, t } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const summary = getEntrySummary(props.entry);
+  const startedAt = props.entry.watchCapture?.measuredValues.startedAt ?? props.entry.manual.measuredValues.startedAt ?? props.entry.createdAt;
+  const maxDepth = getMeasuredValue(props.entry, 'maxDepthMeters');
+  const averageDepth = getMeasuredValue(props.entry, 'averageDepthMeters');
+  const waterTemperature = getMeasuredValue(props.entry, 'waterTemperatureCelsius');
+  const duration = getMeasuredValue(props.entry, 'durationSeconds');
   const tags = props.entry.manual.tags.length ? props.entry.manual.tags.join(', ') : t('logbook.none');
   const buddies = props.entry.manual.buddyIds.length ? props.entry.manual.buddyIds.join(', ') : t('logbook.none');
   const marineLife = props.entry.manual.observedMarineLife.length ? props.entry.manual.observedMarineLife.join(', ') : t('logbook.none');
@@ -39,31 +43,33 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
       />
       <DiveSummaryCard.Body>
         <Text className="text-sm leading-5 text-muted-foreground">
-          {formatDate(summary.startedAt, locale, t('formatters.unknownDate'))}
+          {formatDate(startedAt, locale, t('formatters.unknownDate'))}
         </Text>
         <HStack space="md">
           <DetailMetric
             label={t('logbook.maxDepth')}
-            value={formatDepth(summary.maxDepthMeters)}
-            source={measurementSource(props.entry, 'maxDepthMeters')}
+            value={formatDepth(maxDepth.value)}
+            source={maxDepth.source}
             testID="log-entry-detail-provenance-max-depth"
+            valueTestID="log-entry-detail-max-depth-value"
           />
           <DetailMetric
             label={t('logbook.avgDepth')}
-            value={formatDepth(summary.averageDepthMeters)}
-            source={measurementSource(props.entry, 'averageDepthMeters')}
+            value={formatDepth(averageDepth.value)}
+            source={averageDepth.source}
           />
         </HStack>
         <HStack space="md">
           <DetailMetric
             label={t('logbook.waterTemp')}
-            value={formatTemperature(summary.waterTemperatureCelsius)}
-            source={measurementSource(props.entry, 'waterTemperatureCelsius')}
+            value={formatTemperature(waterTemperature.value)}
+            source={waterTemperature.source}
           />
           <DetailMetric
             label={t('logbook.duration')}
-            value={formatDuration(summary.durationSeconds)}
-            source={measurementSource(props.entry, 'durationSeconds')}
+            value={formatDetailDuration(duration.value)}
+            source={duration.source}
+            valueTestID="log-entry-detail-duration-value"
           />
         </HStack>
         {props.entry.watchCapture?.samples.length ? (
@@ -102,15 +108,24 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
   );
 }
 
-function DetailMetric(props: { label: string; value: string; source: DiveFieldSource; testID?: string }): React.JSX.Element {
+function DetailMetric(props: {
+  label: string;
+  value: string;
+  source: DiveFieldSource;
+  testID?: string;
+  valueTestID?: string;
+}): React.JSX.Element {
   const { t } = useTranslation();
   const sourceLabel = props.source === 'watch' ? t('logbook.watchCaptured') : t('logbook.manualValue');
   const testID = props.testID ? `${props.testID}-${props.source}` : undefined;
+  const valueTestID = props.valueTestID ? `${props.valueTestID}-${toTestIdValue(props.value)}` : undefined;
 
   return (
     <VStack testID={testID} space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-      <Text className="text-lg font-semibold text-foreground">{props.value}</Text>
+      <Text testID={valueTestID} className="text-lg font-semibold text-foreground">
+        {props.value}
+      </Text>
       <ProvenanceLabel provenanceLabel={sourceLabel} />
     </VStack>
   );
@@ -124,24 +139,31 @@ function ProvenanceLabel(props: { provenanceLabel: string }): React.JSX.Element 
   );
 }
 
-function getEntrySummary(entry: DiveLogEntry) {
-  if (entry.watchCapture) {
-    return entry.watchCapture.measuredValues;
+type MeasuredField = 'durationSeconds' | 'maxDepthMeters' | 'averageDepthMeters' | 'waterTemperatureCelsius';
+
+function getMeasuredValue(entry: DiveLogEntry, field: MeasuredField): { value: number | undefined; source: DiveFieldSource } {
+  const manualValue = entry.manual.measuredValues[field as keyof DiveLogManualMeasuredValues] as number | undefined;
+  const watchValue = entry.watchCapture?.measuredValues[field as keyof DiveLogWatchMeasuredValues] as number | undefined;
+
+  if (entry.provenance[field] === 'manual' && manualValue !== undefined) {
+    return { value: manualValue, source: 'manual' };
   }
 
-  return {
-    startedAt: entry.manual.measuredValues.startedAt ?? entry.createdAt,
-    endedAt: entry.manual.measuredValues.endedAt,
-    durationSeconds: entry.manual.measuredValues.durationSeconds ?? 0,
-    maxDepthMeters: entry.manual.measuredValues.maxDepthMeters ?? 0,
-    averageDepthMeters: entry.manual.measuredValues.averageDepthMeters ?? 0,
-    waterTemperatureCelsius: entry.manual.measuredValues.waterTemperatureCelsius,
-  };
+  if (watchValue !== undefined) {
+    return { value: watchValue, source: 'watch' };
+  }
+
+  if (manualValue !== undefined) {
+    return { value: manualValue, source: 'manual' };
+  }
+
+  return { value: undefined, source: entry.provenance[field] ?? (entry.watchCapture ? 'watch' : 'manual') };
 }
 
-function measurementSource(
-  entry: DiveLogEntry,
-  field: 'durationSeconds' | 'maxDepthMeters' | 'averageDepthMeters' | 'waterTemperatureCelsius',
-): DiveFieldSource {
-  return entry.provenance[field] ?? (entry.watchCapture ? 'watch' : 'manual');
+function formatDetailDuration(seconds: number | undefined): string {
+  return seconds === undefined ? '--:--' : formatDuration(seconds);
+}
+
+function toTestIdValue(value: string): string {
+  return value.replace(/\s+/g, '');
 }

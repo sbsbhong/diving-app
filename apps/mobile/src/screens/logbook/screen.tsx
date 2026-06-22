@@ -11,7 +11,7 @@ import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
 import type { DiveLogEntry } from '../../types/dive-log-entry';
-import type { DiveSessionFilter, MobileDiveSession } from '../../types/dive-session';
+import type { DiveSessionFilter } from '../../types/dive-session';
 import { createBlankDiveLogEntry } from '../../utils/create-dive-log-entry';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
 import { summarizeSession } from '../../utils/session-summary';
@@ -21,7 +21,6 @@ import { LogEntryEditor } from './log-entry-editor';
 
 type LogbookScreenProps = {
   entries: DiveLogEntry[];
-  sessions: MobileDiveSession[];
   filter: DiveSessionFilter;
   onFilterChange: (filter: DiveSessionFilter) => void;
   onImportFixtures: () => void;
@@ -50,10 +49,18 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   const selectedEntry = visibleEntries.find(entry => entry.localId === selectedId);
 
   React.useEffect(() => {
-    if (!selectedEntry && visibleEntries[0]) {
+    if (selectedEntry) {
+      return;
+    }
+
+    if (visibleEntries[0]) {
       setSelectedId(visibleEntries[0].localId);
     }
-  }, [selectedEntry, visibleEntries]);
+
+    if (route === 'detail') {
+      setRoute('list');
+    }
+  }, [route, selectedEntry, visibleEntries]);
 
   const openCreate = React.useCallback(() => {
     setDraftEntry(createBlankDiveLogEntry());
@@ -102,6 +109,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
           <VStack space="md" className="rounded-2xl bg-card px-4 py-4">
             <Input className="h-11 rounded-full border-0 bg-muted px-5 shadow-none">
               <InputField
+                testID="logbook-search-input"
                 placeholder={t('logbook.searchPlaceholder')}
                 value={props.filter.query}
                 onChangeText={query => props.onFilterChange({ ...props.filter, query })}
@@ -171,10 +179,12 @@ function EmptyLogbook(): React.JSX.Element {
 
   return (
     <DiveSummaryCard>
-      <DiveSummaryCard.Header eyebrow={t('logbook.emptyEyebrow')} title={t('logbook.noImportedDives')} />
-      <DiveSummaryCard.Footer>
-        <Text className="text-sm leading-5 text-muted-foreground">{t('logbook.emptyBody')}</Text>
-      </DiveSummaryCard.Footer>
+      <VStack testID="logbook-empty-state" space="lg">
+        <DiveSummaryCard.Header eyebrow={t('logbook.emptyEyebrow')} title={t('logbook.noImportedDives')} />
+        <DiveSummaryCard.Footer>
+          <Text className="text-sm leading-5 text-muted-foreground">{t('logbook.emptyBody')}</Text>
+        </DiveSummaryCard.Footer>
+      </VStack>
     </DiveSummaryCard>
   );
 }

@@ -55,6 +55,33 @@ manualEntry.manual = {
   },
 };
 
+const manualEntryWithoutMetrics = createBlankDiveLogEntry({ localId: 'manual-entry-no-metrics', now: 1781351000 });
+manualEntryWithoutMetrics.manual = {
+  ...manualEntryWithoutMetrics.manual,
+  site: { name: 'No Metrics Reef' },
+  measuredValues: {
+    startedAt: 1781350200,
+    diveMode: 'scuba',
+  },
+};
+
+const hybridWatchEntry: DiveLogEntry = {
+  ...watchEntry,
+  localId: 'watch-entry-hybrid',
+  manual: {
+    ...watchEntry.manual,
+    site: { name: 'Hybrid Reef' },
+    measuredValues: {
+      ...watchEntry.manual.measuredValues,
+      maxDepthMeters: 19,
+    },
+  },
+  provenance: {
+    ...watchEntry.provenance,
+    maxDepthMeters: 'manual',
+  },
+};
+
 type HarnessProps = {
   repository: LocalDiveLogRepository;
 };
@@ -68,7 +95,6 @@ function Harness({ repository }: HarnessProps): React.JSX.Element {
   return (
     <LogbookScreen
       entries={logbook.filteredEntries}
-      sessions={logbook.filteredSessions}
       filter={logbook.filter}
       onFilterChange={logbook.setFilter}
       onImportFixtures={logbook.importFixtures}
@@ -193,6 +219,27 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'logbook-list-item-Blue Corner' })).toBeTruthy();
   });
 
+  test('keeps blank manual numeric fields undefined instead of saving zero', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Blank Metrics Reef',
+      'log-entry-editor-duration': '   ',
+      'log-entry-editor-max-depth': '',
+      'log-entry-editor-rating': ' ',
+    });
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Blank Metrics Reef');
+
+    expect(savedEntry?.manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
+    expect(savedEntry?.manual.rating).toBeUndefined();
+  });
+
   test('detail distinguishes manual values from watch-captured values', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);
@@ -204,6 +251,39 @@ describe('Logbook manual entry flow', () => {
     await press(root, 'log-entry-detail-back');
     await press(root, 'logbook-list-item-Watch Reef');
     expect(root.findByProps({ testID: 'log-entry-detail-provenance-max-depth-watch' })).toBeTruthy();
+  });
+
+  test('detail shows unknown placeholders for missing manual measurements', async () => {
+    const repository = new LocalDiveLogRepository([manualEntryWithoutMetrics]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-No Metrics Reef');
+
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.-m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-duration-value---:--' })).toBeTruthy();
+  });
+
+  test('detail displays manual measured values when provenance is manual on a watch entry', async () => {
+    const repository = new LocalDiveLogRepository([hybridWatchEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Hybrid Reef');
+
+    expect(root.findByProps({ testID: 'log-entry-detail-provenance-max-depth-manual' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value-19.0m' })).toBeTruthy();
+  });
+
+  test('returns to useful list content when filtering removes the selected detail entry', async () => {
+    const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Manual Reef');
+    await changeText(root, 'logbook-search-input', 'no matching reef');
+
+    expect(root.findByProps({ testID: 'logbook-empty-state' })).toBeTruthy();
   });
 
   test('failed local save shows an error and allows retrying the same draft', async () => {
