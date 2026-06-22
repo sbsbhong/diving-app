@@ -1,25 +1,53 @@
 import React from 'react';
 import { defaultDiveLogRepository } from '../repositories/local-dive-log-repository';
-import { useDiveLogEntriesQuery, useImportWatchMessagesMutation } from './use-dive-logbook-queries';
+import type { DiveLogRepository } from '../repositories/dive-log-repository';
+import {
+  useDeleteDiveLogEntryMutation,
+  useDiveLogEntriesQuery,
+  useImportWatchMessagesMutation,
+  useSaveDiveLogEntryMutation,
+} from './use-dive-logbook-queries';
 import type { DiveLogEntry, DiveLogSyncStatus } from '../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../types/dive-session';
 import { watchFixtureMessages } from '../utils/watch-fixtures';
 
-export const useDiveLogbook = () => {
+type UseDiveLogbookOptions = {
+  repository?: DiveLogRepository;
+  queryScope?: string;
+};
+
+type DiveLogRepositoryWithSyncList = DiveLogRepository & {
+  listSync?: () => DiveLogEntry[];
+};
+
+export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
+  const repository = options.repository ?? defaultDiveLogRepository;
   const [filter, setFilter] = React.useState<DiveSessionFilter>({ query: '' });
-  const initialEntries = React.useMemo(() => defaultDiveLogRepository.listSync(), []);
-  const entriesQuery = useDiveLogEntriesQuery(defaultDiveLogRepository, {
+  const initialEntries = React.useMemo(() => {
+    const repositoryWithSyncList = repository as DiveLogRepositoryWithSyncList;
+
+    if (typeof repositoryWithSyncList.listSync === 'function') {
+      return repositoryWithSyncList.listSync();
+    }
+
+    return undefined;
+  }, [repository]);
+  const entriesQuery = useDiveLogEntriesQuery(repository, {
     initialData: initialEntries,
     staleTime: Infinity,
+    queryScope: options.queryScope,
   });
-  const importWatchMessages = useImportWatchMessagesMutation();
-  const entries = entriesQuery.data ?? initialEntries;
+  const saveEntryMutation = useSaveDiveLogEntryMutation(repository, { queryScope: options.queryScope });
+  const deleteEntryMutation = useDeleteDiveLogEntryMutation(repository, { queryScope: options.queryScope });
+  const importWatchMessages = useImportWatchMessagesMutation(repository, { queryScope: options.queryScope });
+  const entries: DiveLogEntry[] = entriesQuery.data ?? initialEntries ?? [];
   const sessions = React.useMemo(() => entries.map(diveLogEntryToMobileSession), [entries]);
 
-  const filteredSessions = React.useMemo(() => {
+  const filteredEntries = React.useMemo(() => {
     const query = filter.query.trim().toLowerCase();
 
-    return sessions.filter(session => {
+    return entries.filter(entry => {
+      const session = diveLogEntryToMobileSession(entry);
       const searchable = [
         session.siteName,
         session.notes,
@@ -37,7 +65,9 @@ export const useDiveLogbook = () => {
       const matchesTag = !filter.tag || session.tags?.includes(filter.tag);
       return matchesQuery && matchesTag;
     });
-  }, [filter, sessions]);
+  }, [entries, filter]);
+
+  const filteredSessions = React.useMemo(() => filteredEntries.map(diveLogEntryToMobileSession), [filteredEntries]);
 
   const importFixtures = React.useCallback(() => {
     importWatchMessages.mutate(watchFixtureMessages);
@@ -46,10 +76,19 @@ export const useDiveLogbook = () => {
   return {
     entries,
     sessions,
+    filteredEntries,
     filteredSessions,
     filter,
     setFilter,
     importFixtures,
+    saveEntry: saveEntryMutation.mutateAsync,
+    deleteEntry: deleteEntryMutation.mutateAsync,
+    isLoading: entriesQuery.isLoading,
+    isSaving: saveEntryMutation.isPending,
+    isDeleting: deleteEntryMutation.isPending,
+    listError: entriesQuery.error,
+    saveError: saveEntryMutation.error,
+    deleteError: deleteEntryMutation.error,
   };
 };
 

@@ -9,45 +9,75 @@ import { Pressable } from '../../components/ui/pressable';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
-import { SessionProfile } from '../../components/ui/session-profile';
 import type { InstrumentTone } from '../../components/ui/theme';
+import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../../types/dive-session';
-import {
-  formatDate,
-  formatDepth,
-  formatDuration,
-  formatRating,
-  formatTemperature,
-} from '../../utils/dive-formatters';
+import { createBlankDiveLogEntry } from '../../utils/create-dive-log-entry';
+import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
 import { summarizeSession } from '../../utils/session-summary';
+import { diveLogEntryToMobileSession } from '../../states/use-dive-logbook';
+import { LogEntryDetail } from './log-entry-detail';
+import { LogEntryEditor } from './log-entry-editor';
 
 type LogbookScreenProps = {
+  entries: DiveLogEntry[];
   sessions: MobileDiveSession[];
   filter: DiveSessionFilter;
   onFilterChange: (filter: DiveSessionFilter) => void;
   onImportFixtures: () => void;
+  onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
+  onDeleteEntry: (localId: string) => Promise<void>;
+  saveError?: Error | null;
+  isSaving?: boolean;
 };
 
 type SyncFilter = 'all' | 'synced' | 'pending';
+type LocalRoute = 'list' | 'create' | 'detail';
 
 export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Element {
   const { t } = useTranslation();
   const [syncFilter, setSyncFilter] = React.useState<SyncFilter>('all');
-  const visibleSessions = React.useMemo(() => {
+  const [route, setRoute] = React.useState<LocalRoute>('list');
+  const [draftEntry, setDraftEntry] = React.useState<DiveLogEntry | undefined>();
+  const visibleEntries = React.useMemo(() => {
     if (syncFilter === 'all') {
-      return props.sessions;
+      return props.entries;
     }
 
-    return props.sessions.filter(session => (session.syncStatus ?? 'pending') === syncFilter);
-  }, [props.sessions, syncFilter]);
-  const [selectedId, setSelectedId] = React.useState(props.sessions[0]?.importKey);
-  const selectedSession = visibleSessions.find(session => session.importKey === selectedId) ?? visibleSessions[0];
+    return props.entries.filter(entry => toVisibleSyncStatus(entry.syncStatus) === syncFilter);
+  }, [props.entries, syncFilter]);
+  const [selectedId, setSelectedId] = React.useState(visibleEntries[0]?.localId);
+  const selectedEntry = visibleEntries.find(entry => entry.localId === selectedId);
 
   React.useEffect(() => {
-    if (!selectedSession && visibleSessions[0]) {
-      setSelectedId(visibleSessions[0].importKey);
+    if (!selectedEntry && visibleEntries[0]) {
+      setSelectedId(visibleEntries[0].localId);
     }
-  }, [selectedSession, visibleSessions]);
+  }, [selectedEntry, visibleEntries]);
+
+  const openCreate = React.useCallback(() => {
+    setDraftEntry(createBlankDiveLogEntry());
+    setRoute('create');
+  }, []);
+
+  const saveDraft = React.useCallback(
+    async (entry: DiveLogEntry) => {
+      const savedEntry = await props.onSaveEntry(entry);
+      setSelectedId(savedEntry.localId);
+      setDraftEntry(undefined);
+      setRoute('list');
+      return savedEntry;
+    },
+    [props],
+  );
+
+  const deleteEntry = React.useCallback(
+    async (localId: string) => {
+      await props.onDeleteEntry(localId);
+      setRoute('list');
+    },
+    [props],
+  );
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
@@ -58,7 +88,16 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
               <Text className="text-xs font-semibold uppercase text-muted-foreground">{t('logbook.reviewEyebrow')}</Text>
               <Text className="text-3xl font-semibold leading-9 text-foreground">{t('logbook.title')}</Text>
             </VStack>
-            <InstrumentButton label={t('logbook.import')} onPress={props.onImportFixtures} className="min-h-10 px-4 py-2" />
+            <HStack space="sm">
+              <InstrumentButton
+                testID="logbook-create-action"
+                label={t('logbook.createManual')}
+                variant="primary"
+                onPress={openCreate}
+                className="min-h-10 px-4 py-2"
+              />
+              <InstrumentButton label={t('logbook.import')} onPress={props.onImportFixtures} className="min-h-10 px-4 py-2" />
+            </HStack>
           </HStack>
           <VStack space="md" className="rounded-2xl bg-card px-4 py-4">
             <Input className="h-11 rounded-full border-0 bg-muted px-5 shadow-none">
@@ -87,22 +126,39 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
           </VStack>
         </VStack>
 
-        {visibleSessions.length === 0 ? (
-          <EmptyLogbook />
-        ) : (
-          <VStack space="md">
-            {visibleSessions.map(session => (
-              <SessionListItem
-                key={session.importKey}
-                session={session}
-                selected={session.importKey === selectedSession?.importKey}
-                onPress={() => setSelectedId(session.importKey)}
-              />
-            ))}
-          </VStack>
-        )}
+        {route === 'create' && draftEntry ? (
+          <LogEntryEditor
+            entry={draftEntry}
+            isSaving={props.isSaving}
+            saveError={props.saveError}
+            onCancel={() => setRoute('list')}
+            onSave={saveDraft}
+          />
+        ) : null}
 
-        {selectedSession ? <SessionDetail session={selectedSession} /> : null}
+        {route === 'detail' && selectedEntry ? (
+          <LogEntryDetail entry={selectedEntry} onBack={() => setRoute('list')} onDelete={deleteEntry} />
+        ) : null}
+
+        {route === 'list' ? (
+          visibleEntries.length === 0 ? (
+            <EmptyLogbook />
+          ) : (
+            <VStack space="md">
+              {visibleEntries.map(entry => (
+                <SessionListItem
+                  key={entry.localId}
+                  entry={entry}
+                  selected={entry.localId === selectedEntry?.localId}
+                  onPress={() => {
+                    setSelectedId(entry.localId);
+                    setRoute('detail');
+                  }}
+                />
+              ))}
+            </VStack>
+          )
+        ) : null}
 
         <SafetyText>{t('logbook.safetyText')}</SafetyText>
       </VStack>
@@ -124,18 +180,21 @@ function EmptyLogbook(): React.JSX.Element {
 }
 
 function SessionListItem(props: {
-  session: MobileDiveSession;
+  entry: DiveLogEntry;
   selected: boolean;
   onPress: () => void;
 }): React.JSX.Element {
-  const summary = summarizeSession(props.session);
-  const status = props.session.syncStatus ?? 'pending';
+  const session = diveLogEntryToMobileSession(props.entry);
+  const summary = summarizeSession(session);
+  const status = toVisibleSyncStatus(props.entry.syncStatus);
   const { i18n, t } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const tags = props.session.tags?.length ? props.session.tags.join(', ') : t('logbook.noTags');
+  const tags = session.tags?.length ? session.tags.join(', ') : t('logbook.noTags');
+  const siteName = session.siteName ?? t('logbook.untitledDive');
 
   return (
     <Pressable
+      testID={`logbook-list-item-${siteName}`}
       onPress={props.onPress}
       className="rounded-2xl bg-card px-4 py-4"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}>
@@ -144,9 +203,9 @@ function SessionListItem(props: {
           <HStack space="md" className="flex-1 items-center pr-2.5">
             <Box className={`h-2 w-2 rounded-full ${props.selected ? 'bg-primary' : 'bg-muted'}`} />
             <VStack space="xs" className="flex-1">
-              <Text className="text-lg font-semibold text-card-foreground">{props.session.siteName ?? t('logbook.untitledDive')}</Text>
+              <Text className="text-lg font-semibold text-card-foreground">{siteName}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
-                {formatDate(props.session.startedAt, locale, t('formatters.unknownDate'))}
+                {formatDate(session.startedAt, locale, t('formatters.unknownDate'))}
               </Text>
             </VStack>
           </HStack>
@@ -156,70 +215,11 @@ function SessionListItem(props: {
           </VStack>
         </HStack>
         <Text className="pl-5 text-sm leading-5 text-muted-foreground">
-          {t(`diveModes.${props.session.diveMode ?? 'unknown'}`, { defaultValue: props.session.diveMode ?? t('diveModes.unknown') })} ·{' '}
+          {t(`diveModes.${session.diveMode ?? 'unknown'}`, { defaultValue: session.diveMode ?? t('diveModes.unknown') })} ·{' '}
           {formatDuration(summary.durationSeconds)} · {tags}
         </Text>
       </VStack>
     </Pressable>
-  );
-}
-
-function SessionDetail(props: { session: MobileDiveSession }): React.JSX.Element {
-  const summary = summarizeSession(props.session);
-  const { t } = useTranslation();
-  const tags = props.session.tags?.length ? props.session.tags.join(', ') : t('logbook.none');
-  const media = props.session.mediaPlaceholders.length
-    ? props.session.mediaPlaceholders.map(placeholder => {
-        if (placeholder === 'Photo import placeholder') {
-          return t('logbook.photoImportPlaceholder');
-        }
-
-        return placeholder;
-      }).join(', ')
-    : t('logbook.none');
-
-  return (
-    <DiveSummaryCard accent="primary">
-      <DiveSummaryCard.Header
-        eyebrow={t(`diveModes.${props.session.diveMode ?? 'unknown'}`, {
-          defaultValue: props.session.diveMode ?? t('diveModes.unknown'),
-        })}
-        title={props.session.siteName ?? t('logbook.detailTitle')}
-        right={<Text className="text-sm font-semibold text-primary">{formatRating(props.session.rating, t('formatters.notRated'))}</Text>}
-      />
-      <DiveSummaryCard.Body>
-        <HStack space="md">
-          <DetailMetric label={t('logbook.maxDepth')} value={formatDepth(summary.maxDepthMeters)} />
-          <DetailMetric label={t('logbook.avgDepth')} value={formatDepth(summary.averageDepthMeters)} />
-        </HStack>
-        <HStack space="md">
-          <DetailMetric label={t('logbook.waterTemp')} value={formatTemperature(summary.waterTemperatureCelsius)} />
-          <DetailMetric label={t('logbook.duration')} value={formatDuration(summary.durationSeconds)} />
-        </HStack>
-        <SessionProfile samples={props.session.samples} kind="depth" title={t('logbook.depthProfile')} />
-        <SessionProfile samples={props.session.samples} kind="temperature" title={t('logbook.temperatureProfile')} />
-      </DiveSummaryCard.Body>
-      <DiveSummaryCard.Footer>
-        <VStack space="sm">
-          <Text className="text-sm leading-5 text-card-foreground">{props.session.notes ?? t('logbook.noNotes')}</Text>
-          <Text className="text-sm leading-5 text-muted-foreground">
-            {t('logbook.tags')}: {tags}
-          </Text>
-          <Text className="text-sm leading-5 text-muted-foreground">
-            {t('logbook.media')}: {media}
-          </Text>
-        </VStack>
-      </DiveSummaryCard.Footer>
-    </DiveSummaryCard>
-  );
-}
-
-function DetailMetric(props: { label: string; value: string }): React.JSX.Element {
-  return (
-    <VStack space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
-      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-      <Text className="text-lg font-semibold text-foreground">{props.value}</Text>
-    </VStack>
   );
 }
 
@@ -233,4 +233,12 @@ const syncStatusTone = (status: string): InstrumentTone => {
   }
 
   return 'secondary';
+};
+
+const toVisibleSyncStatus = (syncStatus: DiveLogEntry['syncStatus']): 'synced' | 'pending' | 'failed' => {
+  if (syncStatus === 'synced' || syncStatus === 'failed') {
+    return syncStatus;
+  }
+
+  return 'pending';
 };

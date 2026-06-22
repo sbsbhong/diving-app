@@ -81,6 +81,14 @@ export const useSaveDiveLogEntryMutation = (
     mutationFn: (entry: DiveLogEntry) => repository.save(entry),
     onSuccess: entry => {
       queryClient.setQueryData(diveLogbookQueryKeys.detail(entry.localId, repository, options.queryScope), entry);
+      queryClient.setQueryData<DiveLogEntry[]>(diveLogbookQueryKeys.list(repository, options.queryScope), currentEntries => {
+        const entries = currentEntries ?? [];
+        const nextEntries = entries.some(currentEntry => currentEntry.localId === entry.localId)
+          ? entries.map(currentEntry => (currentEntry.localId === entry.localId ? entry : currentEntry))
+          : [entry, ...entries];
+
+        return nextEntries.sort(compareEntries);
+      });
       queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.list(repository, options.queryScope) });
     },
   });
@@ -94,7 +102,10 @@ export const useDeleteDiveLogEntryMutation = (
 
   return useMutation({
     mutationFn: (localId: string) => repository.delete(localId),
-    onSuccess: () => {
+    onSuccess: (_result, localId) => {
+      queryClient.setQueryData<DiveLogEntry[]>(diveLogbookQueryKeys.list(repository, options.queryScope), currentEntries =>
+        (currentEntries ?? []).filter(entry => entry.localId !== localId),
+      );
       queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, options.queryScope) });
     },
   });
@@ -114,3 +125,11 @@ export const useImportWatchMessagesMutation = (
     },
   });
 };
+
+function compareEntries(left: DiveLogEntry, right: DiveLogEntry): number {
+  return getEntrySortTimestamp(right) - getEntrySortTimestamp(left);
+}
+
+function getEntrySortTimestamp(entry: DiveLogEntry): number {
+  return entry.watchCapture?.session.startedAt ?? entry.manual.measuredValues.startedAt ?? entry.createdAt;
+}

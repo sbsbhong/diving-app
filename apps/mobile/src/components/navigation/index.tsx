@@ -45,10 +45,15 @@ export default function RootNavigation(): React.JSX.Element {
         ) : null}
         {section === 'logbook' ? (
           <LogbookScreen
+            entries={logbook.filteredEntries}
             sessions={logbook.filteredSessions}
             filter={logbook.filter}
             onFilterChange={logbook.setFilter}
             onImportFixtures={logbook.importFixtures}
+            onSaveEntry={logbook.saveEntry}
+            onDeleteEntry={logbook.deleteEntry}
+            saveError={logbook.saveError}
+            isSaving={logbook.isSaving}
           />
         ) : null}
         {section === 'planning' ? (
