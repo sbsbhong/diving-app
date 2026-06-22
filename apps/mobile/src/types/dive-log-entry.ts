@@ -21,6 +21,10 @@ export type DiveLogManualMeasuredValues = {
   perceivedExertion?: number;
   visibilityRating?: number;
   waterCondition?: WatchSession['waterCondition'];
+  repetitionCount?: number;
+  trainingFocus?: string;
+  poolLengthMeters?: number;
+  lapCount?: number;
 };
 
 export type DiveLogManualFields = {
@@ -72,6 +76,14 @@ export type DiveLogFieldProvenance = Partial<
     | 'maxDepthMeters'
     | 'averageDepthMeters'
     | 'waterTemperatureCelsius'
+    | 'gasLabel'
+    | 'perceivedExertion'
+    | 'visibilityRating'
+    | 'waterCondition'
+    | 'repetitionCount'
+    | 'trainingFocus'
+    | 'poolLengthMeters'
+    | 'lapCount'
     | 'depthSamples',
     DiveFieldSource
   >

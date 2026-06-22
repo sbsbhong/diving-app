@@ -11,6 +11,7 @@ import {
   formatDate,
   formatDepth,
   formatDuration,
+  formatLength,
   formatRating,
   formatTemperature,
 } from '../../utils/dive-formatters';
@@ -18,6 +19,7 @@ import {
 type LogEntryDetailProps = {
   entry: DiveLogEntry;
   onBack?: () => void;
+  onEdit?: (entry: DiveLogEntry) => void;
   onDelete?: (localId: string) => Promise<void>;
 };
 
@@ -94,6 +96,10 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
           <Text className="text-sm leading-5 text-muted-foreground">
             {t('logbook.rating')}: {formatRating(props.entry.manual.rating, t('formatters.notRated'))}
           </Text>
+          <ModeSpecificMetadata entry={props.entry} />
+          {props.onEdit ? (
+            <InstrumentButton testID="log-entry-detail-edit" label={t('logbook.editLog')} variant="primary" onPress={() => props.onEdit?.(props.entry)} />
+          ) : null}
           {props.onBack ? <InstrumentButton testID="log-entry-detail-back" label={t('logbook.backToList')} onPress={props.onBack} /> : null}
           {props.onDelete ? (
             <InstrumentButton
@@ -106,6 +112,84 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
   );
+}
+
+function ModeSpecificMetadata(props: { entry: DiveLogEntry }): React.JSX.Element | null {
+  const { t } = useTranslation();
+  const facts = getModeFacts(props.entry, t);
+
+  if (facts.length === 0) {
+    return null;
+  }
+
+  return (
+    <VStack space="xs" className="rounded-2xl bg-muted px-4 py-4">
+      <Text className="text-xs font-semibold uppercase text-muted-foreground">{t('logbook.modeDetails')}</Text>
+      {facts.map(fact => (
+        <HStack key={fact.id} className="items-center justify-between">
+          <Text className="text-sm leading-5 text-muted-foreground">{fact.label}</Text>
+          <Text
+            testID={`log-entry-detail-mode-value-${fact.id}-${toTestIdValue(fact.value)}`}
+            className="text-sm font-semibold text-card-foreground">
+            {fact.value}
+          </Text>
+        </HStack>
+      ))}
+    </VStack>
+  );
+}
+
+type ModeFact = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>['t']): ModeFact[] {
+  const measuredValues = entry.manual.measuredValues;
+
+  if (measuredValues.diveMode === 'scuba') {
+    return compactFacts([
+      { id: 'gas-label', label: t('logbook.gasLabel'), value: measuredValues.gasLabel },
+      { id: 'gear', label: t('logbook.gear'), value: entry.manual.gearIds.length ? entry.manual.gearIds.join(', ') : undefined },
+      { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
+      { id: 'visibility-rating', label: t('logbook.visibilityRating'), value: numberToText(measuredValues.visibilityRating) },
+      { id: 'perceived-exertion', label: t('logbook.perceivedExertion'), value: numberToText(measuredValues.perceivedExertion) },
+    ]);
+  }
+
+  if (measuredValues.diveMode === 'freedive') {
+    return compactFacts([
+      { id: 'repetition-count', label: t('logbook.repetitionCount'), value: numberToText(measuredValues.repetitionCount) },
+      { id: 'training-focus', label: t('logbook.trainingFocus'), value: measuredValues.trainingFocus },
+      { id: 'perceived-exertion', label: t('logbook.perceivedExertion'), value: numberToText(measuredValues.perceivedExertion) },
+    ]);
+  }
+
+  if (measuredValues.diveMode === 'snorkel') {
+    return compactFacts([
+      { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
+      { id: 'visibility-rating', label: t('logbook.visibilityRating'), value: numberToText(measuredValues.visibilityRating) },
+    ]);
+  }
+
+  if (measuredValues.diveMode === 'pool') {
+    return compactFacts([
+      {
+        id: 'pool-length',
+        label: t('logbook.poolLengthMeters'),
+        value: measuredValues.poolLengthMeters === undefined ? undefined : formatLength(measuredValues.poolLengthMeters),
+      },
+      { id: 'lap-count', label: t('logbook.lapCount'), value: numberToText(measuredValues.lapCount) },
+      { id: 'training-focus', label: t('logbook.trainingFocus'), value: measuredValues.trainingFocus },
+    ]);
+  }
+
+  return [];
+}
+
+function compactFacts(facts: Array<{ id: string; label: string; value: string | undefined }>): ModeFact[] {
+  return facts.filter((fact): fact is ModeFact => fact.value !== undefined && fact.value.length > 0);
 }
 
 function DetailMetric(props: {
@@ -162,6 +246,10 @@ function getMeasuredValue(entry: DiveLogEntry, field: MeasuredField): { value: n
 
 function formatDetailDuration(seconds: number | undefined): string {
   return seconds === undefined ? '--:--' : formatDuration(seconds);
+}
+
+function numberToText(value: number | undefined): string | undefined {
+  return value === undefined ? undefined : `${value}`;
 }
 
 function toTestIdValue(value: string): string {

@@ -32,6 +32,14 @@ export const formatDepth = (meters?: number) => {
   return `${meters.toFixed(1)} m`;
 };
 
+export const formatLength = (meters?: number) => {
+  if (meters === undefined) {
+    return '--.- m';
+  }
+
+  return `${meters.toFixed(1)} m`;
+};
+
 export const formatTemperature = (celsius?: number) => {
   if (celsius === undefined) {
     return '--.- °C';

@@ -18,6 +18,7 @@ type DiveSummaryCardHeaderProps = {
   title: string;
   eyebrow?: string;
   right?: React.ReactNode;
+  titleTestID?: string;
 };
 
 type DiveSummaryCardMetricProps = {
@@ -55,7 +56,7 @@ function DiveSummaryCardHeader(props: DiveSummaryCardHeaderProps): React.JSX.Ele
         {props.eyebrow ? (
           <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.eyebrow}</Text>
         ) : null}
-        <Text className="text-xl font-semibold leading-7 text-card-foreground">{props.title}</Text>
+        <Text testID={props.titleTestID} className="text-xl font-semibold leading-7 text-card-foreground">{props.title}</Text>
       </VStack>
       {props.right}
     </HStack>

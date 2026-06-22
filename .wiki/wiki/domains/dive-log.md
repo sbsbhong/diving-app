@@ -57,7 +57,7 @@ Mobile model은 `WatchSession`과 모바일 최종 로그 항목을 분리한다
 
 Watch-captured 측정값은 원본 출처를 보존하고 모바일 편집 화면에서 잠금 값으로 다룬다. Manual field와 mobile-assisted field는 사용자가 수정할 수 있다.
 
-현재 수동 로그 field는 site, startedAt, dive mode, duration, max depth, buddy, tags, observed marine life, notes, rating을 다룬다. 비어 있거나 유효하지 않은 수치 field는 `0`으로 저장하지 않고 `undefined`로 유지해 알 수 없는 값과 실제 0 값을 구분한다. Review summary와 preview aggregate도 같은 규칙을 따라 unknown duration/depth를 `0`으로 더하지 않고 placeholder로 표시한다.
+현재 수동 로그 field는 site, startedAt, dive mode, duration, max depth, buddy, gear, tags, observed marine life, notes, rating을 다룬다. Editor는 `diveMode`별로 다른 metadata를 다룬다. Scuba는 gas label, gear, water condition, visibility rating, perceived exertion을 저장할 수 있고, freedive는 repetition count, training focus, perceived exertion을 저장할 수 있다. Snorkel은 water condition과 visibility rating을 다루고, pool은 pool length, lap count, training focus를 다루며 depth field를 쓰지 않는다. 비어 있거나 유효하지 않은 수치 field는 `0`으로 저장하지 않고 `undefined`로 유지해 알 수 없는 값과 실제 0 값을 구분한다. Review summary와 preview aggregate도 같은 규칙을 따라 unknown duration/depth를 `0`으로 더하지 않고 placeholder로 표시한다.
 
 Watch import는 raw `WatchSession`을 `watchCapture.session`에 보존한다. 같은 watch import key가 다시 들어오면 manual/mobile field는 유지하고 watch capture와 sync status만 최신 payload로 갱신한다. 이렇게 해야 사용자가 모바일에서 보완한 site, notes, tags, rating 같은 맥락이 watch 재가져오기로 사라지지 않는다.
 

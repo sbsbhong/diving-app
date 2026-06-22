@@ -1,5 +1,21 @@
 # Wiki 기록
 
+## 2026-06-22 - 구조 - mobile logbook edit and mode-specific forms
+
+- 수정:
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/screens/logbook/screen.tsx`
+  - `apps/mobile/src/screens/logbook/log-entry-editor.tsx`
+  - `apps/mobile/src/screens/logbook/log-entry-mode-fields.tsx`
+  - `apps/mobile/src/screens/logbook/log-entry-detail.tsx`
+  - `apps/mobile/src/types/dive-log-entry.ts`
+- 요약:
+  - 모바일 로그북이 기존 수동/watch 기반 항목을 수정할 수 있고, `diveMode`에 따라 scuba, freedive, snorkel, pool 전용 입력 section과 metadata를 다르게 저장하는 현재 구현 사실을 기록했다. Watch 기반 항목 수정은 raw watch capture와 `source: 'watch'`를 보존하고 manual overlay를 pending 상태로 둔다.
+
 ## 2026-06-22 - 구조 - mobile local-first logbook Phase 2
 
 - 수정:

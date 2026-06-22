@@ -30,7 +30,7 @@ type LogbookScreenProps = {
 };
 
 type SyncFilter = 'all' | 'synced' | 'pending';
-type LocalRoute = 'list' | 'create' | 'detail';
+type LocalRoute = 'list' | 'create' | 'detail' | 'edit';
 
 export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Element {
   const { t } = useTranslation();
@@ -64,6 +64,11 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   const openCreate = React.useCallback(() => {
     setDraftEntry(createBlankDiveLogEntry());
     setRoute('create');
+  }, []);
+
+  const openEdit = React.useCallback((entry: DiveLogEntry) => {
+    setDraftEntry(entry);
+    setRoute('edit');
   }, []);
 
   const saveDraft = React.useCallback(
@@ -133,18 +138,19 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
           </VStack>
         </VStack>
 
-        {route === 'create' && draftEntry ? (
+        {(route === 'create' || route === 'edit') && draftEntry ? (
           <LogEntryEditor
             entry={draftEntry}
+            mode={route === 'edit' ? 'edit' : 'create'}
             isSaving={props.isSaving}
             saveError={props.saveError}
-            onCancel={() => setRoute('list')}
+            onCancel={() => setRoute(route === 'edit' ? 'detail' : 'list')}
             onSave={saveDraft}
           />
         ) : null}
 
         {route === 'detail' && selectedEntry ? (
-          <LogEntryDetail entry={selectedEntry} onBack={() => setRoute('list')} onDelete={deleteEntry} />
+          <LogEntryDetail entry={selectedEntry} onBack={() => setRoute('list')} onEdit={openEdit} onDelete={deleteEntry} />
         ) : null}
 
         {route === 'list' ? (

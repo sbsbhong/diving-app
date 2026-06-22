@@ -65,6 +65,37 @@ manualEntryWithoutMetrics.manual = {
   },
 };
 
+const scubaEntry = createBlankDiveLogEntry({ localId: 'manual-entry-scuba', now: 1781351000 });
+scubaEntry.manual = {
+  ...scubaEntry.manual,
+  site: { name: 'Scuba Metadata Reef' },
+  gearIds: ['bcd-1', 'computer-1'],
+  measuredValues: {
+    startedAt: 1781350200,
+    durationSeconds: 2700,
+    maxDepthMeters: 20,
+    diveMode: 'scuba',
+    gasLabel: 'EAN32',
+    waterCondition: 'mild',
+    visibilityRating: 4,
+    perceivedExertion: 3,
+  },
+};
+
+const poolEntry = createBlankDiveLogEntry({ localId: 'manual-entry-pool', now: 1781351000 });
+poolEntry.manual = {
+  ...poolEntry.manual,
+  site: { name: 'Pool Metadata Session' },
+  measuredValues: {
+    startedAt: 1781350200,
+    durationSeconds: 1800,
+    diveMode: 'pool',
+    poolLengthMeters: 25,
+    lapCount: 18,
+    trainingFocus: 'streamline practice',
+  },
+};
+
 const hybridWatchEntry: DiveLogEntry = {
   ...watchEntry,
   localId: 'watch-entry-hybrid',
@@ -142,7 +173,11 @@ const press = async (root: ReactTestRenderer.ReactTestInstance, testID: string) 
   });
 };
 
-const fillManualDraft = async (root: ReactTestRenderer.ReactTestInstance, overrides: Partial<Record<string, string>> = {}) => {
+const fillManualDraft = async (
+  root: ReactTestRenderer.ReactTestInstance,
+  overrides: Partial<Record<string, string>> = {},
+  mode: NonNullable<WatchSession['diveMode']> = 'freedive',
+) => {
   const values = {
     'log-entry-editor-started-at': '2026-06-20 09:30',
     'log-entry-editor-site-name': 'Blue Corner',
@@ -157,10 +192,12 @@ const fillManualDraft = async (root: ReactTestRenderer.ReactTestInstance, overri
   };
 
   for (const [testID, value] of Object.entries(values)) {
-    await changeText(root, testID, value);
+    if (root.findAllByProps({ testID }).length > 0) {
+      await changeText(root, testID, value);
+    }
   }
 
-  await press(root, 'log-entry-editor-mode-freedive');
+  await press(root, `log-entry-editor-mode-${mode}`);
 };
 
 describe('Logbook manual entry flow', () => {
@@ -335,5 +372,206 @@ describe('Logbook manual entry flow', () => {
 
     expect((await repository.list()).find(entry => entry.manual.site.name === 'Retry Reef')).toBeTruthy();
     expect(root.findByProps({ testID: 'logbook-list-item-Retry Reef' })).toBeTruthy();
+  });
+
+  test('edits an existing manual entry without creating a duplicate', async () => {
+    const repository = new LocalDiveLogRepository([manualEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Manual Reef');
+    await press(root, 'log-entry-detail-edit');
+    expect(root.findByProps({ testID: 'log-entry-editor-title' }).props.children).toBe('Edit dive log');
+    await changeText(root, 'log-entry-editor-site-name', 'Edited Manual Reef');
+    await changeText(root, 'log-entry-editor-notes', 'Updated after reviewing the dive.');
+    await press(root, 'log-entry-editor-save');
+
+    const entries = await repository.list();
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      localId: 'manual-entry-1',
+      manual: {
+        site: { name: 'Edited Manual Reef' },
+        notes: 'Updated after reviewing the dive.',
+      },
+    });
+    expect(root.findByProps({ testID: 'logbook-list-item-Edited Manual Reef' })).toBeTruthy();
+  });
+
+  test('edits a watch-backed entry without losing watch capture provenance', async () => {
+    const repository = new LocalDiveLogRepository([watchEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Watch Reef');
+    await press(root, 'log-entry-detail-edit');
+    expect(root.findByProps({ testID: 'log-entry-editor-duration' }).props.value).toBe('10');
+    expect(root.findByProps({ testID: 'log-entry-editor-max-depth' }).props.value).toBe('12');
+    await changeText(root, 'log-entry-editor-site-name', 'Edited Watch Reef');
+    await changeText(root, 'log-entry-editor-notes', 'Reviewed on mobile.');
+    await press(root, 'log-entry-editor-save');
+
+    const entries = await repository.list();
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      localId: 'watch:watch-entry-1:1781352600',
+      source: 'watch',
+      syncStatus: 'pending',
+      manual: {
+        site: { name: 'Edited Watch Reef' },
+        notes: 'Reviewed on mobile.',
+      },
+    });
+    expect(entries[0].watchCapture?.importKey).toBe('watch-entry-1:1781352600');
+    expect(entries[0].manual.measuredValues.startedAt).toBeUndefined();
+    expect(entries[0].manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(entries[0].manual.measuredValues.maxDepthMeters).toBeUndefined();
+    expect(entries[0].provenance.startedAt).toBe('watch');
+    expect(entries[0].provenance.durationSeconds).toBe('watch');
+    expect(entries[0].provenance.maxDepthMeters).toBe('watch');
+  });
+
+  test('edits a watch-backed metric as a manual override without changing untouched watch metrics', async () => {
+    const repository = new LocalDiveLogRepository([watchEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Watch Reef');
+    await press(root, 'log-entry-detail-edit');
+    await changeText(root, 'log-entry-editor-max-depth', '15.5');
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+
+    expect(savedEntry.manual.measuredValues.maxDepthMeters).toBe(15.5);
+    expect(savedEntry.manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(savedEntry.provenance.maxDepthMeters).toBe('manual');
+    expect(savedEntry.provenance.durationSeconds).toBe('watch');
+  });
+
+  test('saves scuba-specific fields from the scuba form section', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Scuba Wall',
+    }, 'scuba');
+    await changeText(root, 'log-entry-editor-gas-label', 'EAN32');
+    await changeText(root, 'log-entry-editor-gear', 'bcd-1, computer-1');
+    await press(root, 'log-entry-editor-water-condition-mild');
+    await changeText(root, 'log-entry-editor-visibility-rating', '4');
+    await changeText(root, 'log-entry-editor-perceived-exertion', '3');
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Scuba Wall');
+
+    expect(savedEntry).toMatchObject({
+      manual: {
+        gearIds: ['bcd-1', 'computer-1'],
+        measuredValues: {
+          diveMode: 'scuba',
+          gasLabel: 'EAN32',
+          waterCondition: 'mild',
+          visibilityRating: 4,
+          perceivedExertion: 3,
+        },
+      },
+    });
+  });
+
+  test('switches to a freedive form and does not persist hidden scuba-only fields', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await press(root, 'log-entry-editor-mode-scuba');
+    await changeText(root, 'log-entry-editor-gas-label', 'Air');
+    await press(root, 'log-entry-editor-mode-freedive');
+
+    expect(root.findByProps({ testID: 'log-entry-editor-repetition-count' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-editor-training-focus' })).toBeTruthy();
+    expect(() => root.findByProps({ testID: 'log-entry-editor-gas-label' })).toThrow();
+
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Line Session',
+      'log-entry-editor-max-depth': '21',
+    }, 'freedive');
+    await changeText(root, 'log-entry-editor-repetition-count', '8');
+    await changeText(root, 'log-entry-editor-training-focus', 'constant weight technique');
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Line Session');
+
+    expect(savedEntry?.manual.gearIds).toEqual([]);
+    expect(savedEntry?.manual.measuredValues).toMatchObject({
+      diveMode: 'freedive',
+      maxDepthMeters: 21,
+      repetitionCount: 8,
+      trainingFocus: 'constant weight technique',
+    });
+    expect(savedEntry?.manual.measuredValues.gasLabel).toBeUndefined();
+  });
+
+  test('shows a pool-specific form without depth fields and saves pool metrics', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await press(root, 'log-entry-editor-mode-pool');
+
+    expect(root.findByProps({ testID: 'log-entry-editor-pool-length' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-editor-lap-count' })).toBeTruthy();
+    expect(() => root.findByProps({ testID: 'log-entry-editor-max-depth' })).toThrow();
+
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Training Pool',
+      'log-entry-editor-duration': '35',
+    }, 'pool');
+    await changeText(root, 'log-entry-editor-pool-length', '25');
+    await changeText(root, 'log-entry-editor-lap-count', '20');
+    await changeText(root, 'log-entry-editor-training-focus', 'finning drills');
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Training Pool');
+
+    expect(savedEntry?.manual.measuredValues).toMatchObject({
+      diveMode: 'pool',
+      durationSeconds: 2100,
+      poolLengthMeters: 25,
+      lapCount: 20,
+      trainingFocus: 'finning drills',
+    });
+    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
+  });
+
+  test('detail displays scuba-specific metadata', async () => {
+    const repository = new LocalDiveLogRepository([scubaEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Scuba Metadata Reef');
+
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gas-label-EAN32' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gear-bcd-1,computer-1' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-water-condition-mild' })).toBeTruthy();
+  });
+
+  test('detail displays pool-specific metadata without a max-depth value', async () => {
+    const repository = new LocalDiveLogRepository([poolEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Pool Metadata Session');
+
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.-m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-pool-length-25.0m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-lap-count-18' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-training-focus-streamlinepractice' })).toBeTruthy();
   });
 });
