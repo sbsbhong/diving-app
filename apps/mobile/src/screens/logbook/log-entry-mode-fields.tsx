@@ -5,11 +5,13 @@ import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
+import type { DiveEntryStyle } from '../../types/dive-plan';
 import type { WatchSession } from '../../types/dive-session';
 
 export type LogEntryEditorState = {
   startedAt: string;
   diveMode: WatchSession['diveMode'] | undefined;
+  entryStyle: DiveEntryStyle | '';
   siteName: string;
   duration: string;
   maxDepth: string;

@@ -6,6 +6,7 @@ import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
 import { Textarea, TextareaInput } from '../../components/ui/textarea';
+import type { DiveEntryStyle } from '../../types/dive-plan';
 import type { DiveLogEntry, DiveLogFieldProvenance, DiveLogManualMeasuredValues } from '../../types/dive-log-entry';
 import type { WatchSession } from '../../types/dive-session';
 import { EditorField, ModeSpecificFields, type LogEntryEditorState } from './log-entry-mode-fields';
@@ -20,6 +21,7 @@ type LogEntryEditorProps = {
 };
 
 const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive', 'snorkel', 'pool'];
+const entryStyles: DiveEntryStyle[] = ['shore', 'boat', 'pool'];
 const waterConditions: NonNullable<WatchSession['waterCondition']>[] = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'];
 type TouchedEditorFields = ReadonlySet<keyof LogEntryEditorState>;
 
@@ -81,6 +83,20 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
                 label={t(`diveModes.${diveMode}`)}
                 selected={draft.diveMode === diveMode}
                 onPress={() => setValue('diveMode', diveMode)}
+              />
+            ))}
+          </HStack>
+        </EditorField>
+        <EditorField label={t('logbook.entryStyle', { defaultValue: 'Entry style' })}>
+          <HStack space="xs" className="rounded-full bg-muted p-1">
+            {entryStyles.map(entryStyle => (
+              <SelectorPill
+                key={entryStyle}
+                testID={`log-entry-editor-entry-style-${entryStyle}`}
+                className="flex-1"
+                label={t(`entryStyles.${entryStyle}`, { defaultValue: entryStyle })}
+                selected={draft.entryStyle === entryStyle}
+                onPress={() => setValue('entryStyle', entryStyle)}
               />
             ))}
           </HStack>
@@ -207,6 +223,7 @@ function entryToEditorState(entry: DiveLogEntry): LogEntryEditorState {
   return {
     startedAt: formatEditorDate(getEditorStartedAt(entry)),
     diveMode: entry.manual.measuredValues.diveMode ?? 'scuba',
+    entryStyle: entry.manual.entryStyle ?? '',
     siteName: entry.manual.site.name ?? '',
     duration: secondsToMinutesText(getEditorNumber(entry, 'durationSeconds')),
     maxDepth: numberToText(getEditorNumber(entry, 'maxDepthMeters')),
@@ -275,6 +292,7 @@ function editorStateToEntry(entry: DiveLogEntry, draft: LogEntryEditorState, tou
         ...entry.manual.site,
         name: emptyToUndefined(draft.siteName),
       },
+      entryStyle: draft.entryStyle || undefined,
       buddyIds: splitCommaList(draft.buddies),
       gearIds: diveMode === 'scuba' ? splitCommaList(draft.gearIds) : [],
       tags: splitCommaList(draft.tags),

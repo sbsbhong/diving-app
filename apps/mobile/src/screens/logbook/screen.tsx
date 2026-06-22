@@ -25,6 +25,11 @@ type LogbookScreenProps = {
   onImportFixtures: () => void;
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
+  pendingDraft?: {
+    entry: DiveLogEntry;
+    sourcePlanLocalId?: string;
+  };
+  onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
   saveError?: Error | null;
   isSaving?: boolean;
 };
@@ -37,6 +42,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   const [syncFilter, setSyncFilter] = React.useState<SyncFilter>('all');
   const [route, setRoute] = React.useState<LocalRoute>('list');
   const [draftEntry, setDraftEntry] = React.useState<DiveLogEntry | undefined>();
+  const consumedPendingDraftKey = React.useRef<string | undefined>(undefined);
   const visibleEntries = React.useMemo(() => {
     if (syncFilter === 'all') {
       return props.entries;
@@ -61,6 +67,22 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     }
   }, [route, selectedEntry, visibleEntries]);
 
+  React.useEffect(() => {
+    if (!props.pendingDraft) {
+      return;
+    }
+
+    const pendingDraftKey = `${props.pendingDraft.entry.localId}:${props.pendingDraft.sourcePlanLocalId ?? ''}`;
+
+    if (consumedPendingDraftKey.current === pendingDraftKey) {
+      return;
+    }
+
+    consumedPendingDraftKey.current = pendingDraftKey;
+    setDraftEntry(props.pendingDraft.entry);
+    setRoute('create');
+  }, [props.pendingDraft]);
+
   const openCreate = React.useCallback(() => {
     setDraftEntry(createBlankDiveLogEntry());
     setRoute('create');
@@ -77,6 +99,9 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
       setSelectedId(savedEntry.localId);
       setDraftEntry(undefined);
       setRoute('list');
+      if (props.pendingDraft?.entry.localId === entry.localId) {
+        props.onPendingDraftSave?.(savedEntry, props.pendingDraft.sourcePlanLocalId);
+      }
       return savedEntry;
     },
     [props],

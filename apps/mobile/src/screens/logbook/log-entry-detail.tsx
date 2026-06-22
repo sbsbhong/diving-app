@@ -147,9 +147,17 @@ type ModeFact = {
 
 function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>['t']): ModeFact[] {
   const measuredValues = entry.manual.measuredValues;
+  const entryStyleFact = entry.manual.entryStyle
+    ? {
+        id: 'entry-style',
+        label: t('logbook.entryStyle', { defaultValue: 'Entry style' }),
+        value: t(`entryStyles.${entry.manual.entryStyle}`, { defaultValue: entry.manual.entryStyle }),
+      }
+    : undefined;
 
   if (measuredValues.diveMode === 'scuba') {
     return compactFacts([
+      entryStyleFact,
       { id: 'gas-label', label: t('logbook.gasLabel'), value: measuredValues.gasLabel },
       { id: 'gear', label: t('logbook.gear'), value: entry.manual.gearIds.length ? entry.manual.gearIds.join(', ') : undefined },
       { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
@@ -160,6 +168,7 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
 
   if (measuredValues.diveMode === 'freedive') {
     return compactFacts([
+      entryStyleFact,
       { id: 'repetition-count', label: t('logbook.repetitionCount'), value: numberToText(measuredValues.repetitionCount) },
       { id: 'training-focus', label: t('logbook.trainingFocus'), value: measuredValues.trainingFocus },
       { id: 'perceived-exertion', label: t('logbook.perceivedExertion'), value: numberToText(measuredValues.perceivedExertion) },
@@ -168,6 +177,7 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
 
   if (measuredValues.diveMode === 'snorkel') {
     return compactFacts([
+      entryStyleFact,
       { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
       { id: 'visibility-rating', label: t('logbook.visibilityRating'), value: numberToText(measuredValues.visibilityRating) },
     ]);
@@ -175,6 +185,7 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
 
   if (measuredValues.diveMode === 'pool') {
     return compactFacts([
+      entryStyleFact,
       {
         id: 'pool-length',
         label: t('logbook.poolLengthMeters'),
@@ -188,8 +199,8 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
   return [];
 }
 
-function compactFacts(facts: Array<{ id: string; label: string; value: string | undefined }>): ModeFact[] {
-  return facts.filter((fact): fact is ModeFact => fact.value !== undefined && fact.value.length > 0);
+function compactFacts(facts: Array<{ id: string; label: string; value: string | undefined } | undefined>): ModeFact[] {
+  return facts.filter((fact): fact is ModeFact => Boolean(fact?.value));
 }
 
 function DetailMetric(props: {

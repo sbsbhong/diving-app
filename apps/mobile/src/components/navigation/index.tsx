@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { DiveLogbookSection } from '../../types/dive-session';
+import type { DiveLogEntry } from '../../types/dive-log-entry';
+import type { DivePlan } from '../../types/dive-plan';
 import { useDiveLogbook } from '../../states/use-dive-logbook';
+import { useDivePlans } from '../../states/use-dive-plans';
+import { divePlanToDiveLogEntryDraft } from '../../utils/dive-plan-to-log-entry';
 import { Box } from '../ui/box';
 import { HStack } from '../ui/hstack';
 import { Pressable } from '../ui/pressable';
@@ -23,9 +27,48 @@ export type RootStackParamList = {
 
 export default function RootNavigation(): React.JSX.Element {
   const [section, setSection] = React.useState<DiveLogbookSection>('home');
+  const [pendingLogDraft, setPendingLogDraft] = React.useState<
+    | {
+        entry: DiveLogEntry;
+        sourcePlanLocalId?: string;
+      }
+    | undefined
+  >();
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
+  const planning = useDivePlans();
   const { t } = useTranslation();
+
+  const createLogFromPlan = React.useCallback((plan: DivePlan) => {
+    setPendingLogDraft({
+      entry: divePlanToDiveLogEntryDraft(plan),
+      sourcePlanLocalId: plan.localId,
+    });
+    setSection('logbook');
+  }, []);
+
+  const markPendingDraftSaved = React.useCallback(
+    async (entry: DiveLogEntry, sourcePlanLocalId?: string) => {
+      setPendingLogDraft(undefined);
+
+      if (!sourcePlanLocalId) {
+        return;
+      }
+
+      const sourcePlan = planning.plans.find(plan => plan.localId === sourcePlanLocalId);
+
+      if (!sourcePlan) {
+        return;
+      }
+
+      await planning.savePlan({
+        ...sourcePlan,
+        convertedLogLocalId: entry.localId,
+        updatedAt: Date.now() / 1000,
+      });
+    },
+    [planning],
+  );
 
   return (
     <VStack
@@ -53,10 +96,21 @@ export default function RootNavigation(): React.JSX.Element {
             onDeleteEntry={logbook.deleteEntry}
             saveError={logbook.saveError}
             isSaving={logbook.isSaving}
+            pendingDraft={pendingLogDraft}
+            onPendingDraftSave={markPendingDraftSaved}
           />
         ) : null}
         {section === 'planning' ? (
-          <PlanningScreen sessions={logbook.sessions} onOpenLogbook={() => setSection('logbook')} />
+          <PlanningScreen
+            sessions={logbook.sessions}
+            plans={planning.plans}
+            onSavePlan={planning.savePlan}
+            onDeletePlan={planning.deletePlan}
+            saveError={planning.saveError}
+            isSaving={planning.isSaving}
+            onCreateLogFromPlan={createLogFromPlan}
+            onOpenLogbook={() => setSection('logbook')}
+          />
         ) : null}
         {section === 'settings' ? <SettingsScreen /> : null}
       </VStack>

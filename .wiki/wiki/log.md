@@ -1,5 +1,24 @@
 # Wiki 기록
 
+## 2026-06-23 - 구조 - mobile Planbook local flow
+
+- 수정:
+  - `.wiki/wiki/index.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/domains/dive-planning.md`
+  - `.wiki/wiki/domains/safety-rules.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/types/dive-plan.ts`
+  - `apps/mobile/src/repositories/local-dive-plan-repository.ts`
+  - `apps/mobile/src/states/use-dive-plans.ts`
+  - `apps/mobile/src/screens/planning/screen.tsx`
+  - `apps/mobile/src/utils/dive-plan-to-log-entry.ts`
+  - `apps/mobile/src/screens/logbook/log-entry-editor.tsx`
+- 요약:
+  - 모바일 Planbook이 `DivePlan`, in-memory repository, React Query hook, local route editor/detail/complete flow를 사용한다는 사실을 기록했다. 계획값은 의도와 준비 맥락이고, 완료된 계획에서 Logbook 초안을 만들 때 실제 measured value로 복사하지 않는 안전 경계도 명시했다.
+
 ## 2026-06-22 - 구조 - mobile logbook edit and mode-specific forms
 
 - 수정:

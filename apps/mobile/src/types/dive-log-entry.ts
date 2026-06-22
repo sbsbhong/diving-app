@@ -1,4 +1,5 @@
 import type { WatchDepthSample, WatchSession } from './dive-session';
+import type { DiveEntryStyle } from './dive-plan';
 
 export type DiveLogSource = 'manual' | 'watch';
 export type DiveFieldSource = 'manual' | 'mobile' | 'watch';
@@ -29,6 +30,7 @@ export type DiveLogManualMeasuredValues = {
 
 export type DiveLogManualFields = {
   site: DiveLogSite;
+  entryStyle?: DiveEntryStyle;
   buddyIds: string[];
   gearIds: string[];
   tags: string[];

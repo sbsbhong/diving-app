@@ -115,12 +115,17 @@ const hybridWatchEntry: DiveLogEntry = {
 
 type HarnessProps = {
   repository: LocalDiveLogRepository;
+  pendingDraft?: {
+    entry: DiveLogEntry;
+    sourcePlanLocalId?: string;
+  };
+  onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
 };
 
 const queryClients: QueryClient[] = [];
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
-function Harness({ repository }: HarnessProps): React.JSX.Element {
+function Harness({ repository, pendingDraft, onPendingDraftSave }: HarnessProps): React.JSX.Element {
   const logbook = useDiveLogbook({ repository, queryScope: 'manual-entry-test' });
 
   return (
@@ -133,11 +138,22 @@ function Harness({ repository }: HarnessProps): React.JSX.Element {
       onDeleteEntry={logbook.deleteEntry}
       saveError={logbook.saveError}
       isSaving={logbook.isSaving}
+      pendingDraft={pendingDraft}
+      onPendingDraftSave={onPendingDraftSave}
     />
   );
 }
 
-const renderLogbook = async (repository: LocalDiveLogRepository) => {
+const renderLogbook = async (
+  repository: LocalDiveLogRepository,
+  options: {
+    pendingDraft?: {
+      entry: DiveLogEntry;
+      sourcePlanLocalId?: string;
+    };
+    onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
+  } = {},
+) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { gcTime: Infinity, retry: false },
@@ -151,7 +167,7 @@ const renderLogbook = async (repository: LocalDiveLogRepository) => {
     await i18n.changeLanguage('en');
     renderer = ReactTestRenderer.create(
       <QueryClientProvider client={queryClient}>
-        <Harness repository={repository} />
+        <Harness repository={repository} pendingDraft={options.pendingDraft} onPendingDraftSave={options.onPendingDraftSave} />
       </QueryClientProvider>,
     );
   });
@@ -481,6 +497,72 @@ describe('Logbook manual entry flow', () => {
         },
       },
     });
+  });
+
+  test('saves optional entry style from the manual editor', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Entry Style Reef',
+    }, 'scuba');
+    await press(root, 'log-entry-editor-entry-style-shore');
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Entry Style Reef');
+
+    expect(savedEntry?.manual.entryStyle).toBe('shore');
+  });
+
+  test('does not show an entry style detail row for existing logs without entry style', async () => {
+    const repository = new LocalDiveLogRepository([manualEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Manual Reef');
+
+    expect(root.findAllByProps({ testID: 'log-entry-detail-mode-value-entry-style-shore' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-detail-mode-value-entry-style-boat' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-detail-mode-value-entry-style-pool' })).toHaveLength(0);
+  });
+
+  test('opens a pending plan draft in the logbook editor and reports the saved log id', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const pendingDraft = createBlankDiveLogEntry({ localId: 'manual-from-plan', now: 1781355000 });
+    pendingDraft.manual = {
+      ...pendingDraft.manual,
+      entryStyle: 'boat',
+      site: { name: 'Plan Reef' },
+      buddyIds: ['Mina'],
+      tags: ['planned'],
+      notes: 'Copied from plan objective.',
+      measuredValues: {
+        diveMode: 'scuba',
+        gasLabel: 'EAN32',
+      },
+    };
+    const onPendingDraftSave = jest.fn();
+    const renderer = await renderLogbook(repository, {
+      pendingDraft: {
+        entry: pendingDraft,
+        sourcePlanLocalId: 'plan-1',
+      },
+      onPendingDraftSave,
+    });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'log-entry-editor-site-name' }).props.value).toBe('Plan Reef');
+    expect(root.findByProps({ testID: 'log-entry-editor-gas-label' }).props.value).toBe('EAN32');
+    expect(root.findByProps({ testID: 'log-entry-editor-entry-style-boat' }).props.selected).toBe(true);
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+    expect(savedEntry.localId).toBe('manual-from-plan');
+    expect(savedEntry.manual.measuredValues.maxDepthMeters).toBeUndefined();
+    expect(savedEntry.manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(onPendingDraftSave).toHaveBeenCalledWith(expect.objectContaining({ localId: 'manual-from-plan' }), 'plan-1');
   });
 
   test('switches to a freedive form and does not persist hidden scuba-only fields', async () => {

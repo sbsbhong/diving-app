@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-현재 앱 화면은 dive log 기록과 확인, 과거 기록 요약, watch에서 기록한 activity data import, 비중요 계획 알림을 제공할 수 있다. Sensor data나 derived summary를 안전 판단의 근거처럼 표시하면 안 된다.
+현재 앱 화면은 dive log 기록과 확인, 과거 기록 요약, watch에서 기록한 activity data import, 비중요 계획 알림과 Planbook 작성을 제공할 수 있다. Sensor data, 계획값, derived summary를 안전 판단의 근거처럼 표시하면 안 된다.
 
 ## 상세
 
@@ -30,7 +30,7 @@
 - non-certified planning reminder
 - non-certified ascent/safety-stop assistant status
 
-현재 watch/mobile 화면은 ascent, safety stop, surface interval, no-fly concept을 assistant, 확인 상태, 수동 계획 알림으로만 언급한다. 이 경계는 UI copy와 documentation에서 명시적으로 유지해야 한다.
+현재 watch/mobile 화면은 ascent, safety stop, surface interval, no-fly concept을 assistant, 확인 상태, 수동 계획 알림으로만 언급한다. Planbook의 planned max depth, planned duration, water condition, visibility expectation 같은 값은 사용자의 의도와 준비 메모이지 실제 측정값이나 안전 계산 결과가 아니다. 이 경계는 UI copy와 documentation에서 명시적으로 유지해야 한다.
 
 실제 underwater Apple Watch sensor behavior는 공개 배포 전에 지원되는 hardware에서 수동 검증해야 한다. Simulator나 mock sensor behavior는 실제 underwater correctness의 증거가 아니다.
 
@@ -41,5 +41,6 @@ Decompression planning, air integration, tank pressure, emergency decision, cert
 - [[overview]]
 - [[architecture/watch-app]]
 - [[architecture/mobile]]
+- [[domains/dive-planning]]
 - [[domains/dive-log]]
 - [[questions/open-questions]]
