@@ -14,7 +14,6 @@ import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { DiveSessionFilter } from '../../types/dive-session';
 import { createBlankDiveLogEntry } from '../../utils/create-dive-log-entry';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
-import { summarizeSession } from '../../utils/session-summary';
 import { diveLogEntryToMobileSession } from '../../states/use-dive-logbook';
 import { LogEntryDetail } from './log-entry-detail';
 import { LogEntryEditor } from './log-entry-editor';
@@ -195,12 +194,14 @@ function SessionListItem(props: {
   onPress: () => void;
 }): React.JSX.Element {
   const session = diveLogEntryToMobileSession(props.entry);
-  const summary = summarizeSession(session);
+  const listMetrics = getListMetrics(props.entry);
   const status = toVisibleSyncStatus(props.entry.syncStatus);
   const { i18n, t } = useTranslation();
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const tags = session.tags?.length ? session.tags.join(', ') : t('logbook.noTags');
   const siteName = session.siteName ?? t('logbook.untitledDive');
+  const maxDepthLabel = formatDepth(listMetrics.maxDepthMeters);
+  const durationLabel = formatListDuration(listMetrics.durationSeconds);
 
   return (
     <Pressable
@@ -221,16 +222,40 @@ function SessionListItem(props: {
           </HStack>
           <VStack space="xs" className="items-end">
             <StatusPill label={t(`status.${status}`, { defaultValue: status })} tone={syncStatusTone(status)} />
-            <Text className="text-lg font-semibold text-card-foreground">{formatDepth(summary.maxDepthMeters)}</Text>
+            <Text testID={`logbook-list-max-depth-${siteName}-${toTestIdValue(maxDepthLabel)}`} className="text-lg font-semibold text-card-foreground">
+              {maxDepthLabel}
+            </Text>
           </VStack>
         </HStack>
         <Text className="pl-5 text-sm leading-5 text-muted-foreground">
           {t(`diveModes.${session.diveMode ?? 'unknown'}`, { defaultValue: session.diveMode ?? t('diveModes.unknown') })} ·{' '}
-          {formatDuration(summary.durationSeconds)} · {tags}
+          <Text testID={`logbook-list-duration-${siteName}-${toTestIdValue(durationLabel)}`}>{durationLabel}</Text> · {tags}
         </Text>
       </VStack>
     </Pressable>
   );
+}
+
+function getListMetrics(entry: DiveLogEntry): { durationSeconds?: number; maxDepthMeters?: number } {
+  if (entry.watchCapture) {
+    return {
+      durationSeconds: entry.watchCapture.measuredValues.durationSeconds,
+      maxDepthMeters: entry.watchCapture.measuredValues.maxDepthMeters,
+    };
+  }
+
+  return {
+    durationSeconds: entry.manual.measuredValues.durationSeconds,
+    maxDepthMeters: entry.manual.measuredValues.maxDepthMeters,
+  };
+}
+
+function formatListDuration(seconds: number | undefined): string {
+  return seconds === undefined ? '--:--' : formatDuration(seconds);
+}
+
+function toTestIdValue(value: string): string {
+  return value.replace(/\s+/g, '');
 }
 
 const syncStatusTone = (status: string): InstrumentTone => {

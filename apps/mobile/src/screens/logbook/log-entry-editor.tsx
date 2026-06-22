@@ -219,7 +219,7 @@ function editorStateToEntry(entry: DiveLogEntry, draft: EditorState): DiveLogEnt
     ...entry.manual.measuredValues,
     startedAt: parseEditorDate(draft.startedAt) ?? entry.manual.measuredValues.startedAt ?? entry.createdAt,
     durationSeconds: minutesTextToSeconds(draft.duration),
-    maxDepthMeters: textToNumber(draft.maxDepth),
+    maxDepthMeters: textToNonNegativeNumber(draft.maxDepth),
     diveMode: draft.diveMode,
   };
 
@@ -238,7 +238,7 @@ function editorStateToEntry(entry: DiveLogEntry, draft: EditorState): DiveLogEnt
       tags: splitCommaList(draft.tags),
       observedMarineLife: splitCommaList(draft.observedMarineLife),
       notes: emptyToUndefined(draft.notes),
-      rating: textToNumber(draft.rating),
+      rating: textToRating(draft.rating),
       measuredValues,
     },
     provenance: {
@@ -279,8 +279,18 @@ function textToNumber(value: string): number | undefined {
   return Number.isFinite(parsedValue) ? parsedValue : undefined;
 }
 
+function textToNonNegativeNumber(value: string): number | undefined {
+  const parsedValue = textToNumber(value);
+  return parsedValue !== undefined && parsedValue >= 0 ? parsedValue : undefined;
+}
+
+function textToRating(value: string): number | undefined {
+  const parsedValue = textToNumber(value);
+  return parsedValue !== undefined && Number.isInteger(parsedValue) && parsedValue >= 1 && parsedValue <= 5 ? parsedValue : undefined;
+}
+
 function minutesTextToSeconds(value: string): number | undefined {
-  const minutes = textToNumber(value);
+  const minutes = textToNonNegativeNumber(value);
   return minutes === undefined ? undefined : Math.round(minutes * 60);
 }
 

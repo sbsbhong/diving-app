@@ -240,6 +240,36 @@ describe('Logbook manual entry flow', () => {
     expect(savedEntry?.manual.rating).toBeUndefined();
   });
 
+  test('keeps invalid manual numeric fields undefined instead of saving corrupted values', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await fillManualDraft(root, {
+      'log-entry-editor-site-name': 'Invalid Metrics Reef',
+      'log-entry-editor-duration': '-5',
+      'log-entry-editor-max-depth': '-18',
+      'log-entry-editor-rating': '3.5',
+    });
+    await press(root, 'log-entry-editor-save');
+
+    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Invalid Metrics Reef');
+
+    expect(savedEntry?.manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
+    expect(savedEntry?.manual.rating).toBeUndefined();
+  });
+
+  test('list rows show unknown placeholders for manual logs with blank metrics', async () => {
+    const repository = new LocalDiveLogRepository([manualEntryWithoutMetrics]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'logbook-list-max-depth-No Metrics Reef---.-m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'logbook-list-duration-No Metrics Reef---:--' })).toBeTruthy();
+  });
+
   test('detail distinguishes manual values from watch-captured values', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);
