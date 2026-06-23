@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { DivePlan } from '../types/dive-plan';
 import type { DivePlanRepository } from '../repositories/dive-plan-repository';
-import { defaultDivePlanRepository } from '../repositories/local-dive-plan-repository';
+import { defaultDivePlanRepository } from '../repositories/default-dive-plan-repository';
 
 export type DivePlanQueryOptions = {
   queryScope?: string;

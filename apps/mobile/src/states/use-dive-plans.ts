@@ -1,7 +1,7 @@
 import React from 'react';
 import type { DivePlan } from '../types/dive-plan';
 import type { DivePlanRepository } from '../repositories/dive-plan-repository';
-import { defaultDivePlanRepository } from '../repositories/local-dive-plan-repository';
+import { defaultDivePlanRepository } from '../repositories/default-dive-plan-repository';
 import { useDeleteDivePlanMutation, useDivePlansQuery, useSaveDivePlanMutation } from './use-dive-plan-queries';
 
 type UseDivePlansOptions = {

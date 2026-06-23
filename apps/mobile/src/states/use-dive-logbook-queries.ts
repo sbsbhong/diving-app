@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { DiveLogEntry } from '../types/dive-log-entry';
 import type { WatchSyncMessage } from '../types/dive-session';
 import type { DiveLogRepository } from '../repositories/dive-log-repository';
-import { defaultDiveLogRepository } from '../repositories/local-dive-log-repository';
+import { defaultDiveLogRepository } from '../repositories/default-dive-log-repository';
 
 export type DiveLogbookQueryOptions = {
   queryScope?: string;

@@ -25,4 +25,10 @@ describe('dive logbook query keys', () => {
       'entry-1',
     ]);
   });
+
+  it('keeps explicit local repositories isolated after persistent defaults are introduced', () => {
+    const repository = new LocalDiveLogRepository();
+
+    expect(diveLogbookQueryKeys.list(repository, 'local-test')).toEqual(['diveLogbook', 'local-test', 'list']);
+  });
 });

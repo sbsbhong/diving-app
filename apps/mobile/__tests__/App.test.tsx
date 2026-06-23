@@ -7,6 +7,7 @@ import ReactTestRenderer from 'react-test-renderer';
 import App from '../src/App';
 import { Menu } from '../src/components/ui/menu';
 import i18n from '../src/i18n';
+import { defaultDiveLogRepository } from '../src/repositories/default-dive-log-repository';
 
 jest.mock('react-native-reanimated', () => {
   const createAnimation = () => {
@@ -128,5 +129,12 @@ describe('App navigation', () => {
     });
 
     expect(renderer!.root.findByType(Menu)).toBeTruthy();
+  });
+
+  test('uses the persistent default logbook repository', async () => {
+    const entries = await defaultDiveLogRepository.list();
+
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries[0].watchCapture?.importKey).toBeTruthy();
   });
 });

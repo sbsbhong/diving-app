@@ -1,5 +1,5 @@
 import React from 'react';
-import { defaultDiveLogRepository } from '../repositories/local-dive-log-repository';
+import { defaultDiveLogRepository } from '../repositories/default-dive-log-repository';
 import type { DiveLogRepository } from '../repositories/dive-log-repository';
 import {
   useDeleteDiveLogEntryMutation,
