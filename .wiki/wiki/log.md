@@ -1,5 +1,20 @@
 # Wiki 기록
 
+## 2026-06-23 - 구조 - follow-up implementation priorities
+
+- 수정:
+  - `.wiki/wiki/index.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - 사용자 지시: 1번만 진행하고 2~10번은 위키에 작성
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/questions/open-questions.md`
+- 요약:
+  - 모바일 영구 저장소 이후의 Watch sync 검증, WatchConnectivity, 실제 watch sensor provider, 모바일 리뷰 고도화, Planbook 연계, Memory/share, Auth/Supabase, 문서 정리, 안전/실기기 검증 항목을 후속 확인 우선순위로 기록했다.
+
 ## 2026-06-23 - 구조 - mobile Planbook local flow
 
 - 수정:

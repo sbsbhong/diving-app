@@ -10,6 +10,7 @@
 - [[architecture/monorepo]]는 workspace 구조, package 책임, root command를 설명한다.
 - [[architecture/mobile]]은 React Native 모바일 앱의 현재 구조를 설명한다.
 - [[architecture/mobile-logbook-roadmap]]은 local-first 모바일 로그북과 future Supabase sync의 승인된 구현 순서를 기록한다.
+- [[architecture/implementation-priorities]]는 1순위 영구 저장소 이후 나중에 확인할 2~10번 구현 우선순위를 기록한다.
 - [[architecture/watch-app]]은 현재 동작하는 watchOS 앱과 Xcode project 상태를 설명한다.
 - [[architecture/sync-flow]]는 watch-to-mobile 동기화 계약과 import 흐름을 설명한다.
 - [[architecture/supabase]]는 현재 Supabase가 없다는 사실과 향후 경계를 기록한다.
