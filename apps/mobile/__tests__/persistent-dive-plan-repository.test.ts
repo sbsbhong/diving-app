@@ -1,0 +1,84 @@
+import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
+import { PersistentDivePlanRepository } from '../src/repositories/persistent-dive-plan-repository';
+import { InMemoryKeyValueStore } from '../src/storage/in-memory-key-value-store';
+import type { DivePlan } from '../src/types/dive-plan';
+
+const plan = (overrides: Partial<DivePlan>): DivePlan => ({
+  localId: 'plan-base',
+  status: 'draft',
+  createdAt: 100,
+  updatedAt: 100,
+  site: {},
+  buddyIds: [],
+  gearIds: [],
+  tags: [],
+  plannedValues: {},
+  checklistItems: [],
+  ...overrides,
+});
+
+describe('PersistentDivePlanRepository', () => {
+  it('saves, reloads, sorts, and deletes persisted plans', async () => {
+    const storage = new InMemoryKeyValueStore();
+    const repository = new PersistentDivePlanRepository({ storage, now: () => 350 });
+
+    await repository.save(plan({ localId: 'completed', status: 'completed', completedAt: 210, updatedAt: 210 }));
+    await repository.save(plan({ localId: 'future-planned', status: 'planned', plannedAt: 500, updatedAt: 150 }));
+    await repository.save(plan({ localId: 'draft', status: 'draft', updatedAt: 300 }));
+    await repository.save(plan({ localId: 'near-planned', status: 'planned', plannedAt: 400, updatedAt: 180 }));
+
+    const reloadedRepository = new PersistentDivePlanRepository({ storage, now: () => 350 });
+
+    expect((await reloadedRepository.list()).map(currentPlan => currentPlan.localId)).toEqual([
+      'near-planned',
+      'future-planned',
+      'draft',
+      'completed',
+    ]);
+
+    await reloadedRepository.delete('draft');
+
+    expect((await new PersistentDivePlanRepository({ storage, now: () => 350 }).list()).map(currentPlan => currentPlan.localId)).toEqual([
+      'near-planned',
+      'future-planned',
+      'completed',
+    ]);
+  });
+
+  it('matches the local repository sort order', async () => {
+    const plans = [
+      plan({ localId: 'completed', status: 'completed', completedAt: 210, updatedAt: 210 }),
+      plan({ localId: 'future-planned', status: 'planned', plannedAt: 500, updatedAt: 150 }),
+      plan({ localId: 'draft', status: 'draft', updatedAt: 300 }),
+      plan({ localId: 'near-planned', status: 'planned', plannedAt: 400, updatedAt: 180 }),
+    ];
+    const persistentRepository = new PersistentDivePlanRepository({ storage: new InMemoryKeyValueStore(), now: () => 350 });
+    const localRepository = new LocalDivePlanRepository(plans, { now: () => 350 });
+
+    for (const currentPlan of plans) {
+      await persistentRepository.save(currentPlan);
+    }
+
+    expect((await persistentRepository.list()).map(currentPlan => currentPlan.localId)).toEqual(
+      (await localRepository.list()).map(currentPlan => currentPlan.localId),
+    );
+  });
+
+  it('returns cloned plans so callers cannot mutate persisted state', async () => {
+    const repository = new PersistentDivePlanRepository({ storage: new InMemoryKeyValueStore(), now: () => 350 });
+
+    const saved = await repository.save(
+      plan({
+        localId: 'plan-1',
+        site: { name: 'Original Reef' },
+        checklistItems: [{ id: 'gear', label: 'Gear', completed: false }],
+      }),
+    );
+
+    saved.site.name = 'Mutated Reef';
+    saved.checklistItems[0].completed = true;
+
+    expect((await repository.get('plan-1'))?.site.name).toBe('Original Reef');
+    expect((await repository.get('plan-1'))?.checklistItems[0].completed).toBe(false);
+  });
+});

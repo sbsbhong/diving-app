@@ -13,7 +13,7 @@ export class LocalDivePlanRepository implements DivePlanRepository {
     this.now = options.now ?? getCurrentTimestampSeconds;
 
     for (const plan of initialPlans) {
-      this.plansByLocalId.set(plan.localId, clonePlan(plan));
+      this.plansByLocalId.set(plan.localId, cloneDivePlan(plan));
     }
   }
 
@@ -26,8 +26,8 @@ export class LocalDivePlanRepository implements DivePlanRepository {
   }
 
   async save(plan: DivePlan): Promise<DivePlan> {
-    this.plansByLocalId.set(plan.localId, clonePlan(plan));
-    return clonePlan(plan);
+    this.plansByLocalId.set(plan.localId, cloneDivePlan(plan));
+    return cloneDivePlan(plan);
   }
 
   async delete(localId: string): Promise<void> {
@@ -35,12 +35,12 @@ export class LocalDivePlanRepository implements DivePlanRepository {
   }
 
   listSync(): DivePlan[] {
-    return Array.from(this.plansByLocalId.values()).map(clonePlan).sort((left, right) => comparePlans(left, right, this.now()));
+    return Array.from(this.plansByLocalId.values()).map(cloneDivePlan).sort((left, right) => compareDivePlans(left, right, this.now()));
   }
 
   getSync(localId: string): DivePlan | undefined {
     const plan = this.plansByLocalId.get(localId);
-    return plan ? clonePlan(plan) : undefined;
+    return plan ? cloneDivePlan(plan) : undefined;
   }
 }
 
@@ -50,11 +50,11 @@ function getCurrentTimestampSeconds(): number {
   return Date.now() / 1000;
 }
 
-function clonePlan(plan: DivePlan): DivePlan {
+export function cloneDivePlan(plan: DivePlan): DivePlan {
   return JSON.parse(JSON.stringify(plan)) as DivePlan;
 }
 
-function comparePlans(left: DivePlan, right: DivePlan, now: number): number {
+export function compareDivePlans(left: DivePlan, right: DivePlan, now: number): number {
   const leftBucket = getSortBucket(left, now);
   const rightBucket = getSortBucket(right, now);
 
