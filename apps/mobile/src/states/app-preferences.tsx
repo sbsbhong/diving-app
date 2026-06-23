@@ -1,6 +1,10 @@
 import React from 'react';
 import { useColorScheme, type ColorSchemeName } from 'react-native';
 import i18n, { resolveSupportedLanguage, type SupportedLanguage } from '../i18n';
+import {
+  defaultAppPreferencesStorage,
+  type AppPreferencesStorage,
+} from './app-preferences-storage';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
@@ -15,6 +19,7 @@ export type AppPreferences = {
 
 type AppPreferencesProviderProps = {
   children?: React.ReactNode;
+  storage?: AppPreferencesStorage;
 };
 
 const AppPreferencesContext = React.createContext<AppPreferences | undefined>(undefined);
@@ -35,9 +40,33 @@ const resolveInitialLanguage = (): SupportedLanguage =>
 
 export function AppPreferencesProvider(props: AppPreferencesProviderProps): React.JSX.Element {
   const deviceColorScheme = useColorScheme();
-  // Preference persistence is deliberately deferred because the mobile app has no production persistence boundary yet; add storage behind AppPreferencesProvider later.
+  const storage = props.storage ?? defaultAppPreferencesStorage;
   const [themePreference, setThemePreferenceState] = React.useState<ThemePreference>('system');
   const [language, setLanguageState] = React.useState<SupportedLanguage>(resolveInitialLanguage);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    storage
+      .load()
+      .then(async storedPreferences => {
+        if (!isMounted) {
+          return;
+        }
+
+        setThemePreferenceState(storedPreferences.themePreference);
+        await i18n.changeLanguage(storedPreferences.language);
+
+        if (isMounted) {
+          setLanguageState(storedPreferences.language);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [storage]);
 
   React.useEffect(() => {
     const handleLanguageChanged = (nextLanguage: string) => {
@@ -51,20 +80,28 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
     };
   }, []);
 
-  const setThemePreference = React.useCallback((nextThemePreference: ThemePreference) => {
-    setThemePreferenceState(nextThemePreference);
-  }, []);
+  const setThemePreference = React.useCallback(
+    (nextThemePreference: ThemePreference) => {
+      setThemePreferenceState(nextThemePreference);
+      void storage.save({ themePreference: nextThemePreference, language });
+    },
+    [language, storage],
+  );
 
-  const setLanguage = React.useCallback(async (nextLanguage: SupportedLanguage) => {
-    const supportedLanguage = resolveSupportedLanguage(nextLanguage);
+  const setLanguage = React.useCallback(
+    async (nextLanguage: SupportedLanguage) => {
+      const supportedLanguage = resolveSupportedLanguage(nextLanguage);
 
-    try {
-      await i18n.changeLanguage(supportedLanguage);
-      setLanguageState(supportedLanguage);
-    } catch {
-      // Keep the previous language selection when i18next rejects the change.
-    }
-  }, []);
+      try {
+        await i18n.changeLanguage(supportedLanguage);
+        setLanguageState(supportedLanguage);
+        await storage.save({ themePreference, language: supportedLanguage });
+      } catch {
+        // Keep the previous language selection when i18next rejects the change.
+      }
+    },
+    [storage, themePreference],
+  );
 
   const resolvedTheme = React.useMemo(
     () => resolveThemePreference(themePreference, deviceColorScheme),

@@ -8,6 +8,8 @@ import {
   useAppPreferences,
   type AppPreferences,
 } from '../src/states/app-preferences';
+import { createAppPreferencesStorage } from '../src/states/app-preferences-storage';
+import { InMemoryKeyValueStore } from '../src/storage/in-memory-key-value-store';
 
 function Probe(props: { onValue: (value: AppPreferences) => void }): React.JSX.Element {
   const preferences = useAppPreferences();
@@ -31,6 +33,12 @@ function OutsideProviderProbe(): React.JSX.Element {
 
 describe('app preferences', () => {
   beforeEach(async () => {
+    const asyncStorageMock = jest.requireMock('@react-native-async-storage/async-storage') as {
+      __resetAsyncStorageMock: () => void;
+    };
+
+    asyncStorageMock.__resetAsyncStorageMock();
+
     await ReactTestRenderer.act(async () => {
       await i18n.changeLanguage('ko');
     });
@@ -146,6 +154,76 @@ describe('app preferences', () => {
     } finally {
       consoleErrorSpy.mockRestore();
       consoleWarnSpy.mockRestore();
+    }
+  });
+
+  test('restores saved preferences from persistent storage', async () => {
+    const storage = createAppPreferencesStorage({ storage: new InMemoryKeyValueStore(), now: () => 1000 });
+    await storage.save({ themePreference: 'dark', language: 'en' });
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider storage={storage}>
+          <Probe onValue={jest.fn()} />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+    expect(i18n.language).toBe('en');
+  });
+
+  test('persists runtime preference changes', async () => {
+    const storage = createAppPreferencesStorage({ storage: new InMemoryKeyValueStore(), now: () => 1000 });
+    const snapshots: AppPreferences[] = [];
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider storage={storage}>
+          <Probe onValue={value => snapshots.push(value)} />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    await ReactTestRenderer.act(async () => {
+      snapshots[snapshots.length - 1].setThemePreference('dark');
+    });
+    await ReactTestRenderer.act(async () => {
+      await snapshots[snapshots.length - 1].setLanguage('en');
+    });
+
+    expect(await storage.load()).toEqual({ themePreference: 'dark', language: 'en' });
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+  });
+
+  test('does not persist a language selection when i18next rejects it', async () => {
+    const storage = createAppPreferencesStorage({ storage: new InMemoryKeyValueStore(), now: () => 1000 });
+    const snapshots: AppPreferences[] = [];
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider storage={storage}>
+          <Probe onValue={value => snapshots.push(value)} />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    const changeLanguageSpy = jest
+      .spyOn(i18n, 'changeLanguage')
+      .mockRejectedValueOnce(new Error('language change failed'));
+
+    try {
+      await ReactTestRenderer.act(async () => {
+        await snapshots[snapshots.length - 1].setLanguage('en');
+      });
+
+      expect(await storage.load()).toEqual({ themePreference: 'system', language: 'ko' });
+      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+    } finally {
+      changeLanguageSpy.mockRestore();
     }
   });
 });

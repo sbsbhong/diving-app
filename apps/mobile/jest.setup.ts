@@ -1,4 +1,5 @@
 const mockStores = new Map<string, Map<string, string>>();
+const mockAllStores = new Set<Map<string, string>>();
 
 type AsyncStorageInstance = {
   getItem: jest.Mock<Promise<string | null>, [string]>;
@@ -15,6 +16,7 @@ const mockGetStore = (databaseName: string): Map<string, string> => {
   }
 
   const next = new Map<string, string>();
+  mockAllStores.add(next);
   mockStores.set(databaseName, next);
   return next;
 };
@@ -40,6 +42,9 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   return {
     createAsyncStorage,
     __resetAsyncStorageMock: () => {
+      for (const store of mockAllStores.values()) {
+        store.clear();
+      }
       mockStores.clear();
     },
   };
