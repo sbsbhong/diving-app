@@ -15,7 +15,7 @@ export class LocalDiveLogRepository implements DiveLogRepository {
   constructor(initialEntries: DiveLogEntry[] = [], options: LocalDiveLogRepositoryOptions = {}) {
     this.now = options.now ?? getCurrentTimestampSeconds;
     for (const entry of initialEntries) {
-      this.entriesByLocalId.set(entry.localId, cloneEntry(entry));
+      this.entriesByLocalId.set(entry.localId, cloneDiveLogEntry(entry));
     }
   }
 
@@ -28,8 +28,8 @@ export class LocalDiveLogRepository implements DiveLogRepository {
   }
 
   async save(entry: DiveLogEntry): Promise<DiveLogEntry> {
-    this.entriesByLocalId.set(entry.localId, cloneEntry(entry));
-    return cloneEntry(entry);
+    this.entriesByLocalId.set(entry.localId, cloneDiveLogEntry(entry));
+    return cloneDiveLogEntry(entry);
   }
 
   async delete(localId: string): Promise<void> {
@@ -50,12 +50,12 @@ export class LocalDiveLogRepository implements DiveLogRepository {
   }
 
   listSync(): DiveLogEntry[] {
-    return Array.from(this.entriesByLocalId.values()).map(cloneEntry).sort(compareEntries);
+    return Array.from(this.entriesByLocalId.values()).map(cloneDiveLogEntry).sort(compareDiveLogEntries);
   }
 
   getSync(localId: string): DiveLogEntry | undefined {
     const entry = this.entriesByLocalId.get(localId);
-    return entry ? cloneEntry(entry) : undefined;
+    return entry ? cloneDiveLogEntry(entry) : undefined;
   }
 
   private findByImportKey(importKey: string | undefined): DiveLogEntry | undefined {
@@ -83,11 +83,11 @@ function getCurrentTimestampSeconds(): number {
   return Date.now() / 1000;
 }
 
-function cloneEntry(entry: DiveLogEntry): DiveLogEntry {
+export function cloneDiveLogEntry(entry: DiveLogEntry): DiveLogEntry {
   return JSON.parse(JSON.stringify(entry)) as DiveLogEntry;
 }
 
-function mergeWatchImport(currentEntry: DiveLogEntry | undefined, nextEntry: DiveLogEntry): DiveLogEntry {
+export function mergeWatchImport(currentEntry: DiveLogEntry | undefined, nextEntry: DiveLogEntry): DiveLogEntry {
   if (!currentEntry) {
     return nextEntry;
   }
@@ -121,7 +121,7 @@ function mergeWatchImport(currentEntry: DiveLogEntry | undefined, nextEntry: Div
   };
 }
 
-function compareEntries(left: DiveLogEntry, right: DiveLogEntry): number {
+export function compareDiveLogEntries(left: DiveLogEntry, right: DiveLogEntry): number {
   return getEntrySortTimestamp(right) - getEntrySortTimestamp(left);
 }
 
