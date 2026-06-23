@@ -1,5 +1,21 @@
 # Wiki 기록
 
+## 2026-06-23 - 구조 - mobile persistent storage
+
+- 수정:
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/storage/`
+  - `apps/mobile/src/repositories/persistent-dive-log-repository.ts`
+  - `apps/mobile/src/repositories/persistent-dive-plan-repository.ts`
+  - `apps/mobile/src/states/app-preferences-storage.ts`
+  - `apps/mobile/src/states/app-preferences.tsx`
+- 요약:
+  - 모바일 Logbook, Planbook, 설정 선호가 AsyncStorage 기반 versioned JSON 저장소를 통해 앱 재시작 뒤에도 유지되는 구조를 기록했다.
+
 ## 2026-06-23 - 구조 - follow-up implementation priorities
 
 - 수정:
