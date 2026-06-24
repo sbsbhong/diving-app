@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import metadataRichFixture from '../../../packages/contracts/fixtures/metadata-rich-watch-sync-message.json';
 import i18n from '../src/i18n';
@@ -261,6 +262,14 @@ describe('Logbook manual entry flow', () => {
 
     expect(root.findByProps({ testID: 'log-entry-editor-site-name' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-save' })).toBeTruthy();
+  });
+
+  test('keeps logbook inputs in a keyboard-aware scroll container', async () => {
+    const renderer = await renderLogbook(new LocalDiveLogRepository([]));
+    const root = renderer.root;
+
+    expect(root.findByType(KeyboardAvoidingView).props.behavior).toBe('padding');
+    expect(root.findByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
   });
 
   test('import action drains pending WatchConnectivity payloads into the logbook', async () => {

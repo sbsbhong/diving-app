@@ -4,8 +4,8 @@ import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
 import { Box } from '../../components/ui/box';
 import { HStack } from '../../components/ui/hstack';
+import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
-import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
@@ -116,7 +116,10 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
   );
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
+    <KeyboardAwareScrollView
+      className="flex-1 bg-background"
+      contentContainerClassName="px-5 pt-4 pb-6"
+      contentInsetAdjustmentBehavior="automatic">
       <VStack space="lg">
         <VStack space="sm">
           <HStack className="items-center justify-between">
@@ -201,7 +204,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
         <InstrumentButton label={t('planning.openLogbook')} onPress={props.onOpenLogbook} />
         <SafetyText>{t('planning.safetyText')}</SafetyText>
       </VStack>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
 import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
@@ -127,6 +128,14 @@ describe('Planning screen planbook flow', () => {
       },
     });
     expect(root.findByProps({ testID: 'planning-plan-row-Blue Wall' })).toBeTruthy();
+  });
+
+  it('keeps planning inputs in a keyboard-aware scroll container', async () => {
+    const renderer = await renderPlanning(new LocalDivePlanRepository([]));
+    const root = renderer.root;
+
+    expect(root.findByType(KeyboardAvoidingView).props.behavior).toBe('padding');
+    expect(root.findByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
   });
 
   it('edits an existing plan without creating a duplicate', async () => {

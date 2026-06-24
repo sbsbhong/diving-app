@@ -5,8 +5,8 @@ import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../co
 import { Box } from '../../components/ui/box';
 import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
+import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
-import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
@@ -116,7 +116,10 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   );
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
+    <KeyboardAwareScrollView
+      className="flex-1 bg-background"
+      contentContainerClassName="px-5 pt-4 pb-6"
+      contentInsetAdjustmentBehavior="automatic">
       <VStack space="lg">
         <VStack space="md">
           <HStack className="items-center justify-between">
@@ -205,7 +208,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
 
         <SafetyText>{t('logbook.safetyText')}</SafetyText>
       </VStack>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
