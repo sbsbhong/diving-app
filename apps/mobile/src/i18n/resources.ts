@@ -29,6 +29,18 @@ const resources = {
           korean: '한국어',
           english: 'English',
         },
+        devices: {
+          title: '기기 관리',
+          appleWatch: 'Apple Watch',
+          status: {
+            checking: '확인 중',
+            unsupported: '이 기기에서 워치 연동을 지원하지 않음',
+            notPaired: '연동된 워치 없음',
+            appNotInstalled: '워치 앱 미설치',
+            connected: '연결됨',
+            linked: '연동됨',
+          },
+        },
       },
       status: {
         watchAssistant: '워치 보조 도구',
@@ -333,6 +345,18 @@ const resources = {
           subtitle: 'Choose the app language.',
           korean: '한국어',
           english: 'English',
+        },
+        devices: {
+          title: 'Device Management',
+          appleWatch: 'Apple Watch',
+          status: {
+            checking: 'Checking',
+            unsupported: 'Watch pairing is not supported on this device',
+            notPaired: 'No paired watch',
+            appNotInstalled: 'Watch app not installed',
+            connected: 'Connected',
+            linked: 'Linked',
+          },
         },
       },
       status: {

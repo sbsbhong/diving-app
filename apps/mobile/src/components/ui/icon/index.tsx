@@ -1186,6 +1186,36 @@ const PhoneIcon = createIcon({
 PhoneIcon.displayName = 'PhoneIcon';
 export { PhoneIcon };
 
+const WatchIcon = createIcon({
+  Root: Svg,
+  viewBox: '0 0 24 24',
+  path: (
+    <>
+      <Path
+        d="M7 6V3.5C7 2.67157 7.67157 2 8.5 2H15.5C16.3284 2 17 2.67157 17 3.5V6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M17 18V20.5C17 21.3284 16.3284 22 15.5 22H8.5C7.67157 22 7 21.3284 7 20.5V18"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M8 6H16C17.1046 6 18 6.89543 18 8V16C18 17.1046 17.1046 18 16 18H8C6.89543 18 6 17.1046 6 16V8C6 6.89543 6.89543 6 8 6Z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+});
+
+WatchIcon.displayName = 'WatchIcon';
+export { WatchIcon };
+
 const PlayIcon = createIcon({
   Root: Svg,
   viewBox: '0 0 24 24',

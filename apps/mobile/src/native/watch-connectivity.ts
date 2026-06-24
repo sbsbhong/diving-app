@@ -14,11 +14,20 @@ export type WatchConnectivitySubscription = {
   remove(): void;
 };
 
+export type LinkedWatchInfo = {
+  isSupported: boolean;
+  isPaired: boolean;
+  isWatchAppInstalled: boolean;
+  isReachable: boolean;
+  name?: string;
+};
+
 type WatchConnectivityModule = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: string[]) => Promise<void>;
   updatePlannedDives?: (plannedDivesJson: string) => Promise<void>;
+  getLinkedWatchInfo?: () => Promise<LinkedWatchInfo>;
   addListener: (eventName: string) => void;
   removeListeners: (count: number) => void;
 };
@@ -78,6 +87,19 @@ export async function updatePlannedWatchDives(plans: readonly DivePlan[]): Promi
 
   const plannedDives = plans.filter(isWatchVisiblePlan).map(toWatchPlannedDivePayload);
   await nativeModule.updatePlannedDives(JSON.stringify(plannedDives));
+}
+
+export async function getLinkedWatchInfo(): Promise<LinkedWatchInfo> {
+  if (!nativeModule?.getLinkedWatchInfo) {
+    return {
+      isSupported: false,
+      isPaired: false,
+      isWatchAppInstalled: false,
+      isReachable: false,
+    };
+  }
+
+  return nativeModule.getLinkedWatchInfo();
 }
 
 export function subscribeToWatchConnectivityPayloads(

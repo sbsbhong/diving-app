@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Box } from '../../components/ui/box';
 import { Button, ButtonText } from '../../components/ui/button';
 import { HStack } from '../../components/ui/hstack';
-import { CircleIcon } from '../../components/ui/icon';
+import { CircleIcon, Icon, WatchIcon } from '../../components/ui/icon';
 import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '../../components/ui/radio';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { SupportedLanguage } from '../../i18n';
+import { getLinkedWatchInfo, type LinkedWatchInfo } from '../../native/watch-connectivity';
 import { useAppPreferences, type ThemePreference } from '../../states/app-preferences';
 
 type SettingsRoute = 'index' | 'theme' | 'language';
@@ -30,16 +31,48 @@ type OptionRowProps = {
   value: string;
 };
 
+type SettingsScreenProps = {
+  loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo>;
+};
+
 const themeOptions: ThemePreference[] = ['system', 'light', 'dark'];
 const languageOptions: SupportedLanguage[] = ['ko', 'en'];
 
-export default function SettingsScreen(): React.JSX.Element {
+export default function SettingsScreen({
+  loadLinkedWatchInfo = getLinkedWatchInfo,
+}: SettingsScreenProps): React.JSX.Element {
   const { t } = useTranslation();
   const { language, setLanguage, setThemePreference, themePreference } = useAppPreferences();
   const [route, setRoute] = React.useState<SettingsRoute>('index');
+  const [linkedWatchInfo, setLinkedWatchInfo] = React.useState<LinkedWatchInfo | undefined>();
 
   const themeLabel = getThemeLabel(themePreference, t);
   const languageLabel = getLanguageLabel(language, t);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    loadLinkedWatchInfo()
+      .then(info => {
+        if (isMounted) {
+          setLinkedWatchInfo(info);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setLinkedWatchInfo({
+            isSupported: false,
+            isPaired: false,
+            isWatchAppInstalled: false,
+            isReachable: false,
+          });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadLinkedWatchInfo]);
 
   if (route === 'theme') {
     return (
@@ -126,6 +159,13 @@ export default function SettingsScreen(): React.JSX.Element {
             onPress={() => setRoute('language')}
           />
         </VStack>
+      </VStack>
+
+      <VStack space="sm">
+        <Text testID="settings-section-devices" size="xs" className="font-semibold uppercase text-muted-foreground">
+          {t('settings.devices.title')}
+        </Text>
+        <LinkedWatchCard linkedWatchInfo={linkedWatchInfo} />
       </VStack>
     </SettingsScaffold>
   );
@@ -228,10 +268,56 @@ function OptionRow(props: OptionRowProps): React.JSX.Element {
   );
 }
 
+function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo }): React.JSX.Element {
+  const { t } = useTranslation();
+  const watchName = props.linkedWatchInfo?.name ?? t('settings.devices.appleWatch');
+
+  return (
+    <HStack className="items-center rounded-2xl bg-card px-4 py-4" space="md">
+      <Box testID="settings-linked-watch-icon" className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+        <Icon as={WatchIcon} size="lg" className="text-primary" />
+      </Box>
+      <VStack space="xs" className="flex-1">
+        <Text testID="settings-linked-watch-name" className="text-base font-semibold text-card-foreground">
+          {watchName}
+        </Text>
+        <Text testID="settings-linked-watch-status" size="sm" className="leading-5 text-muted-foreground">
+          {getLinkedWatchStatusLabel(props.linkedWatchInfo, t)}
+        </Text>
+      </VStack>
+    </HStack>
+  );
+}
+
 function getThemeLabel(themePreference: ThemePreference, t: ReturnType<typeof useTranslation>['t']): string {
   return t(`settings.theme.${themePreference}`);
 }
 
 function getLanguageLabel(language: SupportedLanguage, t: ReturnType<typeof useTranslation>['t']): string {
   return language === 'ko' ? t('settings.language.korean') : t('settings.language.english');
+}
+
+function getLinkedWatchStatusLabel(
+  linkedWatchInfo: LinkedWatchInfo | undefined,
+  t: ReturnType<typeof useTranslation>['t'],
+): string {
+  if (!linkedWatchInfo) {
+    return t('settings.devices.status.checking');
+  }
+
+  if (!linkedWatchInfo.isSupported) {
+    return t('settings.devices.status.unsupported');
+  }
+
+  if (!linkedWatchInfo.isPaired) {
+    return t('settings.devices.status.notPaired');
+  }
+
+  if (!linkedWatchInfo.isWatchAppInstalled) {
+    return t('settings.devices.status.appNotInstalled');
+  }
+
+  return linkedWatchInfo.isReachable
+    ? t('settings.devices.status.connected')
+    : t('settings.devices.status.linked');
 }

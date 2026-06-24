@@ -4,14 +4,23 @@ import i18n from '../src/i18n';
 import { HStack } from '../src/components/ui/hstack';
 import { AppPreferencesProvider } from '../src/states/app-preferences';
 import SettingsScreen from '../src/screens/settings/screen';
+import type { LinkedWatchInfo } from '../src/native/watch-connectivity';
 
-const renderSettings = async () => {
+const linkedWatchInfo: LinkedWatchInfo = {
+  isSupported: true,
+  isPaired: true,
+  isWatchAppInstalled: true,
+  isReachable: true,
+  name: 'Seongbin Apple Watch',
+};
+
+const renderSettings = async (options?: { loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo> }) => {
   let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
   await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(
       <AppPreferencesProvider>
-        <SettingsScreen />
+        <SettingsScreen loadLinkedWatchInfo={options?.loadLinkedWatchInfo ?? (() => Promise.resolve(linkedWatchInfo))} />
       </AppPreferencesProvider>,
     );
   });
@@ -33,6 +42,32 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
     expect(root.findByProps({ testID: 'settings-current-theme' }).props.children).toBe('시스템 기본값');
     expect(root.findByProps({ testID: 'settings-current-language' }).props.children).toBe('한국어');
+  });
+
+  test('shows linked watch in device management with icon and status', async () => {
+    const renderer = await renderSettings();
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-section-devices' }).props.children).toBe('기기 관리');
+    expect(root.findByProps({ testID: 'settings-linked-watch-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'settings-linked-watch-name' }).props.children).toBe('Seongbin Apple Watch');
+    expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('연결됨');
+  });
+
+  test('explains when no watch is paired', async () => {
+    const renderer = await renderSettings({
+      loadLinkedWatchInfo: () =>
+        Promise.resolve({
+          isSupported: true,
+          isPaired: false,
+          isWatchAppInstalled: false,
+          isReachable: false,
+        }),
+    });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-linked-watch-name' }).props.children).toBe('Apple Watch');
+    expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('연동된 워치 없음');
   });
 
   test('stretches index row content so labels and values sit at opposite edges', async () => {

@@ -75,6 +75,16 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
+  func linkedWatchInfo() -> [String: Any] {
+    if Thread.isMainThread {
+      return linkedWatchInfoOnMainQueue()
+    }
+
+    return DispatchQueue.main.sync {
+      linkedWatchInfoOnMainQueue()
+    }
+  }
+
   func session(
     _ session: WCSession,
     activationDidCompleteWith activationState: WCSessionActivationState,
@@ -191,6 +201,31 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     } catch {
       assertionFailure("Failed to update watch planned dives: \(error)")
     }
+  }
+
+  private func linkedWatchInfoOnMainQueue() -> [String: Any] {
+    guard WCSession.isSupported(),
+          let connectivitySession else {
+      return [
+        "isSupported": false,
+        "isPaired": false,
+        "isWatchAppInstalled": false,
+        "isReachable": false
+      ]
+    }
+
+    var info: [String: Any] = [
+      "isSupported": true,
+      "isPaired": connectivitySession.isPaired,
+      "isWatchAppInstalled": connectivitySession.isWatchAppInstalled,
+      "isReachable": connectivitySession.isReachable
+    ]
+
+    if connectivitySession.isPaired {
+      info["name"] = "Apple Watch"
+    }
+
+    return info
   }
 
   private func persistPendingPayloads() {

@@ -80,5 +80,10 @@ final class WatchConnectivityModule: RCTEventEmitter {
     resolve(nil)
   }
 
+  @objc(getLinkedWatchInfo:rejecter:)
+  func getLinkedWatchInfo(resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
+    resolve(WatchConnectivityInbox.shared.linkedWatchInfo())
+  }
+
   private static let eventName = "DiveWatchSyncPayloadReceived"
 }

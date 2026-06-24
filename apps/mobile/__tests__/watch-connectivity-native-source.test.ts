@@ -87,6 +87,22 @@ describe('WatchConnectivity native source contract', () => {
     expect(envelope).toContain('plannedDivesJsonKey');
   });
 
+  it('exposes linked watch status to the settings screen', () => {
+    const mobileNative = readRepoFile('apps/mobile/src/native/watch-connectivity.ts');
+    const module = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift');
+    const bridge = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModuleBridge.m');
+    const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
+
+    expect(mobileNative).toContain('type LinkedWatchInfo');
+    expect(mobileNative).toContain('getLinkedWatchInfo');
+    expect(module).toContain('@objc(getLinkedWatchInfo:rejecter:)');
+    expect(bridge).toContain('getLinkedWatchInfo');
+    expect(inbox).toContain('linkedWatchInfo');
+    expect(inbox).toContain('isPaired');
+    expect(inbox).toContain('isWatchAppInstalled');
+    expect(inbox).toContain('isReachable');
+  });
+
   it('shows unexecuted mobile plans on watch and starts recording from a selected plan', () => {
     const model = readRepoFile('apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift');
     const store = readRepoFile('apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift');
