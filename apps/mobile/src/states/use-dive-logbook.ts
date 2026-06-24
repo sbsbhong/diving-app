@@ -6,13 +6,11 @@ import type { DiveLogRepository } from '../repositories/dive-log-repository';
 import {
   useDeleteDiveLogEntryMutation,
   useDiveLogEntriesQuery,
-  useImportWatchMessagesMutation,
   useSaveDiveLogEntryMutation,
 } from './use-dive-logbook-queries';
 import type { DiveLogEntry, DiveLogSyncStatus } from '../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../types/dive-session';
-import { watchFixtureMessages } from '../utils/watch-fixtures';
-import { importPendingWatchConnectivityPayloads } from './watch-connectivity-sync';
+import { importPendingWatchConnectivityPayloads, type WatchConnectivityImportSummary } from './watch-connectivity-sync';
 
 type UseDiveLogbookOptions = {
   repository?: DiveLogRepository;
@@ -21,6 +19,10 @@ type UseDiveLogbookOptions = {
 
 type DiveLogRepositoryWithSyncList = DiveLogRepository & {
   listSync?: () => DiveLogEntry[];
+};
+
+export type WatchSyncActionResult = WatchConnectivityImportSummary & {
+  unavailable: boolean;
 };
 
 export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
@@ -43,7 +45,6 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
   });
   const saveEntryMutation = useSaveDiveLogEntryMutation(repository, { queryScope: options.queryScope });
   const deleteEntryMutation = useDeleteDiveLogEntryMutation(repository, { queryScope: options.queryScope });
-  const importWatchMessages = useImportWatchMessagesMutation(repository, { queryScope: options.queryScope });
   const entries: DiveLogEntry[] = entriesQuery.data ?? initialEntries ?? [];
   const sessions = React.useMemo(() => entries.map(diveLogEntryToMobileSession), [entries]);
 
@@ -73,17 +74,18 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
 
   const filteredSessions = React.useMemo(() => filteredEntries.map(diveLogEntryToMobileSession), [filteredEntries]);
 
-  const importFixtures = React.useCallback(async () => {
-    const importedPayloadCount = await importPendingWatchConnectivityPayloads({
+  const syncWatchPayloads = React.useCallback(async (): Promise<WatchSyncActionResult> => {
+    const summary = await importPendingWatchConnectivityPayloads({
       repository,
       queryClient,
       queryScope: options.queryScope,
     });
 
-    if (importedPayloadCount === 0 && !isWatchConnectivityAvailable()) {
-      await importWatchMessages.mutateAsync(watchFixtureMessages);
-    }
-  }, [importWatchMessages, options.queryScope, queryClient, repository]);
+    return {
+      ...summary,
+      unavailable: !isWatchConnectivityAvailable(),
+    };
+  }, [options.queryScope, queryClient, repository]);
 
   return {
     entries,
@@ -92,7 +94,7 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
     filteredSessions,
     filter,
     setFilter,
-    importFixtures,
+    syncWatchPayloads,
     saveEntry: saveEntryMutation.mutateAsync,
     deleteEntry: deleteEntryMutation.mutateAsync,
     isLoading: entriesQuery.isLoading,

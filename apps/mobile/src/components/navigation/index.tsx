@@ -123,7 +123,7 @@ export default function RootNavigation(): React.JSX.Element {
                 entries={logbook.filteredEntries}
                 filter={logbook.filter}
                 onFilterChange={logbook.setFilter}
-                onImportFixtures={logbook.importFixtures}
+                onSyncWatch={logbook.syncWatchPayloads}
                 onSaveEntry={logbook.saveEntry}
                 onDeleteEntry={logbook.deleteEntry}
                 saveError={logbook.saveError}

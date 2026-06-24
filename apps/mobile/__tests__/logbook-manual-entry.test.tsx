@@ -149,7 +149,7 @@ function Harness({ repository, pendingDraft, onPendingDraftSave }: HarnessProps)
       entries={logbook.filteredEntries}
       filter={logbook.filter}
       onFilterChange={logbook.setFilter}
-      onImportFixtures={logbook.importFixtures}
+      onSyncWatch={logbook.syncWatchPayloads}
       onSaveEntry={logbook.saveEntry}
       onDeleteEntry={logbook.deleteEntry}
       saveError={logbook.saveError}
@@ -264,6 +264,14 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'log-entry-editor-save' })).toBeTruthy();
   });
 
+  test('uses clearer logbook action labels', async () => {
+    const renderer = await renderLogbook(new LocalDiveLogRepository([]));
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'logbook-create-action' }).props.label).toBe('Write');
+    expect(root.findByProps({ testID: 'logbook-import-action' }).props.label).toBe('Sync Watch');
+  });
+
   test('keeps logbook inputs in a keyboard-aware scroll container', async () => {
     const renderer = await renderLogbook(new LocalDiveLogRepository([]));
     const root = renderer.root;
@@ -301,7 +309,20 @@ describe('Logbook manual entry flow', () => {
     expect(entries).toHaveLength(1);
     expect(entries[0].watchCapture?.session.localSessionId).toBe('button-drain-session');
     expect(root.findByProps({ testID: 'logbook-list-item-Button Drain Reef' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'logbook-sync-toast' }).props.children).toBe('Imported 1 watch log.');
     expect(mockAcknowledgeImportedWatchConnectivityPayloads).toHaveBeenCalledWith(['button-payload-1']);
+  });
+
+  test('manual watch sync tells the user when there are no new watch logs', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    mockIsWatchConnectivityAvailable.mockReturnValue(true);
+    mockDrainPendingWatchConnectivityPayloads.mockResolvedValue([]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-import-action');
+
+    expect(root.findByProps({ testID: 'logbook-sync-toast' }).props.children).toBe('No new watch logs.');
   });
 
   test('saves manual local-only entries through the repository flow and lists them with watch entries', async () => {

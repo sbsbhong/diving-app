@@ -12,6 +12,7 @@ import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
 import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { DiveSessionFilter } from '../../types/dive-session';
+import type { WatchSyncActionResult } from '../../states/use-dive-logbook';
 import { createBlankDiveLogEntry } from '../../utils/create-dive-log-entry';
 import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
 import { diveLogEntryToMobileSession } from '../../states/use-dive-logbook';
@@ -22,7 +23,7 @@ type LogbookScreenProps = {
   entries: DiveLogEntry[];
   filter: DiveSessionFilter;
   onFilterChange: (filter: DiveSessionFilter) => void;
-  onImportFixtures: () => void;
+  onSyncWatch: () => Promise<WatchSyncActionResult>;
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
   pendingDraft?: {
@@ -42,6 +43,8 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   const [syncFilter, setSyncFilter] = React.useState<SyncFilter>('all');
   const [route, setRoute] = React.useState<LocalRoute>('list');
   const [draftEntry, setDraftEntry] = React.useState<DiveLogEntry | undefined>();
+  const [syncToastMessage, setSyncToastMessage] = React.useState<string | undefined>();
+  const [isSyncingWatch, setIsSyncingWatch] = React.useState(false);
   const consumedPendingDraftKey = React.useRef<string | undefined>(undefined);
   const visibleEntries = React.useMemo(() => {
     if (syncFilter === 'all') {
@@ -115,6 +118,27 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     [props],
   );
 
+  const syncWatch = React.useCallback(async () => {
+    setIsSyncingWatch(true);
+    setSyncToastMessage(undefined);
+
+    try {
+      const result = await props.onSyncWatch();
+
+      if (result.importedCount > 0) {
+        setSyncToastMessage(t('logbook.syncWatchImported', { count: result.importedCount }));
+      } else if (result.unavailable) {
+        setSyncToastMessage(t('logbook.syncWatchUnavailable'));
+      } else {
+        setSyncToastMessage(t('logbook.syncWatchNone'));
+      }
+    } catch {
+      setSyncToastMessage(t('logbook.syncWatchFailed'));
+    } finally {
+      setIsSyncingWatch(false);
+    }
+  }, [props, t]);
+
   return (
     <KeyboardAwareScrollView
       className="flex-1 bg-background"
@@ -137,12 +161,20 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
               />
               <InstrumentButton
                 testID="logbook-import-action"
-                label={t('logbook.import')}
-                onPress={props.onImportFixtures}
+                label={isSyncingWatch ? t('logbook.syncWatchLoading') : t('logbook.syncWatch')}
+                onPress={syncWatch}
+                disabled={isSyncingWatch}
                 className="min-h-10 px-4 py-2"
               />
             </HStack>
           </HStack>
+          {syncToastMessage ? (
+            <Text
+              testID="logbook-sync-toast"
+              className="rounded-2xl bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">
+              {syncToastMessage}
+            </Text>
+          ) : null}
           <VStack space="md" className="rounded-2xl bg-card px-4 py-4">
             <Input className="h-11 rounded-full border-0 bg-muted px-5 shadow-none">
               <InputField

@@ -33,6 +33,11 @@ type WatchConnectivityImportOptions = {
   acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
 };
 
+export type WatchConnectivityImportSummary = {
+  receivedCount: number;
+  importedCount: number;
+};
+
 type WatchConnectivityAcknowledgement = (payloadIds: readonly string[]) => Promise<void>;
 
 type WatchConnectivityPayloadImportOptions = {
@@ -113,11 +118,12 @@ export async function importPendingWatchConnectivityPayloads({
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
   acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
   acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
-}: WatchConnectivityImportOptions): Promise<number> {
+}: WatchConnectivityImportOptions): Promise<WatchConnectivityImportSummary> {
   const payloads = await drainPendingPayloads();
+  let importedCount = 0;
 
   for (const payload of payloads) {
-    await importWatchConnectivityPayload({
+    const imported = await importWatchConnectivityPayload({
       payload,
       repository,
       queryClient,
@@ -125,9 +131,16 @@ export async function importPendingWatchConnectivityPayloads({
       acknowledgePayloads,
       acknowledgeImportedPayloads,
     });
+
+    if (imported) {
+      importedCount += 1;
+    }
   }
 
-  return payloads.length;
+  return {
+    receivedCount: payloads.length,
+    importedCount,
+  };
 }
 
 async function importWatchConnectivityPayload({
@@ -137,13 +150,13 @@ async function importWatchConnectivityPayload({
   queryScope,
   acknowledgePayloads,
   acknowledgeImportedPayloads,
-}: WatchConnectivityPayloadImportOptions): Promise<void> {
+}: WatchConnectivityPayloadImportOptions): Promise<boolean> {
   const result = parseWatchSyncMessageJson(payload.payloadJson);
 
   if (!result.ok) {
     console.warn('Dropped invalid watch sync payload', result.error);
     await acknowledgePayload(payload, acknowledgePayloads);
-    return;
+    return false;
   }
 
   const entries = await repository.importWatchMessages([result.message]);
@@ -151,6 +164,7 @@ async function importWatchConnectivityPayload({
   queryClient.setQueryData(diveLogbookQueryKeys.list(repository, queryScope), syncedEntries);
   queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, queryScope) });
   await acknowledgePayload(payload, acknowledgeImportedPayloads);
+  return true;
 }
 
 async function acknowledgePayload(
