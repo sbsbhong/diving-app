@@ -12,7 +12,10 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "watch:build": "xcodebuild -project ios/DiveMobile.xcodeproj -scheme DiveWatchApp -configuration Debug -destination 'generic/platform=watchOS Simulator' -derivedDataPath /private/tmp/DiveWatchAppDerivedData CODE_SIGNING_ALLOWED=NO build",
+    "watch:list": "xcodebuild -list -project ios/DiveMobile.xcodeproj",
+    "watch:ui:check": "node ./scripts/check-watch-ui-language.mjs"
   },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",

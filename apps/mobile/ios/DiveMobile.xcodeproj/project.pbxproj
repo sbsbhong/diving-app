@@ -7,30 +7,94 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		079BC7FC489ADFF26E895903 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2C63175E91C4718DBE3923 /* RecordingView.swift */; };
 		0C80B921A6F3F58F76C31292 /* libPods-DiveMobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-DiveMobile.a */; };
+		0DA3A8DE547E6EA68A8F60D0 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 956EB9D331534828E0706E5C /* SessionListView.swift */; };
+		11B4EA76620FF25E2CEF98CF /* DepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C59F3D6EC1FF987ADE3827 /* DepthSensorProvider.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		3D597016F3A3DFE341484908 /* WatchSyncEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F26525BE2C876EE578F3C9A /* WatchSyncEnvelope.swift */; };
+		55EABF84D85DF352419E66E8 /* DepthSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE78178255421044754FD2F /* DepthSample.swift */; };
+		646EDA03C2ECC58782FDB5E0 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE6A545437839029CC97811 /* HomeView.swift */; };
+		65B418949D09CE62247AEB33 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE02CFF90DFD4AE52C7E631 /* SummaryView.swift */; };
+		6839BFC6D39D48C6E24E65FB /* WatchSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB8558F91BE7C8E9EA22C1A /* WatchSyncTransport.swift */; };
+		6D05BB5FE2EB6EE8C69CBDD5 /* MockDepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39957D0BC852B0FDF38FABA2 /* MockDepthSensorProvider.swift */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		775F06ECDC0D3A395069DC74 /* DiveWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895332B886DE77424F1410C1 /* DiveWatchApp.swift */; };
+		8097168CBD59D256F2B105FC /* DiveFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A61ED43A6E3C7D8E1961D9A /* DiveFormatters.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		891A9C77F34BCA25DA0C9AC3 /* DiveSessionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490329F69552608512F0258A /* DiveSessionSummary.swift */; };
+		8A0581CAFEA98B87A4EACC3E /* DiveSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B5388708193690CDCF20BB /* DiveSessionStore.swift */; };
+		AD9A781A1B06B588B0F4E80C /* RealDepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66E06148244A160C72C42 /* RealDepthSensorProvider.swift */; };
+		ADBE16E5205C126C7C217C7E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 972E39BFCAB25BD1867935E1 /* Foundation.framework */; };
 		C00000000000000000000001 /* WatchConnectivityInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* WatchConnectivityInbox.swift */; };
 		C00000000000000000000002 /* WatchConnectivityModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* WatchConnectivityModule.swift */; };
 		C00000000000000000000003 /* WatchConnectivityModuleBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000003 /* WatchConnectivityModuleBridge.m */; };
+		C3413FC7FF3D843EBB171978 /* DiveSessionRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0BF0DB4ED7C81D414F61DB5 /* DiveSessionRecorder.swift */; };
+		C5B140EA62C6109A50CDBD42 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 541ADEAC3E7666DFDC1CF6AE /* Localizable.xcstrings */; };
+		D17C3550307FEA5F1AE61BEA /* DiveSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9E92112D9DE95CBF5EFC3F /* DiveSession.swift */; };
+		D905DC1DE35C97E43DD60078 /* DiveWatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 6359F0F795514043D38F67FB /* DiveWatchApp.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EBED6AA379F2E387A08A6066 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		FD8FF9CF0CE01A2EF209C3BD /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF0EED63FCE91EFD89F04B5 /* SessionDetailView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		20E16BA1C517607E9CCABB8A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5E4C91BDE6F8F1CE9908A029;
+			remoteInfo = DiveWatchApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9B16606204BFD47B4C9DB8FB /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				D905DC1DE35C97E43DD60078 /* DiveWatchApp.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* DiveMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DiveMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = DiveMobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = DiveMobile/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = DiveMobile/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1DC66E06148244A160C72C42 /* RealDepthSensorProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RealDepthSensorProvider.swift; sourceTree = "<group>"; };
+		1E2C63175E91C4718DBE3923 /* RecordingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		2A61ED43A6E3C7D8E1961D9A /* DiveFormatters.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveFormatters.swift; sourceTree = "<group>"; };
+		2F26525BE2C876EE578F3C9A /* WatchSyncEnvelope.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSyncEnvelope.swift; sourceTree = "<group>"; };
+		39957D0BC852B0FDF38FABA2 /* MockDepthSensorProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDepthSensorProvider.swift; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-DiveMobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DiveMobile.debug.xcconfig"; path = "Target Support Files/Pods-DiveMobile/Pods-DiveMobile.debug.xcconfig"; sourceTree = "<group>"; };
+		3BB8558F91BE7C8E9EA22C1A /* WatchSyncTransport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSyncTransport.swift; sourceTree = "<group>"; };
+		490329F69552608512F0258A /* DiveSessionSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveSessionSummary.swift; sourceTree = "<group>"; };
+		4EF0EED63FCE91EFD89F04B5 /* SessionDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		50C59F3D6EC1FF987ADE3827 /* DepthSensorProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DepthSensorProvider.swift; sourceTree = "<group>"; };
+		541ADEAC3E7666DFDC1CF6AE /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-DiveMobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DiveMobile.release.xcconfig"; path = "Target Support Files/Pods-DiveMobile/Pods-DiveMobile.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-DiveMobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DiveMobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6359F0F795514043D38F67FB /* DiveWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = DiveWatchApp.app; path = DiveWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6BE6A545437839029CC97811 /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		6DE78178255421044754FD2F /* DepthSample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DepthSample.swift; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DiveMobile/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DiveMobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		895332B886DE77424F1410C1 /* DiveWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveWatchApp.swift; sourceTree = "<group>"; };
+		8A9E92112D9DE95CBF5EFC3F /* DiveSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveSession.swift; sourceTree = "<group>"; };
+		8EE02CFF90DFD4AE52C7E631 /* SummaryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
+		956EB9D331534828E0706E5C /* SessionListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
+		972E39BFCAB25BD1867935E1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D00000000000000000000001 /* WatchConnectivityInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchConnectivityInbox.swift; path = DiveMobile/WatchConnectivityInbox.swift; sourceTree = "<group>"; };
 		D00000000000000000000002 /* WatchConnectivityModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchConnectivityModule.swift; path = DiveMobile/WatchConnectivityModule.swift; sourceTree = "<group>"; };
 		D00000000000000000000003 /* WatchConnectivityModuleBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WatchConnectivityModuleBridge.m; path = DiveMobile/WatchConnectivityModuleBridge.m; sourceTree = "<group>"; };
+		D5B5388708193690CDCF20BB /* DiveSessionStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveSessionStore.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F0BF0DB4ED7C81D414F61DB5 /* DiveSessionRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiveSessionRecorder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +103,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-DiveMobile.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1C701E1018527EDDA039AF59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADBE16E5205C126C7C217C7E /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,13 +132,49 @@
 			name = DiveMobile;
 			sourceTree = "<group>";
 		};
+		16C1CD0EF7BD44D4C334ABC3 /* DiveWatchApp */ = {
+			isa = PBXGroup;
+			children = (
+				895332B886DE77424F1410C1 /* DiveWatchApp.swift */,
+				66C077D411D8E510F33267A1 /* Models */,
+				E01C29F743F7AC71BB250F07 /* Recording */,
+				8500806367AB67E6834194EA /* Sensors */,
+				8F2F8F15CA5FAA9EAB959C88 /* Storage */,
+				C92F451D86433739DA2613A0 /* Sync */,
+				C2D0DFFB26398A6FE9F151FC /* Views */,
+				541ADEAC3E7666DFDC1CF6AE /* Localizable.xcstrings */,
+			);
+			name = DiveWatchApp;
+			path = DiveWatchApp;
+			sourceTree = "<group>";
+		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-DiveMobile.a */,
+				5A9933860BF96837F6CEB506 /* watchOS */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5A9933860BF96837F6CEB506 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				972E39BFCAB25BD1867935E1 /* Foundation.framework */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+		66C077D411D8E510F33267A1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6DE78178255421044754FD2F /* DepthSample.swift */,
+				8A9E92112D9DE95CBF5EFC3F /* DiveSession.swift */,
+				490329F69552608512F0258A /* DiveSessionSummary.swift */,
+			);
+			name = Models;
+			path = Models;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -84,6 +192,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				16C1CD0EF7BD44D4C334ABC3 /* DiveWatchApp */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -94,8 +203,29 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* DiveMobile.app */,
+				6359F0F795514043D38F67FB /* DiveWatchApp.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8500806367AB67E6834194EA /* Sensors */ = {
+			isa = PBXGroup;
+			children = (
+				50C59F3D6EC1FF987ADE3827 /* DepthSensorProvider.swift */,
+				39957D0BC852B0FDF38FABA2 /* MockDepthSensorProvider.swift */,
+				1DC66E06148244A160C72C42 /* RealDepthSensorProvider.swift */,
+			);
+			name = Sensors;
+			path = Sensors;
+			sourceTree = "<group>";
+		};
+		8F2F8F15CA5FAA9EAB959C88 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				D5B5388708193690CDCF20BB /* DiveSessionStore.swift */,
+			);
+			name = Storage;
+			path = Storage;
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -105,6 +235,39 @@
 				5709B34CF0A7D63546082F79 /* Pods-DiveMobile.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		C2D0DFFB26398A6FE9F151FC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2A61ED43A6E3C7D8E1961D9A /* DiveFormatters.swift */,
+				6BE6A545437839029CC97811 /* HomeView.swift */,
+				1E2C63175E91C4718DBE3923 /* RecordingView.swift */,
+				4EF0EED63FCE91EFD89F04B5 /* SessionDetailView.swift */,
+				956EB9D331534828E0706E5C /* SessionListView.swift */,
+				8EE02CFF90DFD4AE52C7E631 /* SummaryView.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C92F451D86433739DA2613A0 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				2F26525BE2C876EE578F3C9A /* WatchSyncEnvelope.swift */,
+				3BB8558F91BE7C8E9EA22C1A /* WatchSyncTransport.swift */,
+			);
+			name = Sync;
+			path = Sync;
+			sourceTree = "<group>";
+		};
+		E01C29F743F7AC71BB250F07 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				F0BF0DB4ED7C81D414F61DB5 /* DiveSessionRecorder.swift */,
+			);
+			name = Recording;
+			path = Recording;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,14 +285,33 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				9B16606204BFD47B4C9DB8FB /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B7BD3A22F0E6CE3FBD7340FE /* PBXTargetDependency */,
+			);
+			name = DiveMobile;
+			productName = DiveMobile;
+			productReference = 13B07F961A680F5B00A75B9A /* DiveMobile.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5E4C91BDE6F8F1CE9908A029 /* DiveWatchApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B61C9015B445537153F41C3D /* Build configuration list for PBXNativeTarget "DiveWatchApp" */;
+			buildPhases = (
+				E3A8DB1C792D6C28097C1986 /* Sources */,
+				1C701E1018527EDDA039AF59 /* Frameworks */,
+				528DE67ECA1B1608EA4978A8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = DiveMobile;
-			productName = DiveMobile;
-			productReference = 13B07F961A680F5B00A75B9A /* DiveMobile.app */;
+			name = DiveWatchApp;
+			productName = DiveWatchApp;
+			productReference = 6359F0F795514043D38F67FB /* DiveWatchApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -152,6 +334,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -159,6 +342,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* DiveMobile */,
+				5E4C91BDE6F8F1CE9908A029 /* DiveWatchApp */,
 			);
 		};
 /* End PBXProject section */
@@ -171,6 +355,14 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				EBED6AA379F2E387A08A6066 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		528DE67ECA1B1608EA4978A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5B140EA62C6109A50CDBD42 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,7 +473,40 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E3A8DB1C792D6C28097C1986 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				775F06ECDC0D3A395069DC74 /* DiveWatchApp.swift in Sources */,
+				55EABF84D85DF352419E66E8 /* DepthSample.swift in Sources */,
+				D17C3550307FEA5F1AE61BEA /* DiveSession.swift in Sources */,
+				891A9C77F34BCA25DA0C9AC3 /* DiveSessionSummary.swift in Sources */,
+				C3413FC7FF3D843EBB171978 /* DiveSessionRecorder.swift in Sources */,
+				11B4EA76620FF25E2CEF98CF /* DepthSensorProvider.swift in Sources */,
+				6D05BB5FE2EB6EE8C69CBDD5 /* MockDepthSensorProvider.swift in Sources */,
+				AD9A781A1B06B588B0F4E80C /* RealDepthSensorProvider.swift in Sources */,
+				8A0581CAFEA98B87A4EACC3E /* DiveSessionStore.swift in Sources */,
+				3D597016F3A3DFE341484908 /* WatchSyncEnvelope.swift in Sources */,
+				6839BFC6D39D48C6E24E65FB /* WatchSyncTransport.swift in Sources */,
+				8097168CBD59D256F2B105FC /* DiveFormatters.swift in Sources */,
+				646EDA03C2ECC58782FDB5E0 /* HomeView.swift in Sources */,
+				079BC7FC489ADFF26E895903 /* RecordingView.swift in Sources */,
+				FD8FF9CF0CE01A2EF209C3BD /* SessionDetailView.swift in Sources */,
+				0DA3A8DE547E6EA68A8F60D0 /* SessionListView.swift in Sources */,
+				65B418949D09CE62247AEB33 /* SummaryView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B7BD3A22F0E6CE3FBD7340FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DiveWatchApp;
+			target = 5E4C91BDE6F8F1CE9908A029 /* DiveWatchApp */;
+			targetProxy = 20E16BA1C517607E9CCABB8A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
@@ -498,6 +723,71 @@
 			};
 			name = Release;
 		};
+		D2388F5831CBB4A9A7F5AE22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dive Watch";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = org.reactjs.native.example.DiveMobile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.DiveMobile.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		F85BD7A3A832F215EEE52819 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dive Watch";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = org.reactjs.native.example.DiveMobile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.DiveMobile.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -515,6 +805,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B61C9015B445537153F41C3D /* Build configuration list for PBXNativeTarget "DiveWatchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F85BD7A3A832F215EEE52819 /* Release */,
+				D2388F5831CBB4A9A7F5AE22 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

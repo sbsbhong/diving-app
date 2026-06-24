@@ -2,13 +2,13 @@
 
 ## 요약
 
-`apps/watch-ios`는 현재 동작하는 SwiftUI watchOS 앱을 담는다. Xcode project는 `DiveWatchApp.xcodeproj`이고, 확인된 target과 scheme은 모두 `DiveWatchApp`이다.
+`apps/mobile/ios/DiveWatchApp`는 현재 동작하는 SwiftUI watchOS companion 앱 source를 담는다. Xcode project는 `apps/mobile/ios/DiveMobile.xcodeproj`이고, watch target과 scheme은 `DiveWatchApp`이다.
 
 ## 현재 상태
 
-현재 watch 앱 source는 `apps/watch-ios/DiveWatchApp`이다. App entry는 `DiveSessionStore`를 만들고 `HomeView`를 render한다.
+현재 watch 앱 source는 `apps/mobile/ios/DiveWatchApp`이다. App entry는 `DiveSessionStore`를 만들고 `HomeView`를 render한다.
 
-`apps/watch-ios/Sources`에는 이전 standalone Swift source가 남아 있다. 현재 `DiveWatchApp.xcodeproj`는 이 `Sources` path를 참조하지 않으므로, Xcode project가 바뀌기 전까지 컴파일되는 앱 코드로 취급하지 않는다.
+Watch 앱은 더 이상 별도 Yarn workspace나 standalone Xcode project를 사용하지 않는다. iPhone app 설치와 함께 배포될 companion embed 구조를 유지하기 위해 watch target membership은 `apps/mobile/ios/DiveMobile.xcodeproj`에서 관리한다.
 
 ## 상세
 
@@ -34,7 +34,7 @@
 
 watch 앱은 local Swift model과 동기화 가능한 JSON을 만들기 위한 `DiveSession.syncMessageData` encoder를 갖는다. WatchConnectivity 전송 PoC는 이 encoder 결과를 base64 payload로 감싸며, generated Swift contract를 직접 compile하지 않는다. `packages/contracts/generated/swift` 아래 generated Swift contract는 현재 Xcode project에서 참조되지 않는다.
 
-WatchConnectivity 전송 PoC는 build 가능한 code boundary이며, 실제 paired iPhone 전달, entitlement, background delivery, retry behavior는 아직 지원 hardware에서 검증되지 않았다.
+WatchConnectivity 전송 PoC는 build 가능한 code boundary이며, companion embed 구조도 Xcode project에 포함되어 있다. 실제 paired iPhone 전달, entitlement, background delivery, retry behavior는 아직 지원 hardware에서 검증되지 않았다.
 
 ## 관련 문서
 

@@ -1,5 +1,25 @@
 # Wiki 기록
 
+## 2026-06-24 - 구조 - watch app mobile migration
+
+- 수정:
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/monorepo.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/decisions/adr-local-first-mobile-logbook.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
+  - `apps/mobile/ios/DiveWatchApp/`
+  - `apps/mobile/package.json`
+  - `package.json`
+- 요약:
+  - Watch source와 build ownership을 모바일 iOS project로 이관한 사실을 기록했다. 활성 watch source는 `apps/mobile/ios/DiveWatchApp`이고, `DiveWatchApp` target/scheme은 `apps/mobile/ios/DiveMobile.xcodeproj` 안에서 iPhone app의 embedded companion app으로 관리된다. Pairing, entitlement, background delivery, retry behavior, 실기기 전송 검증은 아직 남은 항목으로 유지했다.
+
 ## 2026-06-24 - 구조 - WatchConnectivity transport PoC
 
 - 수정:
@@ -11,9 +31,9 @@
   - `.wiki/wiki/questions/open-questions.md`
   - `.wiki/wiki/log.md`
 - 근거:
-  - `apps/watch-ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`
-  - `apps/watch-ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
-  - `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
   - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
   - `apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift`
   - `apps/mobile/src/native/watch-connectivity.ts`
@@ -155,7 +175,7 @@
   - `apps/mobile/src/states/use-dive-logbook.ts`
   - `apps/mobile/src/types/dive-session.ts`
   - `apps/mobile/src/utils/import-watch-session.ts`
-  - `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
+  - `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
   - `packages/contracts/schemas/watch-session.schema.json`
   - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
   - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`
@@ -191,7 +211,7 @@
   - `DESIGN.md`
   - `apps/mobile/src/screens/`
   - `apps/mobile/src/components/ui/`
-  - `apps/watch-ios/DiveWatchApp/Views/`
+  - `apps/mobile/ios/DiveWatchApp/Views/`
   - `.wiki/wiki/domains/safety-rules.md`
 - 요약:
   - 모바일과 watchOS가 공유할 UI look and feel을 기록했다. 모바일은 iOS grouped 화면을 기본으로 하고, watchOS는 black canvas와 compact instrument card로 번역한다. 다이빙 도메인감은 수심, 시간, profile, 상태 같은 계기 요소에만 집중하며 safety copy는 review/reminder/non-certified assistant 범위에 둔다.
@@ -247,10 +267,10 @@
   - `apps/mobile/src/`
   - `apps/mobile/components/ui/gluestack-ui-provider/`
   - `apps/mobile/tailwind.config.js`
-  - `apps/watch-ios/AGENTS.md`
-  - `apps/watch-ios/package.json`
-  - `apps/watch-ios/DiveWatchApp/`
-  - `apps/watch-ios/DiveWatchApp.xcodeproj/project.pbxproj`
+  - `apps/mobile/AGENTS.md`
+  - `apps/mobile/package.json`
+  - `apps/mobile/ios/DiveWatchApp/`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
   - `packages/contracts/package.json`
   - `packages/contracts/schemas/`
   - `packages/contracts/generated/`
@@ -297,10 +317,10 @@
   - `apps/mobile/README.md`
   - `apps/mobile/src/`
   - `apps/mobile/scripts/ios-build.mjs`
-  - `apps/watch-ios/package.json`
-  - `apps/watch-ios/README.md`
-  - `apps/watch-ios/DiveWatchApp/`
-  - `apps/watch-ios/DiveWatchApp.xcodeproj/project.pbxproj`
+  - `apps/mobile/package.json`
+  - `apps/mobile/README.md`
+  - `apps/mobile/ios/DiveWatchApp/`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
   - `packages/contracts/package.json`
   - `packages/contracts/schemas/`
   - `packages/contracts/scripts/`

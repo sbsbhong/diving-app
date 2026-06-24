@@ -52,8 +52,8 @@ The current mobile logbook is in-memory and watch-fixture based:
 
 The current watch app can encode sync-ready JSON, but transport is not implemented:
 
-- `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift` has `syncMessageData(type:)`.
-- `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift` persists local watch sessions in `UserDefaults`.
+- `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift` has `syncMessageData(type:)`.
+- `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift` persists local watch sessions in `UserDefaults`.
 - `packages/contracts/schemas/*.schema.json` define the watch sync contract.
 - There is no WatchConnectivity integration.
 

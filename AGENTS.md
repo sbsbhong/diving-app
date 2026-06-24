@@ -13,15 +13,14 @@
 - Apple Watch에서 다이빙 세션을 가볍게 기록하고 로컬에서 확인할 수 있는 watchOS 앱 PoC를 유지한다.
 - 모바일 앱에서 워치에서 온 세션을 리뷰하고, 로그북/계획/메모리 화면을 확장할 기반을 만든다.
 - `packages/contracts`의 JSON Schema를 watch-mobile sync contract의 기준으로 유지한다.
-- 향후 Supabase, 인증, WatchConnectivity, 모바일 영구 저장소가 추가될 수 있게 경계를 분리한다.
+- 향후 Supabase, 인증, cloud sync가 추가될 수 있게 경계를 분리하고, 현재 WatchConnectivity PoC와 모바일 영구 저장소는 검증된 범위 안에서 유지한다.
 - 안전-critical 기능으로 오해될 수 있는 감압, 조직 포화도, 가스 전환 안전, 비상 지시 기능은 구현하거나 암시하지 않는다.
 
 ## 저장소 구조
 
 - 루트: Yarn 1 workspaces와 Turborepo를 사용한다. `packageManager`는 `yarn@1.22.22`다. npm, pnpm, bun으로 lockfile을 갱신하지 않는다.
 - 이 저장소는 모노레포다. `apps/` 아래 workspace 변경도 루트 저장소 기준으로 추적한다.
-- `apps/mobile`: Bare React Native 모바일 앱 workspace. React Native `0.85.3`을 사용한다. 앱별 상세 지침은 `apps/mobile/AGENTS.md`를 따른다.
-- `apps/watch-ios`: 현재 Apple Watch 앱 workspace. Xcode project는 `DiveWatchApp.xcodeproj`, target과 scheme은 `DiveWatchApp`다. 앱별 상세 지침은 `apps/watch-ios/AGENTS.md`를 따른다.
+- `apps/mobile`: Bare React Native 모바일 앱 workspace. React Native `0.85.3`을 사용한다. iOS native project는 `apps/mobile/ios/DiveMobile.xcodeproj`이며, iPhone app target `DiveMobile`과 companion watchOS target `DiveWatchApp`를 함께 소유한다. Watch source는 `apps/mobile/ios/DiveWatchApp` 아래에 둔다. 앱별 상세 지침은 `apps/mobile/AGENTS.md`를 따른다.
 - `packages/contracts`: watch sync contract의 JSON Schema 원본과 generated TypeScript/Swift 출력물을 관리한다.
 - `packages/shared-utils`: 예약된 공유 package다. 실제 source 구현은 아직 없다.
 - `.wiki/`: llm-wiki 기반의 장기 프로젝트 지식 저장소다.
@@ -31,13 +30,13 @@
 
 ### `apps/mobile`
 
-모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface다. 현재는 로컬 React state, watch fixture import, custom bottom-tab navigation, 로그북/계획/메모리 preview 화면을 갖는다. 인증, Supabase client, cloud backup, production persistence, live WatchConnectivity는 아직 없다.
+모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 custom bottom-tab navigation, AsyncStorage 기반 Logbook/Planbook/설정 저장소, watch fixture import, 수동 로그 작성, 계획 알림, iOS WatchConnectivity receiver PoC, companion watch target embed 구조를 갖는다. 인증, Supabase client, cloud backup, paired-device delivery 검증은 아직 없다.
 
 모바일 앱은 사용자 프로필, 인증, 로그북, 수동 로그 작성, 미래 Supabase sync, 통계/검색/리뷰/공유 흐름의 중심이 된다. 직접 SQL, 중복 Supabase schema type, watch-only sensor capture logic, imported watch sample을 손실시키는 raw rewrite는 넣지 않는다.
 
-### `apps/watch-ios`
+### watchOS companion
 
-watchOS 앱은 SwiftUI 기반 Apple Watch recording surface다. 현재 active source는 `apps/watch-ios/DiveWatchApp`이며, Xcode project에 의해 빌드된다. `apps/watch-ios/Sources`는 이전 standalone Swift source 영역이고 현재 project에 포함되지 않는다.
+watchOS 앱은 SwiftUI 기반 Apple Watch recording surface다. 현재 active source는 `apps/mobile/ios/DiveWatchApp`이며, `apps/mobile/ios/DiveMobile.xcodeproj`의 `DiveWatchApp` target/scheme으로 빌드된다. 별도 watch workspace는 유지하지 않는다.
 
 watch 앱은 pre-dive metadata capture, mock 기반 live recording, local persistence, summary, saved session list/detail, sync-ready JSON export의 책임을 갖는다. 복잡한 account 관리, 전체 로그북 관리, Supabase schema-specific business logic은 watch 앱에 넣지 않는다.
 
@@ -68,7 +67,7 @@ watch 앱은 pre-dive metadata capture, mock 기반 live recording, local persis
 
 - TypeScript/JavaScript는 기존 ESM script 스타일을 따른다.
 - Node script는 작고 결정적이며 의존성이 적어야 한다.
-- Swift code는 `apps/watch-ios/DiveWatchApp`의 기존 SwiftUI 구조를 따른다.
+- Swift code는 `apps/mobile/ios/DiveWatchApp`의 기존 SwiftUI 구조를 따른다.
 - 실제 call site가 둘 이상 생기기 전에는 speculative shared utility를 만들지 않는다.
 - 명확한 이름과 작은 type을 선호하고, 넓은 abstraction은 피한다.
 

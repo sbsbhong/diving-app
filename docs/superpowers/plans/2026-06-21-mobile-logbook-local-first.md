@@ -26,8 +26,8 @@
 - `apps/mobile/src/components/navigation/index.tsx`
 - `apps/mobile/package.json`
 - `packages/contracts/schemas/*.schema.json`
-- `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
-- `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+- `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+- `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
 
 **Implementation notes:**
 
@@ -167,9 +167,9 @@ Adding a rich editor can expand UI scope quickly. The first version should prove
 - `packages/contracts/schemas/*.schema.json`
 - `packages/contracts/generated/typescript/index.ts`
 - `packages/contracts/generated/swift/WatchContracts.swift`
-- `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
-- `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`
-- `apps/watch-ios/DiveWatchApp.xcodeproj/project.pbxproj`
+- `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+- `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+- `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
 - `apps/mobile/src/utils/import-watch-session.ts`
 - future watch transport files
 

@@ -26,8 +26,8 @@ Root script는 다음 역할을 한다.
 
 Workspace 책임은 다음과 같다.
 
-- `apps/mobile`: React Native 모바일 앱, 모바일 확인 흐름, 계획 알림, 기억 미리보기, 향후 인증/cloud 사용자 흐름을 담당한다.
-- `apps/watch-ios`: SwiftUI watchOS 앱, watch 쪽 기록, 로컬 watch 저장, 동기화 가능한 export payload를 담당한다.
+- `apps/mobile`: React Native 모바일 앱, iOS native app, embedded watchOS companion target, 모바일 확인 흐름, 계획 알림, 기억 미리보기, watch sync receive/import 경계, 향후 인증/cloud 사용자 흐름을 담당한다.
+- `apps/mobile/ios/DiveWatchApp`: `apps/mobile` workspace 내부의 SwiftUI watch source다. watch 쪽 기록, 로컬 watch 저장, 동기화 가능한 export payload, WatchConnectivity enqueue PoC를 담당한다.
 - `packages/contracts`: JSON Schema contract와 generated TypeScript/Swift contract output을 담당한다.
 - `packages/shared-utils`: 현재 source implementation이 없는 예약된 workspace다.
 

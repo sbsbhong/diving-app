@@ -2,7 +2,7 @@
 
 ## 요약
 
-`apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이다. 현재는 server, database, navigation library 없이 React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다.
+`apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server, database, navigation library 없이 React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다.
 
 ## 현재 상태
 
@@ -25,6 +25,8 @@
 - `src/states/watch-connectivity-sync.tsx`: iOS native WatchConnectivity payload를 drain/subscribe하고 runtime validator를 통과한 payload만 로그북 repository에 import한다.
 - `src/states/use-dive-plans.ts`, `src/states/use-dive-plan-queries.ts`: React Query 기반 Planbook hook과 list/save/delete mutation.
 - `src/native/watch-connectivity.ts`: React Native에서 iOS `WatchConnectivityModule` event와 pending drain method를 typed wrapper로 다룬다.
+- `ios/DiveMobile.xcodeproj`: iPhone app target `DiveMobile`과 embedded watchOS companion target `DiveWatchApp`를 함께 관리한다.
+- `ios/DiveWatchApp`: SwiftUI watchOS companion source. Watch 기록, 로컬 저장, WatchConnectivity enqueue PoC를 담당한다.
 - `src/repositories/`: `DiveLogRepository`/`DivePlanRepository` 인터페이스, in-memory `LocalDiveLogRepository`/`LocalDivePlanRepository`, AsyncStorage 기반 `PersistentDiveLogRepository`/`PersistentDivePlanRepository`, app default repository export.
 - `src/types/dive-log-entry.ts`: 모바일 로그북 항목인 `DiveLogEntry`와 source/provenance/sync status type.
 - `src/types/dive-plan.ts`: 모바일 계획 항목인 `DivePlan`, `DivePlanStatus`, `DiveEntryStyle`, 계획값, checklist type.
@@ -73,11 +75,11 @@ Home/Memory 같은 preview surface와 summary helper도 알 수 없는 duration/
 - 인증 없음.
 - Supabase client 없음.
 - Direct SQL 없음.
-- WatchConnectivity code boundary는 있지만 paired-device delivery, entitlement, background delivery, retry behavior, durable native inbox 검증은 아직 없음.
+- WatchConnectivity code boundary와 companion embed 구조는 있지만 paired-device delivery, entitlement, background delivery, retry behavior, durable native inbox 검증은 아직 없음.
 - AsyncStorage storage schema는 현재 version 1만 있다. 향후 schema 변경에는 migration behavior를 추가해야 한다.
 - Certified dive-computer behavior 없음.
 
-iOS project는 `apps/mobile/ios/DiveMobile.xcworkspace`에 있다. Build wrapper는 CocoaPods artifact를 확인하고 signing disabled 상태로 build한다. Android native project file은 `apps/mobile/android` 아래에 있다.
+iOS project는 `apps/mobile/ios/DiveMobile.xcworkspace`와 `apps/mobile/ios/DiveMobile.xcodeproj`에 있다. Full iPhone app build는 CocoaPods workspace를 사용하고, watch-only CLI build는 `DiveMobile.xcodeproj`의 `DiveWatchApp` scheme을 사용한다. Android native project file은 `apps/mobile/android` 아래에 있다.
 
 ## 관련 문서
 

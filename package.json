@@ -15,7 +15,7 @@
     "lint": "turbo run lint",
     "mobile:typecheck": "yarn workspace @repo/mobile typecheck",
     "test": "turbo run test",
-    "watch:build": "yarn workspace @repo/watch-ios xcode:build"
+    "watch:build": "yarn workspace @repo/mobile watch:build"
   },
   "devDependencies": {
     "turbo": "^2.0.12"

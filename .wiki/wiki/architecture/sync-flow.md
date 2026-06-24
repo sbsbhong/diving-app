@@ -54,7 +54,7 @@ WatchConnectivity PoC 동작은 다음과 같다.
 
 현재 비어 있는 부분은 다음과 같다.
 
-- WatchConnectivity pairing, entitlement, app embedding, background delivery 실기기 검증 없음.
+- WatchConnectivity pairing, entitlement, background delivery 실기기 검증 없음. Companion embed 구조는 `apps/mobile/ios/DiveMobile.xcodeproj`에 포함되어 있지만 실제 설치/전송은 아직 실기기에서 검증되지 않았다.
 - Durable native inbox와 retry policy 없음.
 - Supabase upload 없음.
 - 인증된 사용자 연결 없음.

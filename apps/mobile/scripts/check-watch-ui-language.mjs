@@ -2,15 +2,15 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = process.cwd();
-const projectPath = join(root, 'DiveWatchApp.xcodeproj/project.pbxproj');
-const stringCatalogPath = join(root, 'DiveWatchApp/Localizable.xcstrings');
+const projectPath = join(root, 'ios/DiveMobile.xcodeproj/project.pbxproj');
+const stringCatalogPath = join(root, 'ios/DiveWatchApp/Localizable.xcstrings');
 const source = [
-  'DiveWatchApp/Views/DiveFormatters.swift',
-  'DiveWatchApp/Views/RecordingView.swift',
-  'DiveWatchApp/Views/SummaryView.swift',
-  'DiveWatchApp/Views/SessionDetailView.swift',
-  'DiveWatchApp/Views/SessionListView.swift',
-  'DiveWatchApp/Views/HomeView.swift',
+  'ios/DiveWatchApp/Views/DiveFormatters.swift',
+  'ios/DiveWatchApp/Views/RecordingView.swift',
+  'ios/DiveWatchApp/Views/SummaryView.swift',
+  'ios/DiveWatchApp/Views/SessionDetailView.swift',
+  'ios/DiveWatchApp/Views/SessionListView.swift',
+  'ios/DiveWatchApp/Views/HomeView.swift',
 ]
   .map(file => readFileSync(join(root, file), 'utf8'))
   .join('\n');

@@ -36,7 +36,7 @@ Zustand는 첫 구현 범위에서 제외한다. 추후 로그 편집 화면의 
 - `apps/mobile/src/states/use-dive-logbook.ts`
 - `apps/mobile/src/types/dive-session.ts`
 - `apps/mobile/src/utils/import-watch-session.ts`
-- `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
+- `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
 - `packages/contracts/schemas/watch-session.schema.json`
 - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
 - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`

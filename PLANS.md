@@ -62,6 +62,105 @@ Every phase must have a verification gate. If the same gate fails three times wi
 - Remaining risks:
 - Manual setup required:
 
+## Epic: Watch app mobile migration
+
+### Phase 0 Investigation
+
+- Goal: Confirm the current standalone watch workspace, mobile iOS workspace, scripts, and docs that will change when watch ownership moves to mobile.
+- Files to inspect:
+  - `AGENTS.md`
+  - `README.md`
+  - `package.json`
+  - `apps/mobile/AGENTS.md`
+  - `apps/mobile/README.md`
+  - `apps/mobile/package.json`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
+  - retired standalone watch workspace files
+  - `.wiki/wiki/architecture/*.md`
+  - `.wiki/wiki/questions/open-questions.md`
+- Implementation notes:
+  - Treat the retired standalone watch app source as active only for pre-migration comparison.
+  - Treat the old standalone `Sources` area as inactive legacy source that should not remain active.
+  - Use local Xcode watch app templates and `xcodeproj` structure to avoid unusual project settings.
+- Verification gate: `xcodebuild -list -project apps/mobile/ios/DiveMobile.xcodeproj`; pre-migration standalone project listing was used only to compare target/scheme settings.
+- Risk: The local Xcode runtime currently reports CoreSimulator/platform warnings; separate environment failures from project structure failures.
+
+### Phase 1 Contract
+
+- Goal: Define the new ownership contract: mobile owns the watch app source, target, scripts, and docs.
+- Files to create or update:
+  - `docs/superpowers/specs/2026-06-24-watch-app-mobile-migration-design.md`
+  - `docs/superpowers/plans/2026-06-24-watch-app-mobile-migration.md`
+  - `PLANS.md`
+- Implementation notes:
+  - Active watch source becomes `apps/mobile/ios/DiveWatchApp`.
+  - Active watch target becomes `DiveWatchApp` inside `apps/mobile/ios/DiveMobile.xcodeproj`.
+  - Root `watch:build` points to mobile workspace scripts.
+  - The standalone watch workspace stops being active.
+- Verification gate: Spec and plan exist and contain no placeholder markers.
+- Risk: Removing the standalone workspace before mobile-owned watch build is stable could make rollback harder; use git status and focused diffs throughout.
+
+### Phase 2 Core Implementation
+
+- Goal: Move source files and add the watch target/embed structure to the mobile Xcode project.
+- Files to create or update:
+  - `apps/mobile/ios/DiveWatchApp/**`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/xcshareddata/xcschemes/DiveWatchApp.xcscheme`
+  - `apps/mobile/scripts/check-watch-ui-language.mjs`
+  - `apps/mobile/package.json`
+  - `package.json`
+- Implementation notes:
+  - Add the watch target as a watchOS app target in `DiveMobile.xcodeproj`.
+  - Add a target dependency from `DiveMobile` to `DiveWatchApp`.
+  - Add `Embed Watch Content` to `DiveMobile`.
+  - Keep WatchConnectivity code in the same files after moving.
+  - Do not change developer team or provisioning settings.
+- Verification gate: `yarn workspace @repo/mobile watch:list`, then `yarn watch:build`.
+- Risk: Xcode project mutation may produce noisy diffs; review target/product/build phase settings before running broad gates.
+
+### Phase 3 Integration
+
+- Goal: Update repository guides and wiki so future agents no longer use the retired standalone watch workspace as active watch ownership.
+- Files to create or update:
+  - `AGENTS.md`
+  - `README.md`
+  - `apps/mobile/AGENTS.md`
+  - `apps/mobile/README.md`
+  - `.wiki/wiki/index.md`
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/monorepo.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- Implementation notes:
+  - Explain that the mobile iOS project owns both iOS and companion watch targets.
+  - Remove active references to the retired standalone watch workspace package.
+  - Keep historical/migration references only where explicitly labeled.
+- Verification gate: search active docs and package scripts for stale standalone watch workspace references.
+- Risk: Some historical docs may intentionally mention old paths; do not rewrite unrelated old specs unless they would mislead active workflow.
+
+### Phase 4 Cleanup/Review
+
+- Goal: Verify tests/builds and remove stale standalone workspace artifacts from active source.
+- Files to review:
+  - retired standalone watch workspace deletion
+  - `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
+  - `apps/mobile/ios/DiveMobile.xcodeproj/xcshareddata/xcschemes/`
+  - `package.json`
+  - `apps/mobile/package.json`
+- Implementation notes:
+  - Run focused Jest tests for WatchConnectivity import.
+  - Run mobile typecheck.
+  - Run mobile-owned watch build.
+  - Run `codex:check`.
+  - Run `ios:build` as best effort and report Xcode runtime/platform blockers separately.
+- Verification gate: `yarn codex:check`
+- Risk: `yarn ios:build` may continue to fail due local `iOS 26.5 Platform Not Installed`; do not treat that as proof of watch project failure unless compile errors point to migrated files.
+
 ## Epic: Mobile logbook local-first foundation
 
 ### Phase 0 Investigation
@@ -75,7 +174,7 @@ Every phase must have a verification gate. If the same gate fails three times wi
   - `apps/mobile/src/components/navigation/index.tsx`
   - `apps/mobile/package.json`
   - `packages/contracts/schemas/*.schema.json`
-  - `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
+  - `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
 - Implementation notes:
   - Compare a simple key-value JSON local store against a structured local database before adding dependencies.
   - Confirm whether `@tanstack/react-query` is present in the mobile workspace and plan the smallest provider/dependency addition if absent.
@@ -133,7 +232,7 @@ Every phase must have a verification gate. If the same gate fails three times wi
 - Goal: Validate watch data movement into mobile and then support watch-based log authoring.
 - Files to create or update:
   - `packages/contracts/schemas/*.schema.json` only if the contract must change
-  - `apps/watch-ios/DiveWatchApp/*` transport-related files
+  - `apps/mobile/ios/DiveWatchApp/*` transport-related files
   - `apps/mobile/src/utils/import-watch-session.ts`
   - `apps/mobile/src/utils/watch-session-to-dive-log-entry.ts`
   - `apps/mobile/src/screens/logbook/*`

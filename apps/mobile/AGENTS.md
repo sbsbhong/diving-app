@@ -4,9 +4,9 @@
 
 ## 앱 목적
 
-`apps/mobile`은 다이빙 로그를 탐색하고 watch-captured 세션을 리뷰하는 모바일 surface다. 현재는 production backend가 없는 scaffold 상태이며, generated watch contract type과 fixture import를 사용해 앱 구조와 UX boundary를 잡고 있다.
+`apps/mobile`은 다이빙 로그를 탐색하고 watch-captured 세션을 리뷰하는 모바일 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 production backend가 없지만, generated watch contract type, fixture import, AsyncStorage 기반 local persistence, iOS WatchConnectivity receiver PoC, embedded watchOS companion target을 사용해 앱 구조와 UX boundary를 잡고 있다.
 
-장기적으로 모바일 앱은 authentication, user profile, dive log list/detail, manual dive creation, Supabase sync, statistics, search, planning, memory/share, backup flow의 중심이 된다. watch 앱에서 온 원본 기록은 손실 없이 보존하고, server/user 연결은 향후 모바일 또는 backend layer에서 처리한다.
+장기적으로 모바일 앱은 authentication, user profile, dive log list/detail, manual dive creation, Supabase sync, statistics, search, planning, memory/share, backup flow의 중심이 된다. watch 앱에서 온 원본 기록은 손실 없이 보존하고, server/user 연결은 향후 모바일 또는 backend layer에서 처리한다. 별도 watch workspace를 다시 만들지 않고, watch source와 target membership은 `ios/DiveWatchApp`와 `ios/DiveMobile.xcodeproj`에서 관리한다.
 
 ## 현재 Stack
 
@@ -14,8 +14,11 @@
 - React `19.2.3`
 - TypeScript, Jest, ESLint, Metro
 - `react-native-safe-area-context`
+- `@react-native-async-storage/async-storage`
+- `@tanstack/react-query`
+- Gluestack UI v4 alpha, NativeWind, Tailwind CSS
 - Custom bottom-tab navigation in app code
-- 별도 navigation library, UI library, icon library, styling framework는 현재 없다.
+- iOS native WatchConnectivity bridge와 embedded watchOS companion target
 
 새 dependency나 UI framework를 추가하려면 명시적 필요성과 기존 패턴으로 해결할 수 없는 이유가 있어야 한다.
 
@@ -29,9 +32,13 @@
 - `src/screens/logbook/screen.tsx`: imported session list, search/filter, detail review
 - `src/screens/planning/screen.tsx`: non-certified planning reminder UI
 - `src/screens/memory/screen.tsx`: static memory/share preview
-- `src/states/use-dive-logbook.ts`: local in-memory logbook state와 fixture import action
+- `src/states/use-dive-logbook.ts`: React Query 기반 logbook state와 fixture import action
+- `src/states/watch-connectivity-sync.tsx`: iOS WatchConnectivity payload drain/subscribe와 validated repository import
+- `src/native/watch-connectivity.ts`: React Native WatchConnectivity wrapper
 - `src/types/dive-session.ts`: generated watch contract type 기반 mobile session type
 - `src/utils/`: formatter, watch fixture import, summary 계산
+- `ios/DiveMobile.xcodeproj`: iPhone app target `DiveMobile`과 companion watch target `DiveWatchApp`
+- `ios/DiveWatchApp`: SwiftUI watchOS companion app source
 - `ios/`, `android/`: native projects
 
 ## 책임 범위
@@ -42,6 +49,7 @@
 - dive log list/detail, review, search, filtering
 - manual dive log creation과 future editing flow
 - watch sync payload import와 imported values 보존
+- iOS WatchConnectivity receiver와 companion watch target embed 구조
 - Supabase layer가 생긴 뒤의 sync orchestration
 - non-certified planning reminder, memory/share preview, statistics
 
@@ -51,6 +59,7 @@
 - duplicated Supabase schema type
 - watch-only sensor capture logic
 - raw watch sample을 삭제하거나 재계산해 원본 의미를 잃는 rewrite
+- 별도 watch workspace 재도입
 - 감압, 조직 loading, gas switching safety, emergency dive decision 계산
 - certified dive computer 또는 medical/emergency recommendation copy
 
@@ -82,22 +91,28 @@
 - `yarn workspace @repo/mobile lint`
 - `yarn workspace @repo/mobile ios`
 - `yarn workspace @repo/mobile android`
+- `yarn workspace @repo/mobile watch:build`
+- `yarn workspace @repo/mobile watch:list`
+- `yarn workspace @repo/mobile watch:ui:check`
 
 루트 alias:
 
 - `yarn mobile:typecheck`
 - `yarn ios:build`
+- `yarn watch:build`
 
 iOS native build 전 CocoaPods workspace가 필요하다.
 
 - `yarn workspace @repo/mobile ios:pods`
 - `yarn workspace @repo/mobile ios:xcode`
 
-Xcode를 열 때는 `ios/DiveMobile.xcworkspace`를 사용한다. `ios/DiveMobile.xcodeproj`를 직접 열면 React pod module resolution이 깨질 수 있다.
+Xcode를 열 때는 full iOS app 작업 기준으로 `ios/DiveMobile.xcworkspace`를 사용한다. `ios/DiveMobile.xcodeproj`는 `DiveWatchApp` target membership과 watch-only CLI build 확인에 사용하지만, full React Native iOS app build에서는 React pod module resolution이 필요하다.
 
 ## Verification
 
 - TypeScript/mobile-only 변경: `yarn mobile:typecheck`
 - mobile test 대상 변경: `yarn workspace @repo/mobile test`
+- watchOS companion 변경: `yarn watch:build`
+- watch UI localization/style boundary 변경: `yarn workspace @repo/mobile watch:ui:check`
 - iOS native 변경: `yarn ios:build`를 실행하되, Pods나 local Xcode setup이 없으면 그 상태를 정확히 보고한다.
 - cross-package contract import 변경: 먼저 `yarn check:quick`, 그 다음 `yarn mobile:typecheck`

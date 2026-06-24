@@ -100,7 +100,7 @@ Avoid positioning in early versions:
 ### Phase 0 Investigation
 
 - Goal: Decide exact MVP boundary and validate available watchOS sensor APIs in this repo.
-- Files to inspect: `apps/watch-ios/DiveWatchApp`, `packages/contracts/schemas`, `packages/contracts/generated`, future `apps/mobile` scaffold.
+- Files to inspect: `apps/mobile/ios/DiveWatchApp`, `apps/mobile`, `packages/contracts/schemas`, `packages/contracts/generated`.
 - Implementation: no feature code; inspect current models, sensor placeholders, storage, and contract shape.
 - Gate: written MVP boundary with explicit "not a certified dive computer" safety scope.
 - Risk: Apple Watch underwater sensor behavior may not be accessible in simulator and may require real device validation.
@@ -116,7 +116,7 @@ Avoid positioning in early versions:
 ### Phase 2 Core Implementation
 
 - Goal: Improve watch capture and local log quality without introducing certified dive-computer claims.
-- Files: `apps/watch-ios/DiveWatchApp/Models`, `Recording`, `Storage`, `Views`.
+- Files: `apps/mobile/ios/DiveWatchApp/Models`, `Recording`, `Storage`, `Views`.
 - Implementation: large metric UI, robust session lifecycle, haptic events, summary, local persistence and sync-ready export.
 - Gate: `yarn watch:build`.
 - Risk: simulator cannot validate real underwater sensor accuracy or haptic usability through wetsuits.

@@ -12,11 +12,11 @@
 
 ## File Structure
 
-- Create `apps/watch-ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`: constants and envelope creation for WatchConnectivity userInfo.
-- Create `apps/watch-ios/DiveWatchApp/Sync/WatchSyncTransport.swift`: `WCSession` activation and outbound enqueue.
-- Modify `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`: add a copy helper for sync status updates.
-- Modify `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`: activate/enqueue via the transport on save.
-- Modify `apps/watch-ios/DiveWatchApp.xcodeproj/project.pbxproj`: include new watch Swift files in the target.
+- Create `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`: constants and envelope creation for WatchConnectivity userInfo.
+- Create `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`: `WCSession` activation and outbound enqueue.
+- Modify `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`: add a copy helper for sync status updates.
+- Modify `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`: activate/enqueue via the transport on save.
+- Modify `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`: include new watch Swift files in the target.
 - Create `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`: iOS `WCSessionDelegate` receiver and memory queue.
 - Create `apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift`: React Native event emitter and pending-payload drain method.
 - Create `apps/mobile/ios/DiveMobile/WatchConnectivityModuleBridge.m`: Objective-C bridge exports for the Swift module.
@@ -269,11 +269,11 @@ Expected: pass.
 ### Task 3: Watch outbound transport
 
 **Files:**
-- Create: `apps/watch-ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`
-- Create: `apps/watch-ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
-- Modify: `apps/watch-ios/DiveWatchApp/Models/DiveSession.swift`
-- Modify: `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`
-- Modify: `apps/watch-ios/DiveWatchApp.xcodeproj/project.pbxproj`
+- Create: `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`
+- Create: `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+- Modify: `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+- Modify: `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+- Modify: `apps/mobile/ios/DiveMobile.xcodeproj/project.pbxproj`
 
 - [ ] **Step 1: Add envelope helper**
 
