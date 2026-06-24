@@ -23,12 +23,15 @@ Watch 앱은 더 이상 별도 Yarn workspace나 standalone Xcode project를 사
 
 현재 watch flow는 다음과 같다.
 
-1. Home에서 mode, gas label, site, buddy, quick note, planned max depth 같은 pre-dive metadata를 입력한다.
+1. Home에서 mode, gas label, site, buddy, quick note, planned max depth 같은 pre-dive metadata를 입력한다. 모바일에서 전달된 실행하지 않은 planned dive가 있으면 Home에 함께 표시하고, 선택한 계획으로 recording을 시작할 수 있다.
 2. `RecordingView`가 나타나면 기록이 자동으로 시작되고, 현재 `MockDepthSensorProvider`를 사용한다.
 3. Recorder는 sample, current depth, max depth, water temperature, elapsed time, ascent-rate reminder state, safety-stop assistant state를 추적한다.
 4. 기록을 끝내면 post-dive rating, exertion, visibility, water condition, note field가 있는 summary를 보여준다.
 5. 저장된 세션은 `UserDefaults`의 `savedDiveSessions` key에 저장되고 list/detail view에서 확인한다.
 6. `DiveSessionStore`는 저장 시 `WatchSyncTransport`를 통해 `DiveSession.syncMessageData()` 결과를 WatchConnectivity `transferUserInfo` envelope로 enqueue한다. `WCSession.isReachable`이면 같은 payload를 `sendMessage`로도 보낸다. activation 완료와 reachability 변경 시 아직 `synced`가 아닌 저장 세션을 다시 enqueue한다. WatchConnectivity transfer 오류가 나면 저장된 세션의 `syncStatus`를 `failed`로 갱신하고, 모바일 앱이 repository import 뒤 보낸 `watchSyncAcknowledgement`를 받으면 `synced`로 갱신한다.
+7. 모바일 계획에서 시작한 세션은 `plan-<localId>` tag로 source plan을 보존하고, 저장 후 해당 planned dive를 watch Home에서 숨긴다.
+
+모바일에서 전달된 planned dive는 `watchPlannedDives` envelope의 JSON으로 수신된다. `WatchSyncTransport`는 `didReceiveApplicationContext`와 `didReceiveMessage` 양쪽에서 이를 처리하고, `DiveSessionStore`는 `savedWatchPlannedDives`와 `executedWatchPlanIds`를 `UserDefaults`에 저장한다. 실행된 plan id는 이후 planned dive 목록에서 제외한다.
 
 `RealDepthSensorProvider`는 향후 `CMWaterSubmersionManager` 지원을 위한 자리 표시자다. 실제 underwater sensor behavior, haptics, wet control, readability는 지원되는 Apple Watch hardware에서 수동 검증이 필요하다.
 

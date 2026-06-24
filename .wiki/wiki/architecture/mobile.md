@@ -2,7 +2,7 @@
 
 ## 요약
 
-`apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server, database, navigation library 없이 React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다.
+`apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server와 database 없이 React Navigation, React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다.
 
 ## 현재 상태
 
@@ -12,7 +12,7 @@
 
 - `src/App.tsx`: 앱 UI entry.
 - `src/providers.tsx`: top-level `QueryClientProvider`, `SafeAreaProvider`, `AppPreferencesProvider`, `GluestackUIProvider`, `StatusBar`.
-- `src/components/navigation/index.tsx`: custom bottom-tab navigation state.
+- `src/components/navigation/index.tsx`: `@react-navigation/native` 기반 top-level `NavigationContainer`와 custom tab router. 현재 선택된 tab을 다시 누르면 해당 화면을 refresh하고 scroll top을 요청한다.
 - `src/components/ui/`: 재사용 UI primitive, instrument control, session card, profile chart, tone type.
 - `components/ui/gluestack-ui-provider/`: generated Gluestack provider, color-mode script, token bridge.
 - `global.css`, `tailwind.config.js`: NativeWind/Tailwind entrypoint와 semantic token configuration.
@@ -20,11 +20,11 @@
 - `src/screens/memory`: 이전 memory/share preview source가 남아 있지만 현재 bottom tab route에는 연결되어 있지 않다.
 - `src/storage/`: `PersistentKeyValueStore`, AsyncStorage adapter, in-memory test store, versioned JSON store, storage key를 둔다.
 - `src/states/app-preferences.tsx`, `src/states/app-preferences-storage.ts`: 앱 표시 선호를 관리하고 `themePreference`와 `language`를 저장한다.
-- `src/states/use-dive-logbook.ts`: React Query 기반 로그북 hook, search filter, pending WatchConnectivity import action, native unavailable 환경의 fixture fallback, 기존 화면을 위한 `MobileDiveSession` 호환 view.
+- `src/states/use-dive-logbook.ts`: React Query 기반 로그북 hook, search filter, pending WatchConnectivity sync action, 기존 화면을 위한 `MobileDiveSession` 호환 view.
 - `src/states/use-dive-logbook-queries.ts`: `DiveLogRepository`를 호출하는 list/detail/save/delete/watch import query와 mutation hook.
 - `src/states/watch-connectivity-sync.tsx`: iOS native WatchConnectivity payload를 drain/subscribe하고 runtime validator를 통과한 payload만 로그북 repository에 import한다. 저장 성공 payload는 import 완료 acknowledge로 watch에 되돌려 보내고, 무효 payload drop은 native inbox에서만 acknowledge한다.
-- `src/states/use-dive-plans.ts`, `src/states/use-dive-plan-queries.ts`: React Query 기반 Planbook hook과 list/save/delete mutation.
-- `src/native/watch-connectivity.ts`: React Native에서 iOS `WatchConnectivityModule` event, pending drain method, payload acknowledge method, import 완료 acknowledge method를 typed wrapper로 다룬다.
+- `src/states/use-dive-plans.ts`, `src/states/use-dive-plan-queries.ts`: React Query 기반 Planbook hook과 list/save/delete mutation. 실행하지 않은 planned 상태의 모바일 계획을 watch companion에 전달한다.
+- `src/native/watch-connectivity.ts`: React Native에서 iOS `WatchConnectivityModule` event, pending drain method, payload acknowledge method, import 완료 acknowledge method, planned dive update, linked watch status query를 typed wrapper로 다룬다.
 - `ios/DiveMobile.xcodeproj`: iPhone app target `DiveMobile`과 embedded watchOS companion target `DiveWatchApp`를 함께 관리한다.
 - `ios/DiveWatchApp`: SwiftUI watchOS companion source. Watch 기록, 로컬 저장, WatchConnectivity enqueue PoC를 담당한다.
 - `src/repositories/`: `DiveLogRepository`/`DivePlanRepository` 인터페이스, in-memory `LocalDiveLogRepository`/`LocalDivePlanRepository`, AsyncStorage 기반 `PersistentDiveLogRepository`/`PersistentDivePlanRepository`, app default repository export.
@@ -37,10 +37,10 @@
 
 현재 모바일 UI는 네 영역으로 구성된다.
 
-- Home: 가장 최근 가져온 watch 세션, 주요 지표, 안전 assistant 문구.
-- Logbook: manual/watch 로그 목록, 검색, 동기화 상태 filter, 수동 로그 작성과 수정, dive mode별 입력 section, 상세 지표, provenance 표시, 수심 profile, 수온 profile, notes, tags.
+- Home: 가장 최근 가져온 watch 세션, 주요 지표, 워치 로그의 상승/세이프티 스톱 리마인더를 리뷰용 상태로 설명하는 카드.
+- Logbook: manual/watch 로그 목록, 검색, 동기화 상태 filter, 수동 로그 작성과 수정, watch sync action, dive mode별 입력 section, 상세 지표, provenance 표시, 수심 profile, 수온 profile, notes, tags.
 - Planning: persistent Planbook으로 다음 다이브 계획을 작성, 수정, 완료하고 완료된 계획에서 Logbook 초안을 열 수 있다.
-- Settings: 테마와 언어 같은 앱 표시 선호를 grouped list로 관리한다.
+- Settings: 테마와 언어 같은 앱 표시 선호와 paired watch 상태를 grouped list로 관리한다.
 
 Settings는 현재 다음 범위로 제한된다.
 
@@ -48,6 +48,7 @@ Settings는 현재 다음 범위로 제한된다.
 - `AppPreferencesProvider`가 `resolvedTheme`을 계산하고 `GluestackUIProvider` mode와 `StatusBar` style에 전달한다.
 - 언어 선호는 `ko`, `en`만 지원한다. 선택 변경은 `i18next.changeLanguage`를 사용하며, 실패하면 이전 언어 상태를 유지한다.
 - 설정 값 중 `themePreference`와 `language`는 AsyncStorage 기반 versioned JSON store에 저장된다. `resolvedTheme`은 저장하지 않고 device color scheme과 `themePreference`에서 파생한다.
+- 기기 관리는 iOS `WCSession`의 공개 상태인 지원 여부, paired 여부, watch app 설치 여부, reachable 여부를 보여준다. 공개 WatchConnectivity API는 사용자가 설정한 Apple Watch 이름을 제공하지 않으므로 native layer가 이름을 줄 수 없는 경우 `Apple Watch` fallback을 표시한다.
 
 Styling rule은 현재 코드 기준으로 다음과 같다.
 
@@ -60,11 +61,11 @@ Styling rule은 현재 코드 기준으로 다음과 같다.
 
 Watch import는 `localSessionId`와 `endedAt` 기반 `importKey`로 deduplicate하고, 기존 manual/mobile field와 `importedAt`을 보존하며, watch capture와 sync status를 최신 payload로 갱신한다. 결과는 watch 시작 시간, 수동 입력 시작 시간, 생성 시간 기준으로 최신 항목이 먼저 오도록 정렬한다. Persistent 저장소와 in-memory 저장소는 같은 clone, sort, watch merge helper를 사용해 이 동작을 맞춘다.
 
-WatchConnectivity 수신 PoC는 iOS native code에서 시작된다. `WatchConnectivityInbox`는 앱 시작 시 `WCSession`을 activate하고 `didReceiveUserInfo`와 `didReceiveMessage` envelope를 원시 JSON payload로 복원해 `UserDefaults` 기반 durable inbox에 저장한다. `WatchConnectivityModule`은 pending payload drain method, `DiveWatchSyncPayloadReceived` event, mobile-only acknowledge method, imported acknowledge method를 React Native에 노출한다. JS provider는 이 payload를 검증한 뒤 기본 `PersistentDiveLogRepository`에 import하고, 저장이 끝난 payload만 imported acknowledge로 처리해 watch에 `watchSyncAcknowledgement`를 돌려보낸다. Imported acknowledge는 `transferUserInfo`를 기본으로 쓰고 watch가 reachable이면 `sendMessage`로도 보낸다. 저장 실패는 acknowledge하지 않으므로 앱 재시작 뒤 다시 drain될 수 있다. Logbook import action도 pending native inbox를 수동 drain하며, native module이 없는 테스트/비-iOS 환경에서만 fixture import로 fallback한다.
+WatchConnectivity 수신 PoC는 iOS native code에서 시작된다. `WatchConnectivityInbox`는 앱 시작 시 `WCSession`을 activate하고 `didReceiveUserInfo`와 `didReceiveMessage` envelope를 원시 JSON payload로 복원해 `UserDefaults` 기반 durable inbox에 저장한다. `WatchConnectivityModule`은 pending payload drain method, `DiveWatchSyncPayloadReceived` event, mobile-only acknowledge method, imported acknowledge method, planned dive update method, linked watch status method를 React Native에 노출한다. JS provider는 watch payload를 검증한 뒤 기본 `PersistentDiveLogRepository`에 import하고, 저장이 끝난 payload만 imported acknowledge로 처리해 watch에 `watchSyncAcknowledgement`를 돌려보낸다. Imported acknowledge는 `transferUserInfo`를 기본으로 쓰고 watch가 reachable이면 `sendMessage`로도 보낸다. 저장 실패는 acknowledge하지 않으므로 앱 재시작 뒤 다시 drain될 수 있다. Logbook의 `워치 동기화` action도 pending native inbox를 수동 drain하며, native module이 없으면 새 기록 없음 또는 비지원 상태를 사용자에게 표시한다.
 
 수동 로그 작성은 `LogbookScreen`의 create action에서 시작하고, 기존 항목 수정은 상세 화면의 edit action에서 같은 editor를 재사용한다. Editor는 공통 field인 date/time, dive mode, site name, duration, buddy names, tags, observed marine life, notes, rating을 다루고, 선택된 `diveMode`에 따라 scuba, freedive, snorkel, pool 전용 section을 보여준다. 저장된 수동 로그는 `source: 'manual'`, `syncStatus: 'localOnly'`이며, 비어 있거나 유효하지 않은 수치 field는 `0`이 아니라 `undefined`로 유지한다. Watch 기반 항목을 모바일에서 수정하면 raw watch capture와 `source: 'watch'`를 유지하고, manual overlay가 바뀐 상태로 `syncStatus: 'pending'`이 된다.
 
-앱 기본 Planbook 저장소는 `PersistentDivePlanRepository`다. 이 저장소는 `DivePlan[]`를 `dive-app:planbook:v1` key에 저장하고, `LocalDivePlanRepository`와 같은 계획 정렬 helper를 사용한다. 계획 화면은 `draft`, `planned`, `completed` 상태만 사용하고, 완료로 전환할 때 Logbook 초안을 만들지 나중에 할지 선택하게 한다. 계획에서 로그를 만들 때는 navigation 계층이 임시 `pendingDraft`를 Logbook editor로 넘기며, 자동으로 완료 로그를 저장하지 않는다.
+앱 기본 Planbook 저장소는 `PersistentDivePlanRepository`다. 이 저장소는 `DivePlan[]`를 `dive-app:planbook:v1` key에 저장하고, `LocalDivePlanRepository`와 같은 계획 정렬 helper를 사용한다. 계획 화면은 `draft`, `planned`, `completed` 상태만 사용하고, 완료로 전환할 때 Logbook 초안을 만들지 나중에 할지 선택하게 한다. 계획에서 로그를 만들 때는 navigation 계층이 임시 `pendingDraft`를 Logbook editor로 넘기며, 자동으로 완료 로그를 저장하지 않는다. `planned` 상태이고 아직 로그로 전환되지 않은 계획은 `watchPlannedDives` envelope로 watch companion에 전달되어 watch Home에서 시작할 수 있다.
 
 Home/Memory 같은 preview surface와 summary helper도 알 수 없는 duration/depth를 실제 `0`으로 집계하지 않는다. Manual log에 duration만 있고 `endedAt`이 없으면 compatibility `MobileDiveSession`에서 `endedAt`을 파생해 기존 preview가 입력된 duration을 표시할 수 있게 한다.
 
@@ -75,7 +76,8 @@ Home/Memory 같은 preview surface와 summary helper도 알 수 없는 duration/
 - 인증 없음.
 - Supabase client 없음.
 - Direct SQL 없음.
-- WatchConnectivity code boundary, companion embed 구조, durable native inbox, JS acknowledge 경로, Logbook import action의 pending inbox drain은 있지만 paired-device delivery, entitlement, background delivery, retry/backoff policy 검증은 아직 없음.
+- WatchConnectivity code boundary, companion embed 구조, durable native inbox, JS acknowledge 경로, Logbook import action의 pending inbox drain, mobile-to-watch planned dive 전달, linked watch status 표시가 있지만 paired-device delivery, entitlement, background delivery, retry/backoff policy 검증은 아직 없음.
+- 공개 API 한계로 Settings의 watch name은 사용자가 Watch 앱에서 지정한 이름이 아니라 `Apple Watch` fallback일 수 있다.
 - AsyncStorage storage schema는 현재 version 1만 있다. 향후 schema 변경에는 migration behavior를 추가해야 한다.
 - Certified dive-computer behavior 없음.
 

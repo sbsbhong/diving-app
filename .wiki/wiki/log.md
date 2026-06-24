@@ -1,5 +1,27 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - pre-device mobile/watch readiness
+
+- 수정:
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/components/navigation/index.tsx`
+  - `apps/mobile/src/native/watch-connectivity.ts`
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/src/states/use-dive-plans.ts`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/src/screens/settings/screen.tsx`
+  - `apps/mobile/src/screens/home/screen.tsx`
+- 요약:
+  - React Navigation 기반 tab 구조, 로그북의 WatchConnectivity pending inbox 수동 동기화, mobile-to-watch planned dive 전달, watch Home의 planned dive 시작, Settings의 linked watch 상태 표시, Home의 워치 리마인더 상태 문구를 현재 코드 기준으로 기록했다. 공개 API 한계로 사용자가 설정한 Apple Watch 이름은 아직 확인되지 않았고 fallback 이름을 쓰는 점을 열린 질문으로 남겼다.
+
 ## 2026-06-25 - 구조 - WatchConnectivity live retry and acknowledgement
 
 - 수정:

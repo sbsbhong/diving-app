@@ -30,7 +30,7 @@
 
 ### `apps/mobile`
 
-모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 custom bottom-tab navigation, AsyncStorage 기반 Logbook/Planbook/설정 저장소, watch fixture import, 수동 로그 작성, 계획 알림, iOS WatchConnectivity receiver/import acknowledgement PoC, companion watch target embed 구조를 갖는다. 인증, Supabase client, cloud backup, 실기기/background delivery 검증은 아직 없다.
+모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 React Navigation 기반 bottom-tab navigation, AsyncStorage 기반 Logbook/Planbook/설정 저장소, 수동 로그 작성, 계획 알림, iOS WatchConnectivity receiver/import acknowledgement PoC, mobile-to-watch planned dive 전달 PoC, Settings 기기 관리, companion watch target embed 구조를 갖는다. 인증, Supabase client, cloud backup, 실기기/background delivery 검증은 아직 없다.
 
 모바일 앱은 사용자 프로필, 인증, 로그북, 수동 로그 작성, 미래 Supabase sync, 통계/검색/리뷰/공유 흐름의 중심이 된다. 직접 SQL, 중복 Supabase schema type, watch-only sensor capture logic, imported watch sample을 손실시키는 raw rewrite는 넣지 않는다.
 
@@ -38,7 +38,7 @@
 
 watchOS 앱은 SwiftUI 기반 Apple Watch recording surface다. 현재 active source는 `apps/mobile/ios/DiveWatchApp`이며, `apps/mobile/ios/DiveMobile.xcodeproj`의 `DiveWatchApp` target/scheme으로 빌드된다. 별도 watch workspace는 유지하지 않는다.
 
-watch 앱은 pre-dive metadata capture, mock 기반 live recording, local persistence, summary, saved session list/detail, sync-ready JSON export의 책임을 갖는다. 복잡한 account 관리, 전체 로그북 관리, Supabase schema-specific business logic은 watch 앱에 넣지 않는다.
+watch 앱은 pre-dive metadata capture, 모바일 planned dive 시작, mock 기반 live recording, local persistence, summary, saved session list/detail, sync-ready JSON export의 책임을 갖는다. 복잡한 account 관리, 전체 로그북 관리, Supabase schema-specific business logic은 watch 앱에 넣지 않는다.
 
 ## Skill 사용 방식
 
