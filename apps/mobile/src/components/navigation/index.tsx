@@ -1,4 +1,13 @@
 import React from 'react';
+import {
+  NavigationContainer,
+  TabActions,
+  TabRouter,
+  createNavigatorFactory,
+  useNavigationBuilder,
+  type ParamListBase,
+  type TabNavigationState,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
@@ -25,8 +34,21 @@ export type RootStackParamList = {
   settings: undefined;
 };
 
+type NavigationRouteName = keyof RootStackParamList;
+
+type AppTabNavigatorProps = {
+  children: React.ReactNode;
+  initialRouteName?: NavigationRouteName;
+};
+
+type AppTabScreenProps = {
+  name: NavigationRouteName;
+  children: () => React.ReactNode;
+};
+
+const AppTabs = createNavigatorFactory(AppTabNavigator)();
+
 export default function RootNavigation(): React.JSX.Element {
-  const [section, setSection] = React.useState<DiveLogbookSection>('home');
   const [pendingLogDraft, setPendingLogDraft] = React.useState<
     | {
         entry: DiveLogEntry;
@@ -37,14 +59,12 @@ export default function RootNavigation(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
   const planning = useDivePlans();
-  const { t } = useTranslation();
 
   const createLogFromPlan = React.useCallback((plan: DivePlan) => {
     setPendingLogDraft({
       entry: divePlanToDiveLogEntryDraft(plan),
       sourcePlanLocalId: plan.localId,
     });
-    setSection('logbook');
   }, []);
 
   const markPendingDraftSaved = React.useCallback(
@@ -70,6 +90,14 @@ export default function RootNavigation(): React.JSX.Element {
     [planning],
   );
 
+  const openLogbook = React.useCallback(() => {
+    rootNavigationActions.current?.navigate('logbook');
+  }, []);
+
+  const openPlanning = React.useCallback(() => {
+    rootNavigationActions.current?.navigate('planning');
+  }, []);
+
   return (
     <VStack
       className="flex-1 bg-background"
@@ -78,52 +106,129 @@ export default function RootNavigation(): React.JSX.Element {
         paddingLeft: insets.left,
         paddingRight: insets.right,
       }}>
-      <VStack className="flex-1 bg-background">
-        {section === 'home' ? (
-          <HomeScreen
-            sessions={logbook.sessions}
-            onOpenLogbook={() => setSection('logbook')}
-            onOpenPlanning={() => setSection('planning')}
-          />
-        ) : null}
-        {section === 'logbook' ? (
-          <LogbookScreen
-            entries={logbook.filteredEntries}
-            filter={logbook.filter}
-            onFilterChange={logbook.setFilter}
-            onImportFixtures={logbook.importFixtures}
-            onSaveEntry={logbook.saveEntry}
-            onDeleteEntry={logbook.deleteEntry}
-            saveError={logbook.saveError}
-            isSaving={logbook.isSaving}
-            pendingDraft={pendingLogDraft}
-            onPendingDraftSave={markPendingDraftSaved}
-          />
-        ) : null}
-        {section === 'planning' ? (
-          <PlanningScreen
-            sessions={logbook.sessions}
-            plans={planning.plans}
-            onSavePlan={planning.savePlan}
-            onDeletePlan={planning.deletePlan}
-            saveError={planning.saveError}
-            isSaving={planning.isSaving}
-            onCreateLogFromPlan={createLogFromPlan}
-            onOpenLogbook={() => setSection('logbook')}
-          />
-        ) : null}
-        {section === 'settings' ? <SettingsScreen /> : null}
-      </VStack>
-
-      <HStack className="bg-card px-2 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
-        <NavTab id="home" label={t('navigation.home')} selected={section === 'home'} onPress={() => setSection('home')} />
-        <NavTab id="logbook" label={t('navigation.logbook')} selected={section === 'logbook'} onPress={() => setSection('logbook')} />
-        <NavTab id="planning" label={t('navigation.planning')} selected={section === 'planning'} onPress={() => setSection('planning')} />
-        <NavTab id="settings" label={t('navigation.settings')} selected={section === 'settings'} onPress={() => setSection('settings')} />
-      </HStack>
+      <NavigationContainer>
+        <AppTabs.Navigator initialRouteName="home">
+          <AppTabs.Screen name="home">
+            {() => (
+              <HomeScreen
+                sessions={logbook.sessions}
+                onOpenLogbook={openLogbook}
+                onOpenPlanning={openPlanning}
+              />
+            )}
+          </AppTabs.Screen>
+          <AppTabs.Screen name="logbook">
+            {() => (
+              <LogbookScreen
+                entries={logbook.filteredEntries}
+                filter={logbook.filter}
+                onFilterChange={logbook.setFilter}
+                onImportFixtures={logbook.importFixtures}
+                onSaveEntry={logbook.saveEntry}
+                onDeleteEntry={logbook.deleteEntry}
+                saveError={logbook.saveError}
+                isSaving={logbook.isSaving}
+                pendingDraft={pendingLogDraft}
+                onPendingDraftSave={markPendingDraftSaved}
+              />
+            )}
+          </AppTabs.Screen>
+          <AppTabs.Screen name="planning">
+            {() => (
+              <PlanningScreen
+                sessions={logbook.sessions}
+                plans={planning.plans}
+                onSavePlan={planning.savePlan}
+                onDeletePlan={planning.deletePlan}
+                saveError={planning.saveError}
+                isSaving={planning.isSaving}
+                onCreateLogFromPlan={createLogFromPlan}
+                onOpenLogbook={openLogbook}
+              />
+            )}
+          </AppTabs.Screen>
+          <AppTabs.Screen name="settings">{() => <SettingsScreen />}</AppTabs.Screen>
+        </AppTabs.Navigator>
+      </NavigationContainer>
     </VStack>
   );
 }
+
+function AppTabNavigator({ children, initialRouteName }: AppTabNavigatorProps): React.JSX.Element {
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { state, navigation, descriptors, NavigationContent } = useNavigationBuilder<
+    TabNavigationState<ParamListBase>,
+    {
+      initialRouteName?: string;
+      backBehavior?: 'history';
+      children: React.ReactNode;
+    },
+    Record<string, never>,
+    Record<string, never>,
+    Record<string, never>
+  >(TabRouter, {
+    children,
+    initialRouteName,
+    backBehavior: 'history',
+  });
+  const focusedRoute = state.routes[state.index];
+
+  React.useEffect(() => {
+    rootNavigationActions.current = {
+      navigate: routeName => {
+        navigation.dispatch({
+          ...TabActions.jumpTo(routeName),
+          target: state.key,
+        });
+      },
+    };
+
+    return () => {
+      rootNavigationActions.current = undefined;
+    };
+  }, [navigation, state.key]);
+
+  return (
+    <NavigationContent>
+      <VStack className="flex-1 bg-background">
+        {descriptors[focusedRoute.key].render()}
+      </VStack>
+
+      <HStack className="bg-card px-2 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
+        {state.routes.map(route => {
+          const selected = route.key === focusedRoute.key;
+          const routeName = route.name as DiveLogbookSection;
+
+          return (
+            <NavTab
+              key={route.key}
+              id={routeName}
+              label={t(`navigation.${route.name}`)}
+              selected={selected}
+              onPress={() => {
+                if (!selected) {
+                  navigation.dispatch({
+                    ...TabActions.jumpTo(route.name),
+                    target: state.key,
+                  });
+                }
+              }}
+            />
+          );
+        })}
+      </HStack>
+    </NavigationContent>
+  );
+}
+
+const rootNavigationActions = {
+  current: undefined as
+    | {
+        navigate: (routeName: NavigationRouteName) => void;
+      }
+    | undefined,
+};
 
 const navTabStyles = tva({
   base: 'min-h-12 flex-1 items-center justify-center py-1',

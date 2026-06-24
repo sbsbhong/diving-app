@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../src/App';
 import { Menu } from '../src/components/ui/menu';
@@ -96,6 +97,16 @@ describe('App navigation', () => {
     });
 
     expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
+  });
+
+  test('uses React Navigation as the top-level navigation container', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+    });
+
+    expect(renderer!.root.findByType(NavigationContainer)).toBeTruthy();
   });
 
   test('switches language from the restored Home language menu', async () => {
