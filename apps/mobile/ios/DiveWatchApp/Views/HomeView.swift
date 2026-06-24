@@ -14,6 +14,10 @@ struct HomeView: View {
                         LatestSessionCard(session: latestSession)
                     }
 
+                    if !store.plannedDives.isEmpty {
+                        PlannedDivesSection(store: store, plannedDives: store.plannedDives)
+                    }
+
                     PreDivePlanForm(plan: $plan)
 
                     NavigationLink {
@@ -38,6 +42,73 @@ struct HomeView: View {
             .background(DiveWatchTheme.background.ignoresSafeArea())
             .navigationTitle("Dive Watch")
         }
+    }
+}
+
+private struct PlannedDivesSection: View {
+    @ObservedObject var store: DiveSessionStore
+    let plannedDives: [WatchPlannedDive]
+
+    var body: some View {
+        InstrumentCard(accent: DiveWatchTheme.primary) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("UNEXECUTED PLANS")
+                    .font(DiveWatchTheme.labelFont())
+                    .foregroundStyle(DiveWatchTheme.primary)
+
+                ForEach(plannedDives.prefix(3)) { plannedDive in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(plannedDive.displayTitle)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(DiveWatchTheme.text)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.72)
+
+                        HStack(spacing: 8) {
+                            PlannedDiveMetric(title: String(localized: "Mode"), value: (plannedDive.diveMode ?? .scuba).label)
+                            PlannedDiveMetric(title: String(localized: "Max"), value: DiveFormatters.depth(plannedDive.plannedMaxDepthMeters ?? 0))
+                        }
+
+                        if let plannedAt = plannedDive.plannedAt {
+                            Text(DiveFormatters.sessionDate.string(from: Date(timeIntervalSince1970: plannedAt)))
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(DiveWatchTheme.mutedText)
+                                .lineLimit(1)
+                        }
+
+                        NavigationLink {
+                            RecordingView(store: store, plan: plannedDive.preDivePlan)
+                        } label: {
+                            Label("Start Planned Dive", systemImage: "play.fill")
+                        }
+                        .buttonStyle(DiveActionButtonStyle(kind: .primary))
+                    }
+
+                    if plannedDive.id != plannedDives.prefix(3).last?.id {
+                        Divider().opacity(0.35)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct PlannedDiveMetric: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title.uppercased())
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(DiveWatchTheme.mutedText)
+            Text(value)
+                .font(DiveWatchTheme.metricFont(size: 14, weight: .semibold))
+                .foregroundStyle(DiveWatchTheme.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.58)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

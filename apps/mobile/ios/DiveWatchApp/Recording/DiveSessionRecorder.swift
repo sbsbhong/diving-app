@@ -63,13 +63,18 @@ final class DiveSessionRecorder: ObservableObject {
         elapsedTimer = nil
         updateElapsedTime()
         isRecording = false
+        let sourcePlanLocalId = activePlan.sourcePlanLocalId
+        var sessionTags = activePlan.tags
+        if let sourcePlanLocalId, !sessionTags.contains("plan-\(sourcePlanLocalId)") {
+            sessionTags.append("plan-\(sourcePlanLocalId)")
+        }
 
         return DiveSession(
             diveMode: activePlan.diveMode,
             gasLabel: activePlan.gasLabel,
             siteName: activePlan.siteName.isEmpty ? nil : activePlan.siteName,
             buddyIds: activePlan.buddyIds,
-            tags: activePlan.tags,
+            tags: sessionTags,
             notes: activePlan.quickNote.isEmpty ? nil : activePlan.quickNote,
             syncStatus: .pending,
             startedAt: startedAt,

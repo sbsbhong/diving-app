@@ -1,4 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import type { DivePlan } from '../types/dive-plan';
 
 export const WATCH_CONNECTIVITY_PAYLOAD_EVENT = 'DiveWatchSyncPayloadReceived';
 
@@ -17,8 +18,24 @@ type WatchConnectivityModule = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: string[]) => Promise<void>;
+  updatePlannedDives?: (plannedDivesJson: string) => Promise<void>;
   addListener: (eventName: string) => void;
   removeListeners: (count: number) => void;
+};
+
+type WatchPlannedDivePayload = {
+  localId: string;
+  title?: string;
+  siteName?: string;
+  diveMode?: DivePlan['diveMode'];
+  entryStyle?: DivePlan['entryStyle'];
+  plannedAt?: number;
+  plannedMaxDepthMeters?: number;
+  plannedDurationMinutes?: number;
+  gasLabel?: string;
+  buddyIds: string[];
+  tags: string[];
+  notes?: string;
 };
 
 const nativeModule =
@@ -54,6 +71,15 @@ export async function acknowledgeImportedWatchConnectivityPayloads(payloadIds: r
   await nativeModule.acknowledgeImportedPayloads([...payloadIds]);
 }
 
+export async function updatePlannedWatchDives(plans: readonly DivePlan[]): Promise<void> {
+  if (!nativeModule?.updatePlannedDives) {
+    return;
+  }
+
+  const plannedDives = plans.filter(isWatchVisiblePlan).map(toWatchPlannedDivePayload);
+  await nativeModule.updatePlannedDives(JSON.stringify(plannedDives));
+}
+
 export function subscribeToWatchConnectivityPayloads(
   handler: (payload: WatchConnectivityPayload) => void,
 ): WatchConnectivitySubscription {
@@ -63,4 +89,25 @@ export function subscribeToWatchConnectivityPayloads(
 
   const emitter = new NativeEventEmitter(nativeModule);
   return emitter.addListener(WATCH_CONNECTIVITY_PAYLOAD_EVENT, handler);
+}
+
+function isWatchVisiblePlan(plan: DivePlan): boolean {
+  return plan.status === 'planned' && !plan.convertedLogLocalId;
+}
+
+function toWatchPlannedDivePayload(plan: DivePlan): WatchPlannedDivePayload {
+  return {
+    localId: plan.localId,
+    title: plan.title,
+    siteName: plan.site.name,
+    diveMode: plan.diveMode,
+    entryStyle: plan.entryStyle,
+    plannedAt: plan.plannedAt,
+    plannedMaxDepthMeters: plan.plannedValues.plannedMaxDepthMeters,
+    plannedDurationMinutes: plan.plannedValues.plannedDurationMinutes,
+    gasLabel: plan.plannedValues.gasLabel,
+    buddyIds: plan.buddyIds,
+    tags: plan.tags,
+    notes: plan.notes ?? plan.objective,
+  };
 }

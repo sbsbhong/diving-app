@@ -1,4 +1,5 @@
 import React from 'react';
+import { updatePlannedWatchDives } from '../native/watch-connectivity';
 import type { DivePlan } from '../types/dive-plan';
 import type { DivePlanRepository } from '../repositories/dive-plan-repository';
 import { defaultDivePlanRepository } from '../repositories/default-dive-plan-repository';
@@ -31,12 +32,19 @@ export const useDivePlans = (options: UseDivePlansOptions = {}) => {
   });
   const savePlanMutation = useSaveDivePlanMutation(repository, { queryScope: options.queryScope });
   const deletePlanMutation = useDeleteDivePlanMutation(repository, { queryScope: options.queryScope });
+  const plans = plansQuery.data ?? initialPlans ?? [];
   const refresh = React.useCallback(async () => {
     await plansQuery.refetch();
   }, [plansQuery]);
 
+  React.useEffect(() => {
+    void updatePlannedWatchDives(plans).catch(error => {
+      console.warn('Failed to update planned watch dives', error);
+    });
+  }, [plans]);
+
   return {
-    plans: plansQuery.data ?? initialPlans ?? [],
+    plans,
     refresh,
     savePlan: savePlanMutation.mutateAsync,
     deletePlan: deletePlanMutation.mutateAsync,

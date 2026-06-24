@@ -78,6 +78,7 @@ struct WatchLocation: Codable, Equatable {
 }
 
 struct PreDivePlan: Codable, Equatable {
+    var sourcePlanLocalId: String?
     var diveMode: DiveMode = .scuba
     var gasLabel: String = String(localized: "Air")
     var siteName: String = ""
@@ -91,6 +92,9 @@ struct PreDivePlan: Codable, Equatable {
 
     var tags: [String] {
         var values = ["watch-capture"]
+        if let sourcePlanLocalId {
+            values.append("plan-\(sourcePlanLocalId)")
+        }
         if plannedMaxDepthMeters > 0 {
             values.append("planned-\(Int(plannedMaxDepthMeters))m")
         }
@@ -101,6 +105,47 @@ struct PreDivePlan: Codable, Equatable {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         return trimmed.lowercased().replacingOccurrences(of: " ", with: "-")
+    }
+}
+
+struct WatchPlannedDive: Codable, Identifiable, Equatable {
+    let localId: String
+    let title: String?
+    let siteName: String?
+    let diveMode: DiveMode?
+    let entryStyle: String?
+    let plannedAt: TimeInterval?
+    let plannedMaxDepthMeters: Double?
+    let plannedDurationMinutes: Double?
+    let gasLabel: String?
+    let buddyIds: [String]
+    let tags: [String]
+    let notes: String?
+
+    var id: String { localId }
+
+    var displayTitle: String {
+        if let title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return title
+        }
+
+        if let siteName, !siteName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return siteName
+        }
+
+        return String(localized: "Planned dive")
+    }
+
+    var preDivePlan: PreDivePlan {
+        PreDivePlan(
+            sourcePlanLocalId: localId,
+            diveMode: diveMode ?? .scuba,
+            gasLabel: gasLabel ?? String(localized: "Air"),
+            siteName: siteName ?? "",
+            buddyName: buddyIds.joined(separator: ", "),
+            quickNote: notes ?? "",
+            plannedMaxDepthMeters: plannedMaxDepthMeters ?? 18
+        )
     }
 }
 

@@ -64,6 +64,17 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
+  func updatePlannedDives(json plannedDivesJson: String) {
+    if Thread.isMainThread {
+      updatePlannedDivesOnMainQueue(json: plannedDivesJson)
+      return
+    }
+
+    DispatchQueue.main.sync {
+      updatePlannedDivesOnMainQueue(json: plannedDivesJson)
+    }
+  }
+
   func session(
     _ session: WCSession,
     activationDidCompleteWith activationState: WCSessionActivationState,
@@ -160,6 +171,28 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
+  private func updatePlannedDivesOnMainQueue(json plannedDivesJson: String) {
+    guard let connectivitySession else {
+      return
+    }
+
+    let context: [String: Any] = [
+      WatchConnectivityEnvelopeKey.kind: WatchConnectivityEnvelopeValue.plannedDivesKind,
+      WatchConnectivityEnvelopeKey.plannedDivesJson: plannedDivesJson,
+      WatchConnectivityEnvelopeKey.updatedAt: Date().timeIntervalSince1970
+    ]
+
+    if connectivitySession.isReachable {
+      connectivitySession.sendMessage(context, replyHandler: nil) { _ in }
+    }
+
+    do {
+      try connectivitySession.updateApplicationContext(context)
+    } catch {
+      assertionFailure("Failed to update watch planned dives: \(error)")
+    }
+  }
+
   private func persistPendingPayloads() {
     do {
       let data = try JSONEncoder().encode(pendingPayloads)
@@ -209,9 +242,12 @@ private enum WatchConnectivityEnvelopeKey {
   static let payloadBase64 = "payloadBase64"
   static let localSessionId = "localSessionId"
   static let acknowledgedAt = "acknowledgedAt"
+  static let plannedDivesJson = "plannedDivesJson"
+  static let updatedAt = "updatedAt"
 }
 
 private enum WatchConnectivityEnvelopeValue {
   static let kind = "watchSyncMessage"
   static let acknowledgementKind = "watchSyncAcknowledgement"
+  static let plannedDivesKind = "watchPlannedDives"
 }

@@ -4,6 +4,7 @@ import WatchConnectivity
 protocol WatchSyncTransporting: AnyObject {
     var onTransferStatusChanged: ((UUID, DiveSyncStatus) -> Void)? { get set }
     var onActivationCompleted: (() -> Void)? { get set }
+    var onPlannedDivesChanged: (([WatchPlannedDive]) -> Void)? { get set }
 
     func activate()
     func enqueue(session: DiveSession) -> DiveSyncStatus
@@ -12,6 +13,7 @@ protocol WatchSyncTransporting: AnyObject {
 final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelegate {
     var onTransferStatusChanged: ((UUID, DiveSyncStatus) -> Void)?
     var onActivationCompleted: (() -> Void)?
+    var onPlannedDivesChanged: (([WatchPlannedDive]) -> Void)?
 
     private let connectivitySession: WCSession?
 
@@ -90,11 +92,23 @@ final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelega
     }
 
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        guard !handlePlannedDives(userInfo: userInfo) else {
+            return
+        }
+
         handleAcknowledgement(userInfo: userInfo)
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        guard !handlePlannedDives(userInfo: message) else {
+            return
+        }
+
         handleAcknowledgement(userInfo: message)
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        _ = handlePlannedDives(userInfo: applicationContext)
     }
 
     private func handleAcknowledgement(userInfo: [String: Any]) {
@@ -107,5 +121,19 @@ final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelega
         DispatchQueue.main.async { [weak self] in
             self?.onTransferStatusChanged?(sessionId, .synced)
         }
+    }
+
+    private func handlePlannedDives(userInfo: [String: Any]) -> Bool {
+        guard userInfo[WatchSyncEnvelope.kindKey] as? String == WatchSyncEnvelope.plannedDivesKind,
+              let plannedDivesJson = userInfo[WatchSyncEnvelope.plannedDivesJsonKey] as? String,
+              let plannedDivesData = plannedDivesJson.data(using: .utf8),
+              let plannedDives = try? JSONDecoder().decode([WatchPlannedDive].self, from: plannedDivesData) else {
+            return false
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.onPlannedDivesChanged?(plannedDives)
+        }
+        return true
     }
 }

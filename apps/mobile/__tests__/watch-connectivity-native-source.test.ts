@@ -68,4 +68,42 @@ describe('WatchConnectivity native source contract', () => {
     expect(project).toContain('name = "Embed Watch Content";');
     expect(project).toContain('dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";');
   });
+
+  it('syncs planned dives from mobile to the watch companion', () => {
+    const mobileNative = readRepoFile('apps/mobile/src/native/watch-connectivity.ts');
+    const useDivePlans = readRepoFile('apps/mobile/src/states/use-dive-plans.ts');
+    const module = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift');
+    const bridge = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModuleBridge.m');
+    const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
+    const envelope = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift');
+
+    expect(mobileNative).toContain('updatePlannedWatchDives');
+    expect(useDivePlans).toContain('updatePlannedWatchDives(plans');
+    expect(module).toContain('@objc(updatePlannedDives:resolver:rejecter:)');
+    expect(bridge).toContain('updatePlannedDives');
+    expect(inbox).toContain('updateApplicationContext');
+    expect(inbox).toContain('watchPlannedDives');
+    expect(envelope).toContain('plannedDivesKind');
+    expect(envelope).toContain('plannedDivesJsonKey');
+  });
+
+  it('shows unexecuted mobile plans on watch and starts recording from a selected plan', () => {
+    const model = readRepoFile('apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift');
+    const store = readRepoFile('apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift');
+    const transport = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift');
+    const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
+    const recorder = readRepoFile('apps/mobile/ios/DiveWatchApp/Recording/DiveSessionRecorder.swift');
+
+    expect(model).toContain('struct WatchPlannedDive');
+    expect(model).toContain('sourcePlanLocalId');
+    expect(store).toContain('@Published private(set) var plannedDives');
+    expect(store).toContain('replacePlannedDives');
+    expect(store).toContain('markPlanExecuted');
+    expect(transport).toContain('didReceiveApplicationContext applicationContext');
+    expect(transport).toContain('onPlannedDivesChanged');
+    expect(home).toContain('PlannedDivesSection');
+    expect(home).toContain('Start Planned Dive');
+    expect(home).toContain('RecordingView(store: store, plan: plannedDive.preDivePlan)');
+    expect(recorder).toContain('sourcePlanLocalId');
+  });
 });

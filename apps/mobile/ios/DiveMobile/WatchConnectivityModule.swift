@@ -70,5 +70,15 @@ final class WatchConnectivityModule: RCTEventEmitter {
     resolve(nil)
   }
 
+  @objc(updatePlannedDives:resolver:rejecter:)
+  func updatePlannedDives(
+    plannedDivesJson: String,
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    WatchConnectivityInbox.shared.updatePlannedDives(json: plannedDivesJson)
+    resolve(nil)
+  }
+
   private static let eventName = "DiveWatchSyncPayloadReceived"
 }

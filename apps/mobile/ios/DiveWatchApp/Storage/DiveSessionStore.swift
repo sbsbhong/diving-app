@@ -4,15 +4,20 @@ import Foundation
 @MainActor
 final class DiveSessionStore: ObservableObject {
     @Published private(set) var sessions: [DiveSession] = []
+    @Published private(set) var plannedDives: [WatchPlannedDive] = []
 
     private let storageKey = "savedDiveSessions"
+    private let plannedDivesStorageKey = "savedWatchPlannedDives"
+    private let executedPlanIdsStorageKey = "executedWatchPlanIds"
     private let syncTransport: WatchSyncTransporting
     private let userDefaults: UserDefaults
+    private var executedPlanIds = Set<String>()
 
     init(userDefaults: UserDefaults = .standard, syncTransport: WatchSyncTransporting = WatchSyncTransport()) {
         self.userDefaults = userDefaults
         self.syncTransport = syncTransport
         load()
+        loadPlannedDives()
         self.syncTransport.onTransferStatusChanged = { [weak self] sessionId, syncStatus in
             Task { @MainActor in
                 self?.updateSyncStatus(for: sessionId, to: syncStatus)
@@ -23,13 +28,35 @@ final class DiveSessionStore: ObservableObject {
                 self?.retryPendingSyncs()
             }
         }
+        self.syncTransport.onPlannedDivesChanged = { [weak self] plannedDives in
+            Task { @MainActor in
+                self?.replacePlannedDives(plannedDives)
+            }
+        }
         syncTransport.activate()
     }
 
     func save(_ session: DiveSession) {
         let syncStatus = syncTransport.enqueue(session: session)
         sessions.insert(session.withSyncStatus(syncStatus), at: 0)
+        if let sourcePlanLocalId = session.sourcePlanLocalId {
+            markPlanExecuted(sourcePlanLocalId)
+        }
         persist()
+    }
+
+    func replacePlannedDives(_ nextPlannedDives: [WatchPlannedDive]) {
+        plannedDives = nextPlannedDives
+            .filter { !executedPlanIds.contains($0.localId) }
+            .sorted { ($0.plannedAt ?? Double.greatestFiniteMagnitude) < ($1.plannedAt ?? Double.greatestFiniteMagnitude) }
+        persistPlannedDives()
+    }
+
+    func markPlanExecuted(_ localId: String) {
+        executedPlanIds.insert(localId)
+        plannedDives.removeAll { $0.localId == localId }
+        persistExecutedPlanIds()
+        persistPlannedDives()
     }
 
     private func updateSyncStatus(for sessionId: UUID, to syncStatus: DiveSyncStatus) {
@@ -81,6 +108,25 @@ final class DiveSessionStore: ObservableObject {
         }
     }
 
+    private func loadPlannedDives() {
+        if let executedPlanIds = userDefaults.array(forKey: executedPlanIdsStorageKey) as? [String] {
+            self.executedPlanIds = Set(executedPlanIds)
+        }
+
+        guard let data = userDefaults.data(forKey: plannedDivesStorageKey) else {
+            plannedDives = []
+            return
+        }
+
+        do {
+            let decodedPlannedDives = try JSONDecoder().decode([WatchPlannedDive].self, from: data)
+            plannedDives = decodedPlannedDives.filter { !executedPlanIds.contains($0.localId) }
+        } catch {
+            plannedDives = []
+            userDefaults.removeObject(forKey: plannedDivesStorageKey)
+        }
+    }
+
     private func persist() {
         do {
             let data = try JSONEncoder().encode(sessions)
@@ -88,5 +134,26 @@ final class DiveSessionStore: ObservableObject {
         } catch {
             assertionFailure("Failed to save dive sessions: \(error)")
         }
+    }
+
+    private func persistPlannedDives() {
+        do {
+            let data = try JSONEncoder().encode(plannedDives)
+            userDefaults.set(data, forKey: plannedDivesStorageKey)
+        } catch {
+            assertionFailure("Failed to save watch planned dives: \(error)")
+        }
+    }
+
+    private func persistExecutedPlanIds() {
+        userDefaults.set(Array(executedPlanIds), forKey: executedPlanIdsStorageKey)
+    }
+}
+
+private extension DiveSession {
+    var sourcePlanLocalId: String? {
+        tags
+            .first { $0.hasPrefix("plan-") }
+            .map { String($0.dropFirst("plan-".count)) }
     }
 }
