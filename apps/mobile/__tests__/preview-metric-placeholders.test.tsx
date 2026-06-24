@@ -109,6 +109,29 @@ describe('preview metric placeholders', () => {
     expect(refreshControl.props.refreshing).toBe(false);
   });
 
+  test('Home assistant card explains watch reminders instead of an unclear stable state', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider>
+          <HomeScreen
+            sessions={[blankManualSession]}
+            onOpenLogbook={jest.fn()}
+            onOpenPlanning={jest.fn()}
+            onRefresh={jest.fn()}
+          />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    const text = collectText(renderer!.toJSON());
+
+    expect(text).toContain('워치 리마인더 상태');
+    expect(text).toContain('상승과 세이프티 스톱은 워치 로그에서 가져온 리뷰용 리마인더입니다.');
+    expect(text).not.toContain('보조 상태 안정');
+  });
+
   test('Home preview refreshes when the active home tab is selected again', async () => {
     const onRefresh = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;

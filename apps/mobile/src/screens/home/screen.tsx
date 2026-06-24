@@ -89,9 +89,9 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
 
         <DiveSummaryCard>
           <HStack space="md" className="items-center">
-            <AssistantMark />
+            <AssistantMark label={t('home.reminderMark')} />
             <VStack space="xs" className="flex-1">
-              <Text className="text-base font-semibold text-card-foreground">{t('home.assistantSteady')}</Text>
+              <Text className="text-base font-semibold text-card-foreground">{t('home.watchReminderStatus')}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">{t('home.reminderReview')}</Text>
             </VStack>
           </HStack>
@@ -182,10 +182,10 @@ function formatOptionalDuration(seconds: number | undefined): string {
   return seconds === undefined ? '--:--' : formatDuration(seconds);
 }
 
-function AssistantMark(): React.JSX.Element {
+function AssistantMark(props: { label: string }): React.JSX.Element {
   return (
     <VStack className="h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-      <Text className="text-lg font-semibold text-primary">OK</Text>
+      <Text className="text-sm font-semibold text-primary">{props.label}</Text>
     </VStack>
   );
 }
