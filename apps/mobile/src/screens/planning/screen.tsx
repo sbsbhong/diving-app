@@ -22,6 +22,7 @@ type PlanningScreenProps = {
   plans?: DivePlan[];
   onRefresh: () => void | Promise<void>;
   isRefreshing?: boolean;
+  reselectToken?: number;
   onSavePlan?: (plan: DivePlan) => Promise<DivePlan>;
   onDeletePlan?: (localId: string) => Promise<void>;
   onCreateLogFromPlan?: (plan: DivePlan) => void;
@@ -42,6 +43,8 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
   const [selectedId, setSelectedId] = React.useState(plans[0]?.localId);
   const [draftPlan, setDraftPlan] = React.useState<DivePlan | undefined>();
   const [completedPromptPlan, setCompletedPromptPlan] = React.useState<DivePlan | undefined>();
+  const scrollViewRef = React.useRef<React.ComponentRef<typeof KeyboardAwareScrollView>>(null);
+  const previousReselectToken = React.useRef(props.reselectToken ?? 0);
   const visiblePlans = React.useMemo(() => (filter === 'all' ? plans : plans.filter(plan => plan.status === filter)), [filter, plans]);
   const selectedPlan = plans.find(plan => plan.localId === selectedId);
   const activePlan = React.useMemo(() => selectActivePlan(plans), [plans]);
@@ -59,6 +62,18 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
       setRoute('list');
     }
   }, [route, selectedPlan, visiblePlans]);
+
+  React.useEffect(() => {
+    const reselectToken = props.reselectToken ?? 0;
+
+    if (reselectToken === previousReselectToken.current) {
+      return;
+    }
+
+    previousReselectToken.current = reselectToken;
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    void props.onRefresh();
+  }, [props]);
 
   const openCreate = React.useCallback(() => {
     setDraftPlan(createBlankDivePlan());
@@ -120,6 +135,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
 
   return (
     <KeyboardAwareScrollView
+      ref={scrollViewRef}
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-4 pb-6"
       refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}

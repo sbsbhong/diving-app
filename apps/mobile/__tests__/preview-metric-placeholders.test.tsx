@@ -109,6 +109,41 @@ describe('preview metric placeholders', () => {
     expect(refreshControl.props.refreshing).toBe(false);
   });
 
+  test('Home preview refreshes when the active home tab is selected again', async () => {
+    const onRefresh = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider>
+          <HomeScreen
+            sessions={[blankManualSession]}
+            onOpenLogbook={jest.fn()}
+            onOpenPlanning={jest.fn()}
+            onRefresh={onRefresh}
+            reselectToken={0}
+          />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    await ReactTestRenderer.act(async () => {
+      renderer!.update(
+        <AppPreferencesProvider>
+          <HomeScreen
+            sessions={[blankManualSession]}
+            onOpenLogbook={jest.fn()}
+            onOpenPlanning={jest.fn()}
+            onRefresh={onRefresh}
+            reselectToken={1}
+          />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
   test('Memory preview and aggregate metrics keep unknown manual values as placeholders', async () => {
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 

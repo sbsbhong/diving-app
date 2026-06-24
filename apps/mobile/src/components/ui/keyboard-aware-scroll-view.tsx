@@ -8,19 +8,26 @@ type KeyboardAwareScrollViewProps = ScrollViewProps & {
   keyboardVerticalOffset?: number;
 };
 
-export function KeyboardAwareScrollView({
-  children,
-  keyboardDismissMode,
-  keyboardShouldPersistTaps,
-  keyboardVerticalOffset = 0,
-  ...scrollViewProps
-}: KeyboardAwareScrollViewProps): React.JSX.Element {
+export const KeyboardAwareScrollView = React.forwardRef<
+  React.ComponentRef<typeof ScrollView>,
+  KeyboardAwareScrollViewProps
+>(function KeyboardAwareScrollView(
+  {
+    children,
+    keyboardDismissMode,
+    keyboardShouldPersistTaps,
+    keyboardVerticalOffset = 0,
+    ...scrollViewProps
+  },
+  ref,
+): React.JSX.Element {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={keyboardVerticalOffset}
       style={{ flex: 1 }}>
       <ScrollView
+        ref={ref}
         {...scrollViewProps}
         keyboardDismissMode={keyboardDismissMode ?? (Platform.OS === 'ios' ? 'interactive' : 'on-drag')}
         keyboardShouldPersistTaps={keyboardShouldPersistTaps ?? 'handled'}>
@@ -28,4 +35,4 @@ export function KeyboardAwareScrollView({
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+});

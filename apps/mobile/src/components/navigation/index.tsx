@@ -39,6 +39,7 @@ type NavigationRouteName = keyof RootStackParamList;
 type AppTabNavigatorProps = {
   children: React.ReactNode;
   initialRouteName?: NavigationRouteName;
+  onRouteReselect?: (routeName: NavigationRouteName) => void;
 };
 
 type AppTabScreenProps = {
@@ -56,6 +57,12 @@ export default function RootNavigation(): React.JSX.Element {
       }
     | undefined
   >();
+  const [reselectTokens, setReselectTokens] = React.useState<Record<NavigationRouteName, number>>({
+    home: 0,
+    logbook: 0,
+    planning: 0,
+    settings: 0,
+  });
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
   const planning = useDivePlans();
@@ -98,6 +105,13 @@ export default function RootNavigation(): React.JSX.Element {
     rootNavigationActions.current?.navigate('planning');
   }, []);
 
+  const reselectRoute = React.useCallback((routeName: NavigationRouteName) => {
+    setReselectTokens(currentTokens => ({
+      ...currentTokens,
+      [routeName]: currentTokens[routeName] + 1,
+    }));
+  }, []);
+
   return (
     <VStack
       className="flex-1 bg-background"
@@ -107,7 +121,7 @@ export default function RootNavigation(): React.JSX.Element {
         paddingRight: insets.right,
       }}>
       <NavigationContainer>
-        <AppTabs.Navigator initialRouteName="home">
+        <AppTabs.Navigator initialRouteName="home" onRouteReselect={reselectRoute}>
           <AppTabs.Screen name="home">
             {() => (
               <HomeScreen
@@ -116,6 +130,7 @@ export default function RootNavigation(): React.JSX.Element {
                 onOpenPlanning={openPlanning}
                 onRefresh={logbook.refresh}
                 isRefreshing={logbook.isRefreshing}
+                reselectToken={reselectTokens.home}
               />
             )}
           </AppTabs.Screen>
@@ -128,6 +143,7 @@ export default function RootNavigation(): React.JSX.Element {
                 onSyncWatch={logbook.syncWatchPayloads}
                 onRefresh={logbook.refresh}
                 isRefreshing={logbook.isRefreshing}
+                reselectToken={reselectTokens.logbook}
                 onSaveEntry={logbook.saveEntry}
                 onDeleteEntry={logbook.deleteEntry}
                 saveError={logbook.saveError}
@@ -144,6 +160,7 @@ export default function RootNavigation(): React.JSX.Element {
                 plans={planning.plans}
                 onRefresh={planning.refresh}
                 isRefreshing={planning.isRefreshing}
+                reselectToken={reselectTokens.planning}
                 onSavePlan={planning.savePlan}
                 onDeletePlan={planning.deletePlan}
                 saveError={planning.saveError}
@@ -160,7 +177,7 @@ export default function RootNavigation(): React.JSX.Element {
   );
 }
 
-function AppTabNavigator({ children, initialRouteName }: AppTabNavigatorProps): React.JSX.Element {
+function AppTabNavigator({ children, initialRouteName, onRouteReselect }: AppTabNavigatorProps): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { state, navigation, descriptors, NavigationContent } = useNavigationBuilder<
@@ -218,7 +235,10 @@ function AppTabNavigator({ children, initialRouteName }: AppTabNavigatorProps): 
                     ...TabActions.jumpTo(route.name),
                     target: state.key,
                   });
+                  return;
                 }
+
+                onRouteReselect?.(route.name as NavigationRouteName);
               }}
             />
           );

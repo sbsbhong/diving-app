@@ -170,6 +170,8 @@ const renderLogbook = async (
       sourcePlanLocalId?: string;
     };
     onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
+    reselectToken?: number;
+    onRefresh?: () => void | Promise<void>;
   } = {},
 ) => {
   const queryClient = new QueryClient({
@@ -288,6 +290,44 @@ describe('Logbook manual entry flow', () => {
 
     expect(refreshControl.type).toBe(RefreshControl);
     expect(refreshControl.props.refreshing).toBe(false);
+  });
+
+  test('refreshes when the active logbook tab is selected again', async () => {
+    const onRefresh = jest.fn();
+
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    await ReactTestRenderer.act(async () => {
+      await i18n.changeLanguage('en');
+      renderer = ReactTestRenderer.create(
+        <LogbookScreen
+          entries={[]}
+          filter={{ query: '' }}
+          onFilterChange={jest.fn()}
+          onSyncWatch={async () => ({ importedCount: 0, receivedCount: 0, unavailable: false })}
+          onRefresh={onRefresh}
+          onSaveEntry={jest.fn()}
+          onDeleteEntry={jest.fn()}
+          reselectToken={0}
+        />,
+      );
+    });
+
+    await ReactTestRenderer.act(async () => {
+      renderer!.update(
+        <LogbookScreen
+          entries={[]}
+          filter={{ query: '' }}
+          onFilterChange={jest.fn()}
+          onSyncWatch={async () => ({ importedCount: 0, receivedCount: 0, unavailable: false })}
+          onRefresh={onRefresh}
+          onSaveEntry={jest.fn()}
+          onDeleteEntry={jest.fn()}
+          reselectToken={1}
+        />,
+      );
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   test('import action drains pending WatchConnectivity payloads into the logbook', async () => {

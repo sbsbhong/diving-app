@@ -22,6 +22,7 @@ type HomeScreenProps = {
   onOpenPlanning: () => void;
   onRefresh: () => void | Promise<void>;
   isRefreshing?: boolean;
+  reselectToken?: number;
 };
 
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
@@ -31,9 +32,24 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const recentDurationSeconds = recentSession ? getSessionDurationSeconds(recentSession) : undefined;
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const syncStatus = recentSession?.syncStatus ?? 'pending';
+  const scrollViewRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const previousReselectToken = React.useRef(props.reselectToken ?? 0);
+
+  React.useEffect(() => {
+    const reselectToken = props.reselectToken ?? 0;
+
+    if (reselectToken === previousReselectToken.current) {
+      return;
+    }
+
+    previousReselectToken.current = reselectToken;
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    void props.onRefresh();
+  }, [props]);
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-4 pb-6"
       refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}

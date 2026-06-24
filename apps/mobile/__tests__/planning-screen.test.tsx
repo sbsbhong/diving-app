@@ -148,6 +148,40 @@ describe('Planning screen planbook flow', () => {
     expect(refreshControl.props.refreshing).toBe(false);
   });
 
+  it('refreshes when the active planning tab is selected again', async () => {
+    const onRefresh = jest.fn();
+
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    await ReactTestRenderer.act(async () => {
+      await i18n.changeLanguage('en');
+      renderer = ReactTestRenderer.create(
+        <PlanningScreen
+          sessions={[]}
+          plans={[]}
+          onRefresh={onRefresh}
+          onSavePlan={jest.fn()}
+          onOpenLogbook={jest.fn()}
+          reselectToken={0}
+        />,
+      );
+    });
+
+    await ReactTestRenderer.act(async () => {
+      renderer!.update(
+        <PlanningScreen
+          sessions={[]}
+          plans={[]}
+          onRefresh={onRefresh}
+          onSavePlan={jest.fn()}
+          onOpenLogbook={jest.fn()}
+          reselectToken={1}
+        />,
+      );
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
   it('edits an existing plan without creating a duplicate', async () => {
     const repository = new LocalDivePlanRepository([
       plan({

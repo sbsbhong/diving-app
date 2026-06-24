@@ -27,6 +27,7 @@ type LogbookScreenProps = {
   onSyncWatch: () => Promise<WatchSyncActionResult>;
   onRefresh: () => void | Promise<void>;
   isRefreshing?: boolean;
+  reselectToken?: number;
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
   pendingDraft?: {
@@ -49,6 +50,8 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   const [syncToastMessage, setSyncToastMessage] = React.useState<string | undefined>();
   const [isSyncingWatch, setIsSyncingWatch] = React.useState(false);
   const consumedPendingDraftKey = React.useRef<string | undefined>(undefined);
+  const scrollViewRef = React.useRef<React.ComponentRef<typeof KeyboardAwareScrollView>>(null);
+  const previousReselectToken = React.useRef(props.reselectToken ?? 0);
   const visibleEntries = React.useMemo(() => {
     if (syncFilter === 'all') {
       return props.entries;
@@ -88,6 +91,18 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     setDraftEntry(props.pendingDraft.entry);
     setRoute('create');
   }, [props.pendingDraft]);
+
+  React.useEffect(() => {
+    const reselectToken = props.reselectToken ?? 0;
+
+    if (reselectToken === previousReselectToken.current) {
+      return;
+    }
+
+    previousReselectToken.current = reselectToken;
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    void props.onRefresh();
+  }, [props]);
 
   const openCreate = React.useCallback(() => {
     setDraftEntry(createBlankDiveLogEntry());
@@ -144,6 +159,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
 
   return (
     <KeyboardAwareScrollView
+      ref={scrollViewRef}
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-4 pb-6"
       refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}
