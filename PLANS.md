@@ -62,6 +62,106 @@ Every phase must have a verification gate. If the same gate fails three times wi
 - Remaining risks:
 - Manual setup required:
 
+## Epic: Pre-device-test mobile and watch readiness
+
+### Phase 0 Investigation
+
+- Goal: Map the current mobile navigation, form/input, logbook import, refresh, watch planning, device management, and home status surfaces before editing.
+- Files to inspect:
+  - `apps/mobile/package.json`
+  - `apps/mobile/src/App.tsx`
+  - `apps/mobile/src/providers.tsx`
+  - `apps/mobile/src/components/navigation/index.tsx`
+  - `apps/mobile/src/screens/home/screen.tsx`
+  - `apps/mobile/src/screens/logbook/screen.tsx`
+  - `apps/mobile/src/screens/planning/screen.tsx`
+  - `apps/mobile/src/screens/memory/screen.tsx`
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/native/watch-connectivity.ts`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveWatchApp/**`
+- Implementation notes:
+  - Keep the existing UI primitives and visual language unless a requirement directly asks for a UX change.
+  - Use `@react-navigation/native` as the new navigation state container while preserving the custom tab bar styling.
+  - Treat manual import as a user-facing sync affordance, not a second source of truth.
+  - Do not introduce Supabase, auth, certified dive-computer copy, or physical-device-only verification gates.
+- Verification gate: `yarn workspace @repo/mobile test --runInBand` for focused touched tests and `yarn mobile:typecheck`.
+- Risk: React Navigation may require additional peer dependencies for a richer navigator; the first pass should avoid adding extra packages unless the build requires them.
+
+### Phase 1 Contract
+
+- Goal: Define the app-level behavior contracts for navigation, refresh, keyboard avoidance, manual watch sync, formatting, planned dives, and linked watch display.
+- Files to create or update:
+  - `apps/mobile/__tests__/*.test.tsx`
+  - `apps/mobile/__tests__/*.test.ts`
+  - `apps/mobile/src/types/*.ts`
+  - `apps/mobile/src/native/watch-connectivity.ts`
+- Implementation notes:
+  - Add or extend tests before behavior changes where the existing Jest setup can exercise the code.
+  - Keep native contracts explicit for linked watch metadata and manual sync status.
+  - Round display numbers at formatting boundaries so stored/raw watch values remain intact.
+- Verification gate: Each requirement gets a focused red/green test run before its commit when testable, then `yarn mobile:typecheck`.
+- Risk: Some UI behavior such as keyboard avoidance and pull-to-refresh is partly platform behavior and may need simulator/manual validation after type/test gates.
+
+### Phase 2 Core Implementation
+
+- Goal: Implement requirements 1 through 10 in separate commits.
+- Files to create or update:
+  - `apps/mobile/package.json`
+  - `yarn.lock`
+  - `apps/mobile/src/components/navigation/index.tsx`
+  - `apps/mobile/src/screens/home/screen.tsx`
+  - `apps/mobile/src/screens/logbook/screen.tsx`
+  - `apps/mobile/src/screens/planning/screen.tsx`
+  - `apps/mobile/src/screens/memory/screen.tsx`
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/native/watch-connectivity.ts`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveWatchApp/**`
+- Implementation notes:
+  - Commit messages must start with `feat:`, `fix:`, `refactor:`, or `chore:` and use lowercase after the prefix.
+  - Keep one requirement per implementation commit so rollback remains practical.
+  - Prefer `KeyboardAvoidingView`, `ScrollView`/`FlatList` keyboard props, and `RefreshControl` before custom gesture code.
+  - Let active tab reselection trigger refresh and scroll-to-top through a shared route registry instead of duplicated per-tab hacks.
+- Verification gate: Focused Jest/typecheck after each high-risk requirement; broader gate in Phase 4.
+- Risk: Requirement 8 crosses mobile planning and watch UI; avoid safety-critical planning semantics and frame it as a non-certified reminder.
+
+### Phase 3 Integration
+
+- Goal: Wire the changed app behavior into native/mobile boundaries and durable project knowledge.
+- Files to create or update:
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/log.md`
+  - `README.md`
+  - `apps/mobile/README.md`
+  - `AGENTS.md`
+  - `apps/mobile/AGENTS.md`
+- Implementation notes:
+  - Update durable docs only for architecture, sync behavior, planning/watch boundary, or recurring pitfalls that actually changed.
+  - Keep README/AGENTS concise and focused on active developer workflow.
+- Verification gate: Search docs for stale statements after code changes and run `yarn codex:check`.
+- Risk: Documentation can overstate simulator or physical-device verification; explicitly separate verified simulator behavior from unverified real-device behavior.
+
+### Phase 4 Cleanup/Review
+
+- Goal: Run final verification, review commit boundaries, and report remaining risks before real-device testing.
+- Files to review:
+  - `git log --oneline`
+  - `git status --short`
+  - `git diff --stat main...HEAD`
+  - touched source, native, test, and docs files
+- Implementation notes:
+  - Run `yarn mobile:typecheck`, focused Jest suites, `yarn watch:build`, and `yarn codex:check`.
+  - Run `yarn ios:build` if CocoaPods/native workspace is available.
+  - Run `git diff --check` before final reporting.
+- Verification gate: Final command outputs and exit codes are recorded in the handoff.
+- Risk: Physical Apple Watch behavior remains unverified until the user runs real-device testing.
+
 ## Epic: Watch app mobile migration
 
 ### Phase 0 Investigation
