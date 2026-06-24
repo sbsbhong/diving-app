@@ -30,7 +30,7 @@
 
 ### `apps/mobile`
 
-모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 custom bottom-tab navigation, AsyncStorage 기반 Logbook/Planbook/설정 저장소, watch fixture import, 수동 로그 작성, 계획 알림, iOS WatchConnectivity receiver PoC, companion watch target embed 구조를 갖는다. 인증, Supabase client, cloud backup, paired-device delivery 검증은 아직 없다.
+모바일 앱은 React Native 기반의 다이빙 로그 리뷰 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 custom bottom-tab navigation, AsyncStorage 기반 Logbook/Planbook/설정 저장소, watch fixture import, 수동 로그 작성, 계획 알림, iOS WatchConnectivity receiver/import acknowledgement PoC, companion watch target embed 구조를 갖는다. 인증, Supabase client, cloud backup, 실기기/background delivery 검증은 아직 없다.
 
 모바일 앱은 사용자 프로필, 인증, 로그북, 수동 로그 작성, 미래 Supabase sync, 통계/검색/리뷰/공유 흐름의 중심이 된다. 직접 SQL, 중복 Supabase schema type, watch-only sensor capture logic, imported watch sample을 손실시키는 raw rewrite는 넣지 않는다.
 

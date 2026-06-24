@@ -4,7 +4,7 @@
 
 ## 앱 목적
 
-`apps/mobile`은 다이빙 로그를 탐색하고 watch-captured 세션을 리뷰하는 모바일 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 production backend가 없지만, generated watch contract type, fixture import, AsyncStorage 기반 local persistence, iOS WatchConnectivity receiver PoC, embedded watchOS companion target을 사용해 앱 구조와 UX boundary를 잡고 있다.
+`apps/mobile`은 다이빙 로그를 탐색하고 watch-captured 세션을 리뷰하는 모바일 surface이자 iPhone/watch companion bundle의 소유자다. 현재는 production backend가 없지만, generated watch contract type, fixture import, AsyncStorage 기반 local persistence, iOS WatchConnectivity receiver/import acknowledgement PoC, embedded watchOS companion target을 사용해 앱 구조와 UX boundary를 잡고 있다.
 
 장기적으로 모바일 앱은 authentication, user profile, dive log list/detail, manual dive creation, Supabase sync, statistics, search, planning, memory/share, backup flow의 중심이 된다. watch 앱에서 온 원본 기록은 손실 없이 보존하고, server/user 연결은 향후 모바일 또는 backend layer에서 처리한다. 별도 watch workspace를 다시 만들지 않고, watch source와 target membership은 `ios/DiveWatchApp`와 `ios/DiveMobile.xcodeproj`에서 관리한다.
 
@@ -18,7 +18,7 @@
 - `@tanstack/react-query`
 - Gluestack UI v4 alpha, NativeWind, Tailwind CSS
 - Custom bottom-tab navigation in app code
-- iOS native WatchConnectivity bridge와 embedded watchOS companion target
+- iOS native WatchConnectivity bridge, import acknowledgement, embedded watchOS companion target
 
 새 dependency나 UI framework를 추가하려면 명시적 필요성과 기존 패턴으로 해결할 수 없는 이유가 있어야 한다.
 

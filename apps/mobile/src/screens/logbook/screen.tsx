@@ -132,7 +132,12 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
                 onPress={openCreate}
                 className="min-h-10 px-4 py-2"
               />
-              <InstrumentButton label={t('logbook.import')} onPress={props.onImportFixtures} className="min-h-10 px-4 py-2" />
+              <InstrumentButton
+                testID="logbook-import-action"
+                label={t('logbook.import')}
+                onPress={props.onImportFixtures}
+                className="min-h-10 px-4 py-2"
+              />
             </HStack>
           </HStack>
           <VStack space="md" className="rounded-2xl bg-card px-4 py-4">

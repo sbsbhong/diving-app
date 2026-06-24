@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import metadataRichFixture from '../../../packages/contracts/fixtures/metadata-rich-watch-sync-message.json';
 import i18n from '../src/i18n';
 import { LocalDiveLogRepository } from '../src/repositories/local-dive-log-repository';
 import LogbookScreen from '../src/screens/logbook/screen';
@@ -9,6 +10,20 @@ import type { DiveLogEntry } from '../src/types/dive-log-entry';
 import type { WatchSession } from '../src/types/dive-session';
 import { createBlankDiveLogEntry } from '../src/utils/create-dive-log-entry';
 import { watchSessionToDiveLogEntry } from '../src/utils/watch-session-to-dive-log-entry';
+
+const mockIsWatchConnectivityAvailable = jest.fn();
+const mockDrainPendingWatchConnectivityPayloads = jest.fn();
+const mockAcknowledgeWatchConnectivityPayloads = jest.fn();
+const mockAcknowledgeImportedWatchConnectivityPayloads = jest.fn();
+
+jest.mock('../src/native/watch-connectivity', () => ({
+  isWatchConnectivityAvailable: () => mockIsWatchConnectivityAvailable(),
+  drainPendingWatchConnectivityPayloads: () => mockDrainPendingWatchConnectivityPayloads(),
+  acknowledgeWatchConnectivityPayloads: (payloadIds: readonly string[]) => mockAcknowledgeWatchConnectivityPayloads(payloadIds),
+  acknowledgeImportedWatchConnectivityPayloads: (payloadIds: readonly string[]) =>
+    mockAcknowledgeImportedWatchConnectivityPayloads(payloadIds),
+  subscribeToWatchConnectivityPayloads: () => ({ remove: jest.fn() }),
+}));
 
 class ToggleFailSaveRepository extends LocalDiveLogRepository {
   shouldFailSave = true;
@@ -217,6 +232,13 @@ const fillManualDraft = async (
 };
 
 describe('Logbook manual entry flow', () => {
+  beforeEach(() => {
+    mockIsWatchConnectivityAvailable.mockReturnValue(false);
+    mockDrainPendingWatchConnectivityPayloads.mockResolvedValue([]);
+    mockAcknowledgeWatchConnectivityPayloads.mockResolvedValue(undefined);
+    mockAcknowledgeImportedWatchConnectivityPayloads.mockResolvedValue(undefined);
+  });
+
   afterEach(async () => {
     await ReactTestRenderer.act(async () => {
       for (const renderer of renderers.splice(0)) {
@@ -227,6 +249,8 @@ describe('Logbook manual entry flow', () => {
     for (const queryClient of queryClients.splice(0)) {
       queryClient.clear();
     }
+
+    jest.clearAllMocks();
   });
 
   test('create action opens the manual editor', async () => {
@@ -237,6 +261,38 @@ describe('Logbook manual entry flow', () => {
 
     expect(root.findByProps({ testID: 'log-entry-editor-site-name' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-save' })).toBeTruthy();
+  });
+
+  test('import action drains pending WatchConnectivity payloads into the logbook', async () => {
+    const repository = new LocalDiveLogRepository([]);
+    const payload = {
+      ...metadataRichFixture,
+      session: {
+        ...metadataRichFixture.session,
+        localSessionId: 'button-drain-session',
+        siteName: 'Button Drain Reef',
+        endedAt: 1781359999,
+      },
+    };
+    mockIsWatchConnectivityAvailable.mockReturnValue(true);
+    mockDrainPendingWatchConnectivityPayloads.mockResolvedValue([
+      {
+        payloadId: 'button-payload-1',
+        payloadJson: JSON.stringify(payload),
+        localSessionId: 'button-drain-session',
+        receivedAt: 1781360100,
+      },
+    ]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-import-action');
+
+    const entries = await repository.list();
+    expect(entries).toHaveLength(1);
+    expect(entries[0].watchCapture?.session.localSessionId).toBe('button-drain-session');
+    expect(root.findByProps({ testID: 'logbook-list-item-Button Drain Reef' })).toBeTruthy();
+    expect(mockAcknowledgeImportedWatchConnectivityPayloads).toHaveBeenCalledWith(['button-payload-1']);
   });
 
   test('saves manual local-only entries through the repository flow and lists them with watch entries', async () => {

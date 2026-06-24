@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-모바일 앱은 `DiveLogRepository`와 `DivePlanRepository` 경계를 갖고 AsyncStorage 기반 persistent repository를 기본으로 사용한다. 모바일은 원시 watch sync JSON을 실행 시점에 검증한 뒤 `WatchSyncMessage`로 좁혀 import할 수 있다. Watch 앱 source는 `apps/mobile/ios/DiveWatchApp`로 이관됐고, `apps/mobile/ios/DiveMobile.xcodeproj`의 embedded companion target으로 관리된다. Watch 앱은 sync-ready JSON encoder, 로컬 저장 흐름, WatchConnectivity `transferUserInfo` enqueue PoC를 갖는다. 모바일 iOS app도 WatchConnectivity userInfo를 React Native로 넘기는 PoC receiver를 갖는다. 다만 pairing, entitlement, background delivery, retry behavior, 실기기 검증은 아직 완료되지 않았다. `RealDepthSensorProvider`는 자리 표시자이며 실제 Apple Watch underwater sensor behavior는 검증되지 않았다. Supabase, 인증, cloud backup은 아직 구현되어 있지 않다.
+모바일 앱은 `DiveLogRepository`와 `DivePlanRepository` 경계를 갖고 AsyncStorage 기반 persistent repository를 기본으로 사용한다. 모바일은 원시 watch sync JSON을 실행 시점에 검증한 뒤 `WatchSyncMessage`로 좁혀 import할 수 있다. Watch 앱 source는 `apps/mobile/ios/DiveWatchApp`로 이관됐고, `apps/mobile/ios/DiveMobile.xcodeproj`의 embedded companion target으로 관리된다. Watch 앱은 sync-ready JSON encoder, 로컬 저장 흐름, WatchConnectivity `transferUserInfo` enqueue, reachable `sendMessage`, activation/reachability 기반 pending retry, acknowledgement 기반 local sync status 갱신을 갖는다. 모바일 iOS app도 WatchConnectivity userInfo/message를 durable inbox에 저장한 뒤 React Native로 넘기는 receiver와 JS acknowledge 경로를 갖는다. 다만 entitlement, background delivery, 사용자-facing retry/backoff policy, 실기기 검증은 아직 완료되지 않았다. `RealDepthSensorProvider`는 자리 표시자이며 실제 Apple Watch underwater sensor behavior는 검증되지 않았다. Supabase, 인증, cloud backup은 아직 구현되어 있지 않다.
 
 ## 상세
 
@@ -19,10 +19,13 @@
    - 관련 문서: [[architecture/sync-flow]]
 
 2. WatchConnectivity 전송 계층 PoC
-   - Watch 앱은 저장된 `DiveSession`을 `WatchSyncTransport`로 `transferUserInfo`에 enqueue한다.
-   - 모바일 iOS native code는 `WatchConnectivityInbox`와 `WatchConnectivityModule`로 envelope를 raw JSON payload로 복원해 React Native에 전달한다.
-   - 모바일 JS는 `WatchConnectivitySyncProvider`에서 pending payload와 event payload를 받아 기존 runtime validator와 repository import 흐름으로 넘긴다.
-   - 이 항목은 전송 계층 code boundary와 build/import behavior를 만든 상태이며, paired-device delivery 검증 완료를 뜻하지 않는다.
+   - Watch 앱은 저장된 `DiveSession`을 `WatchSyncTransport`로 `transferUserInfo`에 enqueue하고, reachable 상태에서는 `sendMessage`도 병행한다.
+   - Watch 앱은 activation 완료와 reachability 변경 시 아직 `synced`가 아닌 저장 세션을 다시 enqueue한다.
+   - Watch 앱은 transfer 오류와 모바일 import acknowledgement로 저장된 local session의 `syncStatus`를 갱신한다. `synced` 상태는 뒤늦은 failed 결과로 내리지 않는다.
+   - 모바일 iOS native code는 `WatchConnectivityInbox`와 `WatchConnectivityModule`로 userInfo/message envelope를 raw JSON payload로 복원해 durable inbox에 저장하고 React Native에 전달한다.
+   - 모바일 JS는 `WatchConnectivitySyncProvider`에서 pending payload와 event payload를 받아 기존 runtime validator와 repository import 흐름으로 넘긴다. 저장 성공 또는 무효 payload drop 이후에는 native inbox에 acknowledge한다. Import 완료 acknowledgement도 `transferUserInfo`와 reachable `sendMessage`를 병행한다.
+   - WatchConnectivity로 받아 저장한 모바일 항목은 top-level `syncStatus`를 `synced`로 보정하지만, raw watch capture 안의 원본 `session.syncStatus`는 보존한다.
+   - 이 항목은 전송 계층 code boundary와 활성 simulator import/ack behavior를 만든 상태이며, 실기기 paired-device delivery 검증 완료를 뜻하지 않는다.
    - 관련 문서: [[architecture/watch-app]], [[architecture/sync-flow]]
 
 3. Watch app mobile migration
@@ -36,8 +39,8 @@
 
 1. WatchConnectivity 실기기 검증과 sync 상태 확정
    - watch 로컬 세션이 실제 paired iPhone으로 전달되는지 지원 hardware에서 검증해야 한다.
-   - 모바일에서 `pending`, `synced`, `failed` 상태를 실제 동기화 상태로 갱신하는 durable 상태 모델과 retry policy는 아직 남아 있다.
-   - pairing, entitlement, background delivery, retry behavior는 simulator만으로 검증됐다고 쓰면 안 된다.
+   - Durable native inbox, reachable live message, JS acknowledge, 모바일 수신 성공 시 `synced` 표시, watch acknowledgement status 갱신은 구현됐지만, 사용자-facing retry/backoff policy와 manual retry UI는 아직 없다.
+   - entitlement, background delivery, 장시간 retry behavior, 실기기 pairing은 simulator만으로 검증됐다고 쓰면 안 된다.
    - 관련 문서: [[architecture/watch-app]], [[architecture/sync-flow]]
 
 2. 실제 Apple Watch 수심 센서 provider

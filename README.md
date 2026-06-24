@@ -21,12 +21,12 @@ Apple Watch 기록과 React Native 모바일 로그북을 함께 다루는 compa
   - React Native `0.85.3` 모바일 앱
   - AsyncStorage 기반 Logbook/Planbook/설정 저장소
   - watch fixture import와 runtime watch sync JSON validation
-  - iOS WatchConnectivity receiver PoC
+  - iOS WatchConnectivity receiver PoC와 active simulator import/ack 확인 경로
 - `apps/mobile/ios/DiveWatchApp`:
   - `apps/mobile/ios/DiveMobile.xcodeproj` 안의 embedded watchOS companion target
   - Start/End 기록 흐름, 세션 요약, UserDefaults 기반 로컬 저장
   - 저장된 세션 목록/상세 화면
-  - 저장 시 WatchConnectivity `transferUserInfo` enqueue PoC
+  - 저장 시 WatchConnectivity `transferUserInfo` enqueue와 reachable `sendMessage` 병행 PoC
 
 ## 폴더 구조
 ```text

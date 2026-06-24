@@ -1,5 +1,57 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - WatchConnectivity live retry and acknowledgement
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/__tests__/watch-connectivity-native-source.test.ts`
+- 요약:
+  - WatchConnectivity `transferUserInfo`만 쓰던 전송 경로에 reachable `sendMessage`를 병행하는 동작을 기록했다. Watch 앱은 activation/reachability 이후 pending 세션을 재전송하고, 모바일 import acknowledgement도 live message와 durable transfer를 병행한다. 활성 simulator에서는 watch 세션 import와 watch `syncStatus: "synced"` acknowledgement가 확인됐지만, background delivery와 실기기 paired-device 검증은 남은 항목으로 유지했다.
+
+## 2026-06-24 - 구조 - WatchConnectivity import acknowledgement
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/states/use-dive-logbook.ts`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/__tests__/watch-connectivity-sync.test.tsx`
+  - `apps/mobile/__tests__/logbook-manual-entry.test.tsx`
+- 요약:
+  - WatchConnectivity `transferUserInfo` 완료와 모바일 import 완료를 분리했다. Watch local session은 전송 성공만으로 `synced`가 되지 않고, 모바일 repository 저장 뒤 돌아오는 `watchSyncAcknowledgement`를 받은 뒤에만 `synced`가 된다. Logbook import action은 pending WatchConnectivity native inbox를 수동 drain하며, native module이 없는 환경에서만 fixture import로 fallback한다.
+
+## 2026-06-24 - 구조 - WatchConnectivity durable inbox and status
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/__tests__/watch-connectivity-sync.test.tsx`
+- 요약:
+  - 모바일 WatchConnectivity 수신 payload가 durable inbox에 저장되고 JS import 뒤 acknowledge되는 사실을 기록했다. Watch transfer 완료 callback이 watch local session의 `syncStatus`를 갱신하고, 모바일 수신 성공 항목은 top-level `syncStatus`를 `synced`로 보정한다. Paired-device delivery, entitlement, background delivery, retry/backoff behavior, 실기기 전송 검증은 아직 남은 항목으로 유지했다.
+
 ## 2026-06-24 - 구조 - watch app mobile migration
 
 - 수정:

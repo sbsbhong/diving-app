@@ -3,6 +3,7 @@ import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 export const WATCH_CONNECTIVITY_PAYLOAD_EVENT = 'DiveWatchSyncPayloadReceived';
 
 export type WatchConnectivityPayload = {
+  payloadId?: string;
   payloadJson: string;
   localSessionId?: string;
   receivedAt?: number;
@@ -14,6 +15,8 @@ export type WatchConnectivitySubscription = {
 
 type WatchConnectivityModule = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
+  acknowledgePayloads?: (payloadIds: string[]) => Promise<void>;
+  acknowledgeImportedPayloads?: (payloadIds: string[]) => Promise<void>;
   addListener: (eventName: string) => void;
   removeListeners: (count: number) => void;
 };
@@ -33,6 +36,22 @@ export async function drainPendingWatchConnectivityPayloads(): Promise<WatchConn
   }
 
   return nativeModule.drainPendingPayloads();
+}
+
+export async function acknowledgeWatchConnectivityPayloads(payloadIds: readonly string[]): Promise<void> {
+  if (!nativeModule?.acknowledgePayloads || payloadIds.length === 0) {
+    return;
+  }
+
+  await nativeModule.acknowledgePayloads([...payloadIds]);
+}
+
+export async function acknowledgeImportedWatchConnectivityPayloads(payloadIds: readonly string[]): Promise<void> {
+  if (!nativeModule?.acknowledgeImportedPayloads || payloadIds.length === 0) {
+    return;
+  }
+
+  await nativeModule.acknowledgeImportedPayloads([...payloadIds]);
 }
 
 export function subscribeToWatchConnectivityPayloads(

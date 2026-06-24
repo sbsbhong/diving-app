@@ -34,10 +34,6 @@ final class WatchConnectivityModule: RCTEventEmitter {
 
       self.sendEvent(withName: WatchConnectivityModule.eventName, body: payload)
     }
-
-    for payload in WatchConnectivityInbox.shared.drainPendingPayloads() {
-      sendEvent(withName: WatchConnectivityModule.eventName, body: payload)
-    }
   }
 
   override func stopObserving() {
@@ -52,6 +48,26 @@ final class WatchConnectivityModule: RCTEventEmitter {
   @objc(drainPendingPayloads:rejecter:)
   func drainPendingPayloads(resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
     resolve(WatchConnectivityInbox.shared.drainPendingPayloads())
+  }
+
+  @objc(acknowledgePayloads:resolver:rejecter:)
+  func acknowledgePayloads(
+    payloadIds: [String],
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    WatchConnectivityInbox.shared.acknowledge(payloadIds: payloadIds)
+    resolve(nil)
+  }
+
+  @objc(acknowledgeImportedPayloads:resolver:rejecter:)
+  func acknowledgeImportedPayloads(
+    payloadIds: [String],
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    WatchConnectivityInbox.shared.acknowledgeImported(payloadIds: payloadIds)
+    resolve(nil)
   }
 
   private static let eventName = "DiveWatchSyncPayloadReceived"

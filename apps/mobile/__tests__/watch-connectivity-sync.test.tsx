@@ -48,11 +48,13 @@ describe('WatchConnectivitySyncProvider', () => {
             repository={repository}
             drainPendingPayloads={async () => [
               {
+                payloadId: 'pending-1',
                 payloadJson: JSON.stringify(metadataRichFixture),
                 localSessionId: 'fixture-rich-session',
                 receivedAt: 1781355000,
               },
             ]}
+            acknowledgePayloads={jest.fn()}
             subscribeToPayloads={() => ({ remove: jest.fn() })}
           />
         </QueryClientProvider>,
@@ -63,7 +65,42 @@ describe('WatchConnectivitySyncProvider', () => {
     const entries = await repository.list();
     expect(entries).toHaveLength(1);
     expect(entries[0].watchCapture?.session.localSessionId).toBe('fixture-rich-session');
+    expect(entries[0].syncStatus).toBe('synced');
+    expect(entries[0].watchCapture?.session.syncStatus).toBe('pending');
     expect(queryClient.getQueryData(diveLogbookQueryKeys.list(repository))).toEqual(entries);
+  });
+
+  it('acknowledges imported durable native payloads after repository save succeeds', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const queryClient = createQueryClient();
+    const acknowledgePayloads = jest.fn().mockResolvedValue(undefined);
+    const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            drainPendingPayloads={async () => [
+              {
+                payloadId: 'durable-payload-1',
+                payloadJson: JSON.stringify(metadataRichFixture),
+                localSessionId: 'fixture-rich-session',
+                receivedAt: 1781355000,
+              },
+            ]}
+            acknowledgePayloads={acknowledgePayloads}
+            acknowledgeImportedPayloads={acknowledgeImportedPayloads}
+            subscribeToPayloads={() => ({ remove: jest.fn() })}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    expect(await repository.list()).toHaveLength(1);
+    expect(acknowledgePayloads).not.toHaveBeenCalled();
+    expect(acknowledgeImportedPayloads).toHaveBeenCalledWith(['durable-payload-1']);
   });
 
   it('imports valid event payloads delivered after subscription', async () => {
@@ -77,6 +114,7 @@ describe('WatchConnectivitySyncProvider', () => {
           <WatchConnectivitySyncProvider
             repository={repository}
             drainPendingPayloads={async () => []}
+            acknowledgePayloads={jest.fn()}
             subscribeToPayloads={handler => {
               listener = handler;
               return { remove: jest.fn() };
@@ -104,6 +142,8 @@ describe('WatchConnectivitySyncProvider', () => {
   it('ignores payloads that fail the watch sync contract validator', async () => {
     const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
     const queryClient = createQueryClient();
+    const acknowledgePayloads = jest.fn().mockResolvedValue(undefined);
+    const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
     jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     await ReactTestRenderer.act(async () => {
@@ -113,11 +153,14 @@ describe('WatchConnectivitySyncProvider', () => {
             repository={repository}
             drainPendingPayloads={async () => [
               {
+                payloadId: 'invalid-payload-1',
                 payloadJson: '{"type":"sessionEnded","session":{"startedAt":1781352000,"samples":[]}}',
                 localSessionId: 'broken-session',
                 receivedAt: 1781355000,
               },
             ]}
+            acknowledgePayloads={acknowledgePayloads}
+            acknowledgeImportedPayloads={acknowledgeImportedPayloads}
             subscribeToPayloads={() => ({ remove: jest.fn() })}
           />
         </QueryClientProvider>,
@@ -131,5 +174,39 @@ describe('WatchConnectivitySyncProvider', () => {
       'Dropped invalid watch sync payload',
       expect.objectContaining({ path: 'session.localSessionId' }),
     );
+    expect(acknowledgePayloads).toHaveBeenCalledWith(['invalid-payload-1']);
+    expect(acknowledgeImportedPayloads).not.toHaveBeenCalled();
+  });
+
+  it('does not acknowledge durable payloads when repository import fails', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const queryClient = createQueryClient();
+    const acknowledgePayloads = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(repository, 'importWatchMessages').mockRejectedValue(new Error('storage unavailable'));
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            drainPendingPayloads={async () => [
+              {
+                payloadId: 'retry-later-payload',
+                payloadJson: JSON.stringify(metadataRichFixture),
+                localSessionId: 'fixture-rich-session',
+                receivedAt: 1781355000,
+              },
+            ]}
+            acknowledgePayloads={acknowledgePayloads}
+            subscribeToPayloads={() => ({ remove: jest.fn() })}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    expect(acknowledgePayloads).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('Failed to import watch sync payload', expect.any(Error));
   });
 });

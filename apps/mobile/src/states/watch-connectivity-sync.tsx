@@ -1,6 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import React from 'react';
 import {
+  acknowledgeImportedWatchConnectivityPayloads,
+  acknowledgeWatchConnectivityPayloads,
   drainPendingWatchConnectivityPayloads,
   subscribeToWatchConnectivityPayloads,
   type WatchConnectivityPayload,
@@ -8,6 +10,8 @@ import {
 } from '../native/watch-connectivity';
 import { defaultDiveLogRepository } from '../repositories/default-dive-log-repository';
 import type { DiveLogRepository } from '../repositories/dive-log-repository';
+import type { DiveLogEntry } from '../types/dive-log-entry';
+import type { WatchSyncMessage } from '../types/dive-session';
 import { parseWatchSyncMessageJson } from '../utils/watch-sync-message-validation';
 import { diveLogbookQueryKeys } from './use-dive-logbook-queries';
 
@@ -15,31 +19,61 @@ type WatchConnectivitySyncProviderProps = {
   children?: React.ReactNode;
   repository?: DiveLogRepository;
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
+  acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
+  acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
   subscribeToPayloads?: (handler: (payload: WatchConnectivityPayload) => void) => WatchConnectivitySubscription;
+};
+
+type WatchConnectivityImportOptions = {
+  repository: DiveLogRepository;
+  queryClient: QueryClient;
+  queryScope?: string;
+  drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
+  acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
+  acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
+};
+
+type WatchConnectivityAcknowledgement = (payloadIds: readonly string[]) => Promise<void>;
+
+type WatchConnectivityPayloadImportOptions = {
+  payload: WatchConnectivityPayload;
+  repository: DiveLogRepository;
+  queryClient: QueryClient;
+  queryScope?: string;
+  acknowledgePayloads: WatchConnectivityAcknowledgement;
+  acknowledgeImportedPayloads: WatchConnectivityAcknowledgement;
 };
 
 export function WatchConnectivitySyncProvider({
   children,
   repository = defaultDiveLogRepository,
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
+  acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
+  acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
   subscribeToPayloads = subscribeToWatchConnectivityPayloads,
 }: WatchConnectivitySyncProviderProps): React.JSX.Element {
   const queryClient = useQueryClient();
 
   const importPayload = React.useCallback(
     async (payload: WatchConnectivityPayload) => {
-      const result = parseWatchSyncMessageJson(payload.payloadJson);
-
-      if (!result.ok) {
-        console.warn('Dropped invalid watch sync payload', result.error);
-        return;
-      }
-
-      const entries = await repository.importWatchMessages([result.message]);
-      queryClient.setQueryData(diveLogbookQueryKeys.list(repository), entries);
-      queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository) });
+      await importWatchConnectivityPayload({
+        payload,
+        repository,
+        queryClient,
+        acknowledgePayloads,
+        acknowledgeImportedPayloads,
+      });
     },
-    [queryClient, repository],
+    [acknowledgeImportedPayloads, acknowledgePayloads, queryClient, repository],
+  );
+
+  const importPayloadSafely = React.useCallback(
+    (payload: WatchConnectivityPayload) => {
+      void importPayload(payload).catch(error => {
+        console.warn('Failed to import watch sync payload', error);
+      });
+    },
+    [importPayload],
   );
 
   React.useEffect(() => {
@@ -52,7 +86,7 @@ export function WatchConnectivitySyncProvider({
         }
 
         for (const payload of payloads) {
-          void importPayload(payload);
+          importPayloadSafely(payload);
         }
       })
       .catch(error => {
@@ -60,14 +94,99 @@ export function WatchConnectivitySyncProvider({
       });
 
     const subscription = subscribeToPayloads(payload => {
-      void importPayload(payload);
+      importPayloadSafely(payload);
     });
 
     return () => {
       isMounted = false;
       subscription.remove();
     };
-  }, [drainPendingPayloads, importPayload, subscribeToPayloads]);
+  }, [drainPendingPayloads, importPayloadSafely, subscribeToPayloads]);
 
   return <>{children}</>;
+}
+
+export async function importPendingWatchConnectivityPayloads({
+  repository,
+  queryClient,
+  queryScope,
+  drainPendingPayloads = drainPendingWatchConnectivityPayloads,
+  acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
+  acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
+}: WatchConnectivityImportOptions): Promise<number> {
+  const payloads = await drainPendingPayloads();
+
+  for (const payload of payloads) {
+    await importWatchConnectivityPayload({
+      payload,
+      repository,
+      queryClient,
+      queryScope,
+      acknowledgePayloads,
+      acknowledgeImportedPayloads,
+    });
+  }
+
+  return payloads.length;
+}
+
+async function importWatchConnectivityPayload({
+  payload,
+  repository,
+  queryClient,
+  queryScope,
+  acknowledgePayloads,
+  acknowledgeImportedPayloads,
+}: WatchConnectivityPayloadImportOptions): Promise<void> {
+  const result = parseWatchSyncMessageJson(payload.payloadJson);
+
+  if (!result.ok) {
+    console.warn('Dropped invalid watch sync payload', result.error);
+    await acknowledgePayload(payload, acknowledgePayloads);
+    return;
+  }
+
+  const entries = await repository.importWatchMessages([result.message]);
+  const syncedEntries = await markWatchConnectivityImportSynced(repository, entries, result.message, payload);
+  queryClient.setQueryData(diveLogbookQueryKeys.list(repository, queryScope), syncedEntries);
+  queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, queryScope) });
+  await acknowledgePayload(payload, acknowledgeImportedPayloads);
+}
+
+async function acknowledgePayload(
+  payload: WatchConnectivityPayload,
+  acknowledgePayloads: WatchConnectivityAcknowledgement,
+): Promise<void> {
+  if (!payload.payloadId) {
+    return;
+  }
+
+  await acknowledgePayloads([payload.payloadId]);
+}
+
+async function markWatchConnectivityImportSynced(
+  repository: DiveLogRepository,
+  entries: DiveLogEntry[],
+  message: WatchSyncMessage,
+  payload: WatchConnectivityPayload,
+): Promise<DiveLogEntry[]> {
+  const importedEntry = entries.find(entry => {
+    const session = entry.watchCapture?.session;
+    return (
+      session?.localSessionId === message.session.localSessionId &&
+      session?.endedAt === message.session.endedAt
+    );
+  });
+
+  if (!importedEntry || importedEntry.syncStatus === 'synced') {
+    return entries;
+  }
+
+  await repository.save({
+    ...importedEntry,
+    syncStatus: 'synced',
+    updatedAt: payload.receivedAt ?? Date.now() / 1000,
+  });
+
+  return repository.list();
 }

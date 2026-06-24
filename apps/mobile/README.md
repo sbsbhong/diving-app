@@ -75,4 +75,4 @@ Android builds require Android Studio, Android SDK, `ANDROID_HOME`, and an emula
 
 ## Current Scope
 
-The app currently includes local persistent Logbook/Planbook/settings storage, watch fixture import, runtime watch sync JSON validation, and a WatchConnectivity receiver PoC. It does not implement auth, Supabase/cloud backup, verified paired-device delivery, or production dive-computer behavior.
+The app currently includes local persistent Logbook/Planbook/settings storage, watch fixture import, runtime watch sync JSON validation, and a WatchConnectivity receiver/import acknowledgement PoC verified in active iPhone/watch simulators. It does not implement auth, Supabase/cloud backup, real-device/background delivery verification, or production dive-computer behavior.

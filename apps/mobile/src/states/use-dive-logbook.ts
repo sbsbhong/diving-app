@@ -1,4 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
+import { isWatchConnectivityAvailable } from '../native/watch-connectivity';
 import { defaultDiveLogRepository } from '../repositories/default-dive-log-repository';
 import type { DiveLogRepository } from '../repositories/dive-log-repository';
 import {
@@ -10,6 +12,7 @@ import {
 import type { DiveLogEntry, DiveLogSyncStatus } from '../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../types/dive-session';
 import { watchFixtureMessages } from '../utils/watch-fixtures';
+import { importPendingWatchConnectivityPayloads } from './watch-connectivity-sync';
 
 type UseDiveLogbookOptions = {
   repository?: DiveLogRepository;
@@ -22,6 +25,7 @@ type DiveLogRepositoryWithSyncList = DiveLogRepository & {
 
 export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
   const repository = options.repository ?? defaultDiveLogRepository;
+  const queryClient = useQueryClient();
   const [filter, setFilter] = React.useState<DiveSessionFilter>({ query: '' });
   const initialEntries = React.useMemo(() => {
     const repositoryWithSyncList = repository as DiveLogRepositoryWithSyncList;
@@ -69,9 +73,17 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
 
   const filteredSessions = React.useMemo(() => filteredEntries.map(diveLogEntryToMobileSession), [filteredEntries]);
 
-  const importFixtures = React.useCallback(() => {
-    importWatchMessages.mutate(watchFixtureMessages);
-  }, [importWatchMessages]);
+  const importFixtures = React.useCallback(async () => {
+    const importedPayloadCount = await importPendingWatchConnectivityPayloads({
+      repository,
+      queryClient,
+      queryScope: options.queryScope,
+    });
+
+    if (importedPayloadCount === 0 && !isWatchConnectivityAvailable()) {
+      await importWatchMessages.mutateAsync(watchFixtureMessages);
+    }
+  }, [importWatchMessages, options.queryScope, queryClient, repository]);
 
   return {
     entries,

@@ -51,7 +51,7 @@
 		9B16606204BFD47B4C9DB8FB /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
 				D905DC1DE35C97E43DD60078 /* DiveWatchApp.app in Embed Watch Content */,
