@@ -405,7 +405,7 @@ describe('Logbook manual entry flow', () => {
     const renderer = await renderLogbook(repository);
     const root = renderer.root;
 
-    expect(root.findByProps({ testID: 'logbook-list-max-depth-No Metrics Reef---.-m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'logbook-list-max-depth-No Metrics Reef---.--m' })).toBeTruthy();
     expect(root.findByProps({ testID: 'logbook-list-duration-No Metrics Reef---:--' })).toBeTruthy();
   });
 
@@ -429,7 +429,7 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-list-item-No Metrics Reef');
 
-    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.-m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.--m' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-duration-value---:--' })).toBeTruthy();
   });
 
@@ -441,7 +441,7 @@ describe('Logbook manual entry flow', () => {
     await press(root, 'logbook-list-item-Hybrid Reef');
 
     expect(root.findByProps({ testID: 'log-entry-detail-provenance-max-depth-manual' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value-19.0m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value-19.00m' })).toBeTruthy();
   });
 
   test('returns to useful list content when filtering removes the selected detail entry', async () => {
@@ -737,8 +737,8 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-list-item-Pool Metadata Session');
 
-    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.-m' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-pool-length-25.0m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.--m' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-pool-length-25.00m' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-lap-count-18' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-training-focus-streamlinepractice' })).toBeTruthy();
   });

@@ -26,26 +26,26 @@ export const formatDuration = (seconds: number) => {
 
 export const formatDepth = (meters?: number) => {
   if (meters === undefined) {
-    return '--.- m';
+    return '--.-- m';
   }
 
-  return `${meters.toFixed(1)} m`;
+  return `${formatDecimal(meters)} m`;
 };
 
 export const formatLength = (meters?: number) => {
   if (meters === undefined) {
-    return '--.- m';
+    return '--.-- m';
   }
 
-  return `${meters.toFixed(1)} m`;
+  return `${formatDecimal(meters)} m`;
 };
 
 export const formatTemperature = (celsius?: number) => {
   if (celsius === undefined) {
-    return '--.- °C';
+    return '--.-- °C';
   }
 
-  return `${celsius.toFixed(1)} °C`;
+  return `${formatDecimal(celsius)} °C`;
 };
 
 export const formatRating = (rating?: number, notRatedLabel = '평가 없음') => {
@@ -55,3 +55,7 @@ export const formatRating = (rating?: number, notRatedLabel = '평가 없음') =
 
   return '★'.repeat(Math.max(1, Math.min(5, rating)));
 };
+
+function formatDecimal(value: number): string {
+  return (Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2);
+}
