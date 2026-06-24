@@ -1,490 +1,1319 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "ASSIST" : {
+    "%@ %lld" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "ASSIST" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "보조" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld"
+          }
+        }
       }
     },
-    "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "보조 도구 전용. 교육 내용과 인증된 다이브 컴퓨터를 따르세요." } }
-      }
+    "%lld" : {
+
+    },
+    "%lld ★" : {
+
+    },
+    "%lld m" : {
+
     },
     "Active dive" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Active dive" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "활성 다이브" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active dive"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활성 다이브"
+          }
+        }
       }
     },
     "Air" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Air" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공기" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Air"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공기"
+          }
+        }
       }
     },
     "Ascent" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Ascent" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상승" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascent"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상승"
+          }
+        }
       }
     },
     "Ascent reminder" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Ascent reminder" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상승 리마인더" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascent reminder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상승 리마인더"
+          }
+        }
       }
     },
     "Ascent reminder max" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Ascent reminder max" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상승 리마인더 최대값" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascent reminder max"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상승 리마인더 최대값"
+          }
+        }
+      }
+    },
+    "ASSIST" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ASSIST"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보조"
+          }
+        }
+      }
+    },
+    "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ASSISTANT ONLY. FOLLOW TRAINING AND A CERTIFIED DIVE COMPUTER."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보조 도구 전용. 교육 내용과 인증된 다이브 컴퓨터를 따르세요."
+          }
+        }
       }
     },
     "Assistant steady" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Assistant steady" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "보조 상태 안정" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assistant steady"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보조 상태 안정"
+          }
+        }
       }
     },
     "Average depth" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Average depth" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "평균 수심" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average depth"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "평균 수심"
+          }
+        }
       }
     },
     "Average temp" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Average temp" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "평균 수온" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average temp"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "평균 수온"
+          }
+        }
       }
     },
     "Buddy" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buddy" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "버디" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buddy"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버디"
+          }
+        }
       }
     },
     "Calm" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Calm" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "잔잔함" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calm"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잔잔함"
+          }
+        }
       }
     },
     "Choppy" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choppy" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "물결 있음" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choppy"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "물결 있음"
+          }
+        }
       }
     },
     "Current" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "조류" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "조류"
+          }
+        }
       }
     },
     "CURRENT DEPTH" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "CURRENT DEPTH" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "현재 수심" } }
-      }
-    },
-    "DONE" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "DONE" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "완료" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CURRENT DEPTH"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 수심"
+          }
+        }
       }
     },
     "Details" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Details" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상세" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상세"
+          }
+        }
       }
     },
     "Discard" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Discard" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "삭제" } }
-      }
-    },
-    "Dive Summary" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dive Summary" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 요약" } }
-      }
-    },
-    "Dive Watch" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dive Watch" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Dive Watch" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
       }
     },
     "Dive captured" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dive captured" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 캡처됨" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dive captured"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 캡처됨"
+          }
+        }
+      }
+    },
+    "Dive Summary" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dive Summary"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 요약"
+          }
+        }
+      }
+    },
+    "Dive Watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dive Watch"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dive Watch"
+          }
+        }
+      }
+    },
+    "DONE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DONE"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        }
       }
     },
     "Duration" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Duration" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "시간" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시간"
+          }
+        }
       }
     },
     "Effort" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Effort" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "노력도" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effort"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노력도"
+          }
+        }
       }
     },
     "End Dive" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "End Dive" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 종료" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Dive"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 종료"
+          }
+        }
       }
     },
     "Exertion" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Exertion" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "노력도" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exertion"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노력도"
+          }
+        }
       }
     },
     "Freedive" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Freedive" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "프리다이빙" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freedive"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프리다이빙"
+          }
+        }
       }
     },
     "Gas" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gas" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가스" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gas"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가스"
+          }
+        }
       }
     },
     "Gas label" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gas label" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가스 라벨" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gas label"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가스 라벨"
+          }
+        }
       }
     },
     "LAST DIVE" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "LAST DIVE" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "지난 다이브" } }
-      }
-    },
-    "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그 리뷰 전용. 인증된 장비가 아닌 보조 도구." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAST DIVE"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지난 다이브"
+          }
+        }
       }
     },
     "Live Log" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Live Log" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "라이브 로그" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Log"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브 로그"
+          }
+        }
       }
     },
-    "Max" : {
+    "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT." : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Max" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최대" } }
-      }
-    },
-    "Max Depth" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Max Depth" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최대 수심" } }
-      }
-    },
-    "Mild" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mild" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "약함" } }
-      }
-    },
-    "Mode" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mode" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "모드" } }
-      }
-    },
-    "NOTE" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "NOTE" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "메모" } }
-      }
-    },
-    "No logs" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No logs" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그 없음" } }
-      }
-    },
-    "No note" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No note" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "메모 없음" } }
-      }
-    },
-    "No saved sessions" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No saved sessions" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "저장된 세션 없음" } }
-      }
-    },
-    "Not rated" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not rated" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "평가 없음" } }
-      }
-    },
-    "Not set" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Not set" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "설정 안 됨" } }
-      }
-    },
-    "PLANNED MAX" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "PLANNED MAX" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "계획 최대 수심" } }
-      }
-    },
-    "POST-DIVE REVIEW" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "POST-DIVE REVIEW" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 후 리뷰" } }
-      }
-    },
-    "PRE-DIVE PLAN" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "PRE-DIVE PLAN" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 전 계획" } }
-      }
-    },
-    "Pending sync" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pending sync" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "동기화 대기" } }
-      }
-    },
-    "Planning reminder" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Planning reminder" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "계획 리마인더" } }
-      }
-    },
-    "Pool" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pool" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "풀" } }
-      }
-    },
-    "Quick note" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Quick note" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "빠른 메모" } }
-      }
-    },
-    "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "레크리에이션 기록 전용. 인증된 장비가 아닌 보조 도구." } }
-      }
-    },
-    "REVIEW" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "REVIEW" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "리뷰" } }
-      }
-    },
-    "Rating" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rating" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "평가" } }
-      }
-    },
-    "Reminder active" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder active" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "리마인더 활성" } }
-      }
-    },
-    "Reminder review from watch logs only." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reminder review from watch logs only." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "워치 로그의 리마인더 리뷰만 표시합니다." } }
-      }
-    },
-    "Review ascent rate with certified equipment." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Review ascent rate with certified equipment." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "상승 속도는 인증된 장비로 확인하세요." } }
-      }
-    },
-    "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "저장된 로그 전용. 인증된 장비가 아닌 보조 도구." } }
-      }
-    },
-    "STOP" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "STOP" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "스톱" } }
-      }
-    },
-    "Safety stop" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Safety stop" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "세이프티 스톱" } }
-      }
-    },
-    "Safety stop planning reminder" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Safety stop planning reminder" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "세이프티 스톱 계획 리마인더" } }
-      }
-    },
-    "Samples" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Samples" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "샘플" } }
-      }
-    },
-    "Save" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "저장" } }
-      }
-    },
-    "Saved Sessions" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saved Sessions" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "저장된 세션" } }
-      }
-    },
-    "Scuba" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Scuba" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "스쿠버" } }
-      }
-    },
-    "Sessions" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sessions" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "세션" } }
-      }
-    },
-    "Site" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Site" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "사이트" } }
-      }
-    },
-    "Snorkel" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Snorkel" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "스노클링" } }
-      }
-    },
-    "Start Dive" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start Dive" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다이브 시작" } }
-      }
-    },
-    "Start a recreational capture to create a watch log." : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start a recreational capture to create a watch log." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "레크리에이션 캡처를 시작해 워치 로그를 만드세요." } }
-      }
-    },
-    "Summary" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Summary" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "요약" } }
-      }
-    },
-    "Surge" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Surge" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "서지" } }
-      }
-    },
-    "Sync failed" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync failed" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "동기화 실패" } }
-      }
-    },
-    "Synced" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Synced" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "동기화됨" } }
-      }
-    },
-    "Temp" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Temp" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "수온" } }
-      }
-    },
-    "Time" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Time" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "시간" } }
-      }
-    },
-    "Unknown" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unknown" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "알 수 없음" } }
-      }
-    },
-    "Vis" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Vis" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "시야" } }
-      }
-    },
-    "Visibility" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Visibility" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "시야" } }
-      }
-    },
-    "Watch assistant" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Watch assistant" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "워치 보조 도구" } }
-      }
-    },
-    "Water" : {
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Water" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "물 상태" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOG REVIEW ONLY. NON-CERTIFIED ASSISTANT."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그 리뷰 전용. 인증된 장비가 아닌 보조 도구."
+          }
+        }
       }
     },
     "logs" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "logs" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "로그" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "logs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그"
+          }
+        }
       }
     },
-    "samples" : {
+    "Max" : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "samples" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "샘플" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최대"
+          }
+        }
+      }
+    },
+    "Max Depth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max Depth"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최대 수심"
+          }
+        }
+      }
+    },
+    "Mild" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mild"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "약함"
+          }
+        }
+      }
+    },
+    "Mode" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모드"
+          }
+        }
+      }
+    },
+    "No logs" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No logs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그 없음"
+          }
+        }
+      }
+    },
+    "No note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No note"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "메모 없음"
+          }
+        }
+      }
+    },
+    "No saved sessions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 세션 없음"
+          }
+        }
+      }
+    },
+    "Not rated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not rated"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "평가 없음"
+          }
+        }
+      }
+    },
+    "Not set" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 안 됨"
+          }
+        }
+      }
+    },
+    "NOTE" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NOTE"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "Pending sync" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pending sync"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동기화 대기"
+          }
+        }
+      }
+    },
+    "PLANNED MAX" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PLANNED MAX"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획 최대 수심"
+          }
+        }
+      }
+    },
+    "Planning reminder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planning reminder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획 리마인더"
+          }
+        }
+      }
+    },
+    "Pool" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pool"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "풀"
+          }
+        }
+      }
+    },
+    "POST-DIVE REVIEW" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "POST-DIVE REVIEW"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 후 리뷰"
+          }
+        }
+      }
+    },
+    "PRE-DIVE PLAN" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PRE-DIVE PLAN"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 전 계획"
+          }
+        }
+      }
+    },
+    "Quick note" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick note"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빠른 메모"
+          }
+        }
+      }
+    },
+    "Rating" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rating"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "평가"
+          }
+        }
       }
     },
     "Recreational capture and review. Not a certified dive computer." : {
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recreational capture and review. Not a certified dive computer." } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "레크리에이션 캡처와 리뷰용입니다. 인증된 다이브 컴퓨터가 아닙니다." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recreational capture and review. Not a certified dive computer."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "레크리에이션 캡처와 리뷰용입니다. 인증된 다이브 컴퓨터가 아닙니다."
+          }
+        }
+      }
+    },
+    "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "레크리에이션 기록 전용. 인증된 장비가 아닌 보조 도구."
+          }
+        }
+      }
+    },
+    "Reminder active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder active"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리마인더 활성"
+          }
+        }
+      }
+    },
+    "Reminder review from watch logs only." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reminder review from watch logs only."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워치 로그의 리마인더 리뷰만 표시합니다."
+          }
+        }
+      }
+    },
+    "REVIEW" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "REVIEW"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리뷰"
+          }
+        }
+      }
+    },
+    "Review ascent rate with certified equipment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review ascent rate with certified equipment."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상승 속도는 인증된 장비로 확인하세요."
+          }
+        }
+      }
+    },
+    "Safety stop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safety stop"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세이프티 스톱"
+          }
+        }
+      }
+    },
+    "Safety stop planning reminder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safety stop planning reminder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세이프티 스톱 계획 리마인더"
+          }
+        }
+      }
+    },
+    "samples" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "samples"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샘플"
+          }
+        }
+      }
+    },
+    "Samples" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samples"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샘플"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVED LOG ONLY. NON-CERTIFIED ASSISTANT."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 로그 전용. 인증된 장비가 아닌 보조 도구."
+          }
+        }
+      }
+    },
+    "Saved Sessions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved Sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장된 세션"
+          }
+        }
+      }
+    },
+    "Scuba" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scuba"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스쿠버"
+          }
+        }
+      }
+    },
+    "Sessions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세션"
+          }
+        }
+      }
+    },
+    "Site" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사이트"
+          }
+        }
+      }
+    },
+    "Snorkel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snorkel"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스노클링"
+          }
+        }
+      }
+    },
+    "Start a recreational capture to create a watch log." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a recreational capture to create a watch log."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "레크리에이션 캡처를 시작해 워치 로그를 만드세요."
+          }
+        }
+      }
+    },
+    "Start Dive" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Dive"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 시작"
+          }
+        }
+      }
+    },
+    "STOP" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOP"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스톱"
+          }
+        }
+      }
+    },
+    "Summary" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요약"
+          }
+        }
+      }
+    },
+    "Surge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surge"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서지"
+          }
+        }
+      }
+    },
+    "Sync failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync failed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동기화 실패"
+          }
+        }
+      }
+    },
+    "Synced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synced"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동기화됨"
+          }
+        }
+      }
+    },
+    "Temp" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temp"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수온"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시간"
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알 수 없음"
+          }
+        }
+      }
+    },
+    "Vis" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시야"
+          }
+        }
+      }
+    },
+    "Visibility" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visibility"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시야"
+          }
+        }
+      }
+    },
+    "Watch assistant" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch assistant"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워치 보조 도구"
+          }
+        }
+      }
+    },
+    "Water" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "물 상태"
+          }
+        }
       }
     }
   },

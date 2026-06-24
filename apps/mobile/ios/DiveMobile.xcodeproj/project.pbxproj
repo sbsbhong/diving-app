@@ -11,6 +11,9 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		C00000000000000000000001 /* WatchConnectivityInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* WatchConnectivityInbox.swift */; };
+		C00000000000000000000002 /* WatchConnectivityModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* WatchConnectivityModule.swift */; };
+		C00000000000000000000003 /* WatchConnectivityModuleBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000003 /* WatchConnectivityModuleBridge.m */; };
 		EBED6AA379F2E387A08A6066 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +27,9 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-DiveMobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DiveMobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = DiveMobile/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DiveMobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D00000000000000000000001 /* WatchConnectivityInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchConnectivityInbox.swift; path = DiveMobile/WatchConnectivityInbox.swift; sourceTree = "<group>"; };
+		D00000000000000000000002 /* WatchConnectivityModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WatchConnectivityModule.swift; path = DiveMobile/WatchConnectivityModule.swift; sourceTree = "<group>"; };
+		D00000000000000000000003 /* WatchConnectivityModuleBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WatchConnectivityModuleBridge.m; path = DiveMobile/WatchConnectivityModuleBridge.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -44,6 +50,9 @@
 			children = (
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				D00000000000000000000001 /* WatchConnectivityInbox.swift */,
+				D00000000000000000000002 /* WatchConnectivityModule.swift */,
+				D00000000000000000000003 /* WatchConnectivityModuleBridge.m */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -266,6 +275,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				C00000000000000000000001 /* WatchConnectivityInbox.swift in Sources */,
+				C00000000000000000000002 /* WatchConnectivityModule.swift in Sources */,
+				C00000000000000000000003 /* WatchConnectivityModuleBridge.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

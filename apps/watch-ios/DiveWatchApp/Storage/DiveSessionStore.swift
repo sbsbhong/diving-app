@@ -6,15 +6,19 @@ final class DiveSessionStore: ObservableObject {
     @Published private(set) var sessions: [DiveSession] = []
 
     private let storageKey = "savedDiveSessions"
+    private let syncTransport: WatchSyncTransporting
     private let userDefaults: UserDefaults
 
-    init(userDefaults: UserDefaults = .standard) {
+    init(userDefaults: UserDefaults = .standard, syncTransport: WatchSyncTransporting = WatchSyncTransport()) {
         self.userDefaults = userDefaults
+        self.syncTransport = syncTransport
         load()
+        syncTransport.activate()
     }
 
     func save(_ session: DiveSession) {
-        sessions.insert(session, at: 0)
+        let syncStatus = syncTransport.enqueue(session: session)
+        sessions.insert(session.withSyncStatus(syncStatus), at: 0)
         persist()
     }
 

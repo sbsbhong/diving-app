@@ -2,23 +2,34 @@
 
 ## 요약
 
-이 문서는 현재 앱에서 나중에 다시 확인해야 할 구현 우선순위를 기록한다. 1순위인 모바일 영구 저장소는 별도 브레인스토밍과 설계 대상으로 진행하고, 이 문서는 2~10번 후속 항목을 구현하지 않은 상태로 남긴다.
+이 문서는 현재 앱에서 나중에 다시 확인해야 할 구현 우선순위를 기록한다. 모바일 영구 저장소와 Watch-mobile sync contract 검증 경로는 완료됐고, 이 문서는 남은 후속 항목을 구현하지 않은 상태로 남긴다.
 
 ## 현재 상태
 
-모바일 앱은 `DiveLogRepository`와 `DivePlanRepository` 경계를 갖지만 현재 저장소 구현은 실행 중 메모리 기반이다. Watch 앱은 sync-ready JSON encoder와 로컬 저장 흐름을 갖지만 실제 WatchConnectivity 전송은 없다. `RealDepthSensorProvider`는 자리 표시자이며 실제 Apple Watch underwater sensor behavior는 검증되지 않았다. Supabase, 인증, cloud backup은 아직 구현되어 있지 않다.
+모바일 앱은 `DiveLogRepository`와 `DivePlanRepository` 경계를 갖고 AsyncStorage 기반 persistent repository를 기본으로 사용한다. 모바일은 원시 watch sync JSON을 실행 시점에 검증한 뒤 `WatchSyncMessage`로 좁혀 import할 수 있다. Watch 앱은 sync-ready JSON encoder, 로컬 저장 흐름, WatchConnectivity `transferUserInfo` enqueue PoC를 갖는다. 모바일 iOS app도 WatchConnectivity userInfo를 React Native로 넘기는 PoC receiver를 갖는다. 다만 pairing, entitlement, background delivery, retry behavior, 실기기 검증은 아직 완료되지 않았다. `RealDepthSensorProvider`는 자리 표시자이며 실제 Apple Watch underwater sensor behavior는 검증되지 않았다. Supabase, 인증, cloud backup은 아직 구현되어 있지 않다.
 
 ## 상세
 
-후속으로 확인할 우선순위는 다음과 같다.
+완료된 항목은 다음과 같다.
 
 1. Watch-mobile sync contract 검증 경로
-   - watch가 만든 `WatchSyncMessage` payload를 모바일이 fixture가 아니라 실제 JSON으로 검증하고 `DiveLogEntry`로 import할 수 있는지 확인한다.
-   - Generated Swift contract를 watch target에서 직접 사용할지, 현재 `DiveSession.syncMessageData` encoder를 contract-compatible encoder로 유지할지 결정해야 한다.
+   - 모바일은 `watch-sync-message-validation.ts`를 통해 원시 JSON string이나 `unknown` payload를 실행 시점에 검증하고, 통과한 `WatchSyncMessage`만 기존 `DiveLogEntry` import 흐름으로 넘긴다.
+   - 앱 fixture import도 `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`을 validator에 통과시킨 뒤 사용한다.
+   - Generated Swift contract를 watch target에서 직접 사용하는 결정은 아직 남아 있으며, 현재 watch 앱은 `DiveSession.syncMessageData` encoder를 유지한다.
    - 관련 문서: [[architecture/sync-flow]]
 
-2. WatchConnectivity 전송
-   - watch 로컬 세션을 iPhone으로 보내고 모바일에서 `pending`, `synced`, `failed` 상태를 실제 동기화 상태로 갱신하는 흐름이다.
+2. WatchConnectivity 전송 계층 PoC
+   - Watch 앱은 저장된 `DiveSession`을 `WatchSyncTransport`로 `transferUserInfo`에 enqueue한다.
+   - 모바일 iOS native code는 `WatchConnectivityInbox`와 `WatchConnectivityModule`로 envelope를 raw JSON payload로 복원해 React Native에 전달한다.
+   - 모바일 JS는 `WatchConnectivitySyncProvider`에서 pending payload와 event payload를 받아 기존 runtime validator와 repository import 흐름으로 넘긴다.
+   - 이 항목은 전송 계층 code boundary와 build/import behavior를 만든 상태이며, paired-device delivery 검증 완료를 뜻하지 않는다.
+   - 관련 문서: [[architecture/watch-app]], [[architecture/sync-flow]]
+
+후속으로 확인할 우선순위는 다음과 같다.
+
+2 후속. WatchConnectivity 실기기 검증과 sync 상태 확정
+   - watch 로컬 세션이 실제 paired iPhone으로 전달되는지 지원 hardware에서 검증해야 한다.
+   - 모바일에서 `pending`, `synced`, `failed` 상태를 실제 동기화 상태로 갱신하는 durable 상태 모델과 retry policy는 아직 남아 있다.
    - pairing, entitlement, background delivery, retry behavior는 simulator만으로 검증됐다고 쓰면 안 된다.
    - 관련 문서: [[architecture/watch-app]], [[architecture/sync-flow]]
 

@@ -21,6 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
+    WatchConnectivityInbox.shared.activate()
+
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(

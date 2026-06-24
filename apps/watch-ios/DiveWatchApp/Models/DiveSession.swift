@@ -230,6 +230,31 @@ struct DiveSession: Codable, Identifiable {
         )
     }
 
+    func withSyncStatus(_ nextSyncStatus: DiveSyncStatus) -> DiveSession {
+        DiveSession(
+            id: id,
+            schemaVersion: schemaVersion,
+            diveMode: diveMode,
+            gasLabel: gasLabel,
+            siteId: siteId,
+            siteName: siteName,
+            buddyIds: buddyIds,
+            gearIds: gearIds,
+            tags: tags,
+            notes: notes,
+            rating: rating,
+            perceivedExertion: perceivedExertion,
+            visibilityRating: visibilityRating,
+            waterCondition: waterCondition,
+            syncStatus: nextSyncStatus,
+            entryLocation: entryLocation,
+            exitLocation: exitLocation,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            samples: samples
+        )
+    }
+
     func syncMessageData(type: String = "sessionEnded") throws -> Data {
         let message = WatchSyncMessagePayload(type: type, session: WatchSessionPayload(session: self))
         return try JSONEncoder().encode(message)

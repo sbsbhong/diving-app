@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-현재 모바일 로그북은 `DiveLogEntry`를 `DiveLogRepository` 경계 뒤에서 다룬다. 앱 기본 구현은 AsyncStorage 기반 `PersistentDiveLogRepository`와 React Query hook을 사용한다. 수동 로그 작성/수정과 watch fixture import는 같은 목록에 표시되고 앱 재시작 뒤에도 저장된다. 실제 WatchConnectivity, 인증, Supabase sync는 구현되어 있지 않다.
+현재 모바일 로그북은 `DiveLogEntry`를 `DiveLogRepository` 경계 뒤에서 다룬다. 앱 기본 구현은 AsyncStorage 기반 `PersistentDiveLogRepository`와 React Query hook을 사용한다. 수동 로그 작성/수정과 watch fixture import는 같은 목록에 표시되고 앱 재시작 뒤에도 저장된다. WatchConnectivity 전송 계층 PoC는 있지만 실제 paired-device delivery 검증, 인증, Supabase sync는 구현되어 있지 않다.
 
 승인된 방향은 다음과 같다.
 
@@ -27,7 +27,7 @@
 - [x] Phase 1: `DiveLogEntry`, field provenance, sync status, `DiveLogRepository` 인터페이스를 만든다.
 - [x] Phase 2: React Query mutation을 통해 로그인 없이 모바일에서 수동 로그를 만들고 수정해 repository에 저장한다.
 - [x] Phase 2.5: Logbook, Planbook, 설정 선호를 AsyncStorage 기반 persistent repository/provider에 저장한다.
-- [ ] Phase 3: Watch에서 만든 contract-valid payload가 모바일로 들어올 수 있는지 검증한다.
+- [x] Phase 3: Watch에서 만든 contract-valid payload가 모바일로 들어올 수 있는지 검증한다.
 - [ ] Phase 4: Watch 기반 로그 작성 화면에서 측정값을 잠금 처리하고 누락된 맥락을 모바일에서 채운다.
 - [ ] Phase 5: Supabase Auth, user-owned table, RLS, generated type, remote repository를 추가한다.
 - [ ] Phase 6: 로그인 상태에 따라 guest local-only와 signed-in local-plus-sync 저장 전략을 적용한다.
@@ -52,6 +52,10 @@ Watch-captured field는 원본을 덮어쓰지 않는다. 사용자가 틀렸다
 React Query는 durable store가 아니다. `useQuery`와 `useMutation`은 `DiveLogRepository`를 호출하고 cache invalidation, loading state, error state를 관리한다. 로컬 저장소와 future Supabase row가 실제 데이터 보관 책임을 갖는다.
 
 현재 앱 기본 저장소는 AsyncStorage 기반 persistent repository다. `DiveLogEntry[]`는 `dive-app:logbook:v1`, `DivePlan[]`는 `dive-app:planbook:v1`, 설정 선호는 `dive-app:preferences:v1` key에 versioned JSON envelope로 저장된다. React Query는 여전히 cache와 mutation orchestration만 맡고, 실제 보관 책임은 persistent repository와 future Supabase row가 갖는다.
+
+Watch sync payload는 모바일에서 실행 시점 검증을 거친다. `watch-sync-message-validation.ts`는 원시 JSON string이나 `unknown` value를 `WatchSyncMessage` contract로 검증하고, 통과한 payload만 기존 repository import 흐름으로 넘긴다. 현재 앱 fixture도 `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`을 validator에 통과시켜 만든다.
+
+WatchConnectivity PoC에서는 iOS native `WatchConnectivityModule`이 전달한 raw JSON payload도 같은 validator와 repository import 경로를 사용한다. 이 경로는 app process memory 안의 pending payload만 다루며, 실제 paired-device 전송 성공이나 background retry를 보장하지 않는다.
 
 현재 storage schema는 version 1이다. 향후 로그 모델, 계획 모델, 설정값이 변경되면 migration function을 추가해야 한다. Supabase는 모델과 로컬 저장이 안정된 뒤 도입한다. Mobile code는 direct SQL을 사용하지 않고 repository 함수를 통해 접근한다. Public schema table을 만들 경우 RLS와 user ownership policy가 함께 필요하다.
 

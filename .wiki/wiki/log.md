@@ -1,5 +1,42 @@
 # Wiki 기록
 
+## 2026-06-24 - 구조 - WatchConnectivity transport PoC
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/watch-ios/DiveWatchApp/Sync/WatchSyncEnvelope.swift`
+  - `apps/watch-ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/watch-ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift`
+  - `apps/mobile/src/native/watch-connectivity.ts`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/__tests__/watch-connectivity-sync.test.tsx`
+- 요약:
+  - Watch 앱이 저장된 세션 JSON을 WatchConnectivity `transferUserInfo`로 enqueue하고, 모바일 iOS native/JS가 payload를 받아 validator와 repository import로 넘기는 PoC 경계를 기록했다. Pairing, entitlement, app embedding, background delivery, retry behavior, 실기기 전송 검증은 아직 남은 항목으로 유지했다.
+
+## 2026-06-24 - 구조 - watch sync JSON validation
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/architecture/mobile-logbook-roadmap.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/utils/watch-sync-message-validation.ts`
+  - `apps/mobile/src/utils/watch-fixtures.ts`
+  - `apps/mobile/__tests__/watch-sync-message-validation.test.ts`
+  - `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`
+- 요약:
+  - 모바일 앱이 원시 watch sync JSON을 실행 시점에 검증한 뒤 `WatchSyncMessage`로 좁혀 기존 `DiveLogEntry` import 흐름으로 넘길 수 있다는 사실을 기록했다. WatchConnectivity 전송과 generated Swift contract target membership은 아직 남은 항목으로 유지했다.
+
 ## 2026-06-23 - 구조 - mobile persistent storage
 
 - 수정:
