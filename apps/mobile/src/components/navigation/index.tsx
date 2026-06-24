@@ -114,6 +114,8 @@ export default function RootNavigation(): React.JSX.Element {
                 sessions={logbook.sessions}
                 onOpenLogbook={openLogbook}
                 onOpenPlanning={openPlanning}
+                onRefresh={logbook.refresh}
+                isRefreshing={logbook.isRefreshing}
               />
             )}
           </AppTabs.Screen>
@@ -124,6 +126,8 @@ export default function RootNavigation(): React.JSX.Element {
                 filter={logbook.filter}
                 onFilterChange={logbook.setFilter}
                 onSyncWatch={logbook.syncWatchPayloads}
+                onRefresh={logbook.refresh}
+                isRefreshing={logbook.isRefreshing}
                 onSaveEntry={logbook.saveEntry}
                 onDeleteEntry={logbook.deleteEntry}
                 saveError={logbook.saveError}
@@ -138,6 +142,8 @@ export default function RootNavigation(): React.JSX.Element {
               <PlanningScreen
                 sessions={logbook.sessions}
                 plans={planning.plans}
+                onRefresh={planning.refresh}
+                isRefreshing={planning.isRefreshing}
                 onSavePlan={planning.savePlan}
                 onDeletePlan={planning.deletePlan}
                 saveError={planning.saveError}

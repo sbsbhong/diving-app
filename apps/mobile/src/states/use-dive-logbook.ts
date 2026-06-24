@@ -87,6 +87,10 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
     };
   }, [options.queryScope, queryClient, repository]);
 
+  const refresh = React.useCallback(async () => {
+    await entriesQuery.refetch();
+  }, [entriesQuery]);
+
   return {
     entries,
     sessions,
@@ -95,9 +99,11 @@ export const useDiveLogbook = (options: UseDiveLogbookOptions = {}) => {
     filter,
     setFilter,
     syncWatchPayloads,
+    refresh,
     saveEntry: saveEntryMutation.mutateAsync,
     deleteEntry: deleteEntryMutation.mutateAsync,
     isLoading: entriesQuery.isLoading,
+    isRefreshing: entriesQuery.isRefetching,
     isSaving: saveEntryMutation.isPending,
     isDeleting: deleteEntryMutation.isPending,
     listError: entriesQuery.error,

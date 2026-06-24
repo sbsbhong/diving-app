@@ -31,12 +31,17 @@ export const useDivePlans = (options: UseDivePlansOptions = {}) => {
   });
   const savePlanMutation = useSaveDivePlanMutation(repository, { queryScope: options.queryScope });
   const deletePlanMutation = useDeleteDivePlanMutation(repository, { queryScope: options.queryScope });
+  const refresh = React.useCallback(async () => {
+    await plansQuery.refetch();
+  }, [plansQuery]);
 
   return {
     plans: plansQuery.data ?? initialPlans ?? [],
+    refresh,
     savePlan: savePlanMutation.mutateAsync,
     deletePlan: deletePlanMutation.mutateAsync,
     isLoading: plansQuery.isLoading,
+    isRefreshing: plansQuery.isRefetching,
     isSaving: savePlanMutation.isPending,
     isDeleting: deletePlanMutation.isPending,
     listError: plansQuery.error,

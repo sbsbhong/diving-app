@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { KeyboardAvoidingView, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, RefreshControl, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
 import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
@@ -37,6 +37,8 @@ function Harness({ repository, onCreateLogFromPlan = jest.fn() }: HarnessProps):
     <PlanningScreen
       sessions={[]}
       plans={plans.plans}
+      onRefresh={plans.refresh}
+      isRefreshing={plans.isRefreshing}
       onSavePlan={plans.savePlan}
       onDeletePlan={plans.deletePlan}
       saveError={plans.saveError}
@@ -136,6 +138,14 @@ describe('Planning screen planbook flow', () => {
 
     expect(root.findByType(KeyboardAvoidingView).props.behavior).toBe('padding');
     expect(root.findByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
+  it('uses native pull-to-refresh on the planning scroll view', async () => {
+    const renderer = await renderPlanning(new LocalDivePlanRepository([]));
+    const refreshControl = renderer.root.findByType(ScrollView).props.refreshControl;
+
+    expect(refreshControl.type).toBe(RefreshControl);
+    expect(refreshControl.props.refreshing).toBe(false);
   });
 
   it('edits an existing plan without creating a duplicate', async () => {

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { KeyboardAvoidingView, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, RefreshControl, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import metadataRichFixture from '../../../packages/contracts/fixtures/metadata-rich-watch-sync-message.json';
 import i18n from '../src/i18n';
@@ -150,6 +150,8 @@ function Harness({ repository, pendingDraft, onPendingDraftSave }: HarnessProps)
       filter={logbook.filter}
       onFilterChange={logbook.setFilter}
       onSyncWatch={logbook.syncWatchPayloads}
+      onRefresh={logbook.refresh}
+      isRefreshing={logbook.isRefreshing}
       onSaveEntry={logbook.saveEntry}
       onDeleteEntry={logbook.deleteEntry}
       saveError={logbook.saveError}
@@ -278,6 +280,14 @@ describe('Logbook manual entry flow', () => {
 
     expect(root.findByType(KeyboardAvoidingView).props.behavior).toBe('padding');
     expect(root.findByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
+  test('uses native pull-to-refresh on the logbook scroll view', async () => {
+    const renderer = await renderLogbook(new LocalDiveLogRepository([]));
+    const refreshControl = renderer.root.findByType(ScrollView).props.refreshControl;
+
+    expect(refreshControl.type).toBe(RefreshControl);
+    expect(refreshControl.props.refreshing).toBe(false);
   });
 
   test('import action drains pending WatchConnectivity payloads into the logbook', async () => {

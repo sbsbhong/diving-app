@@ -7,6 +7,7 @@ import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
+import { RefreshControl } from '../../components/ui/refresh-control';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
@@ -24,6 +25,8 @@ type LogbookScreenProps = {
   filter: DiveSessionFilter;
   onFilterChange: (filter: DiveSessionFilter) => void;
   onSyncWatch: () => Promise<WatchSyncActionResult>;
+  onRefresh: () => void | Promise<void>;
+  isRefreshing?: boolean;
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
   pendingDraft?: {
@@ -143,6 +146,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     <KeyboardAwareScrollView
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-4 pb-6"
+      refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}
       contentInsetAdjustmentBehavior="automatic">
       <VStack space="lg">
         <VStack space="md">

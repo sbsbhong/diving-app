@@ -5,6 +5,7 @@ import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
 import { Menu, MenuItem, MenuItemLabel } from '../../components/ui/menu';
+import { RefreshControl } from '../../components/ui/refresh-control';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
@@ -19,6 +20,8 @@ type HomeScreenProps = {
   sessions: MobileDiveSession[];
   onOpenLogbook: () => void;
   onOpenPlanning: () => void;
+  onRefresh: () => void | Promise<void>;
+  isRefreshing?: boolean;
 };
 
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
@@ -30,7 +33,11 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const syncStatus = recentSession?.syncStatus ?? 'pending';
 
   return (
-    <ScrollView className="flex-1 bg-background" contentContainerClassName="px-5 pt-4 pb-6" contentInsetAdjustmentBehavior="automatic">
+    <ScrollView
+      className="flex-1 bg-background"
+      contentContainerClassName="px-5 pt-4 pb-6"
+      refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}
+      contentInsetAdjustmentBehavior="automatic">
       <VStack space="lg">
         <VStack space="md" className="pt-2">
           <HStack className="items-start justify-between">

@@ -6,6 +6,7 @@ import { Box } from '../../components/ui/box';
 import { HStack } from '../../components/ui/hstack';
 import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
+import { RefreshControl } from '../../components/ui/refresh-control';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { InstrumentTone } from '../../components/ui/theme';
@@ -19,6 +20,8 @@ import { PlanEditor } from './plan-editor';
 type PlanningScreenProps = {
   sessions: MobileDiveSession[];
   plans?: DivePlan[];
+  onRefresh: () => void | Promise<void>;
+  isRefreshing?: boolean;
   onSavePlan?: (plan: DivePlan) => Promise<DivePlan>;
   onDeletePlan?: (localId: string) => Promise<void>;
   onCreateLogFromPlan?: (plan: DivePlan) => void;
@@ -119,6 +122,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
     <KeyboardAwareScrollView
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-4 pb-6"
+      refreshControl={<RefreshControl refreshing={Boolean(props.isRefreshing)} onRefresh={props.onRefresh} tintColor="#0a84ff" />}
       contentInsetAdjustmentBehavior="automatic">
       <VStack space="lg">
         <VStack space="sm">

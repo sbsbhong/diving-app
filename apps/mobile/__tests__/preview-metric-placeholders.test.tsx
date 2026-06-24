@@ -1,4 +1,5 @@
 import React from 'react';
+import { RefreshControl, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
 import HomeScreen from '../src/screens/home/screen';
@@ -69,17 +70,43 @@ describe('preview metric placeholders', () => {
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(
         <AppPreferencesProvider>
-          <HomeScreen sessions={[blankManualSession]} onOpenLogbook={jest.fn()} onOpenPlanning={jest.fn()} />
+          <HomeScreen
+            sessions={[blankManualSession]}
+            onOpenLogbook={jest.fn()}
+            onOpenPlanning={jest.fn()}
+            onRefresh={jest.fn()}
+          />
         </AppPreferencesProvider>,
       );
     });
 
     const text = collectText(renderer!.toJSON());
 
-    expect(text).toContain('--.- m');
+    expect(text).toContain('--.-- m');
     expect(text).toContain('--:--');
     expect(text).not.toContain('0.0 m');
     expect(text).not.toContain('0:00');
+  });
+
+  test('Home preview uses native pull-to-refresh', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <AppPreferencesProvider>
+          <HomeScreen
+            sessions={[blankManualSession]}
+            onOpenLogbook={jest.fn()}
+            onOpenPlanning={jest.fn()}
+            onRefresh={jest.fn()}
+          />
+        </AppPreferencesProvider>,
+      );
+    });
+
+    const refreshControl = renderer!.root.findByType(ScrollView).props.refreshControl;
+    expect(refreshControl.type).toBe(RefreshControl);
+    expect(refreshControl.props.refreshing).toBe(false);
   });
 
   test('Memory preview and aggregate metrics keep unknown manual values as placeholders', async () => {
@@ -91,7 +118,7 @@ describe('preview metric placeholders', () => {
 
     const text = collectText(renderer!.toJSON());
 
-    expect(text).toEqual(expect.arrayContaining(['--.- m', '--:--']));
+    expect(text).toEqual(expect.arrayContaining(['--.-- m', '--:--']));
     expect(text).not.toContain('0.0 m');
     expect(text).not.toContain('0:00');
   });
