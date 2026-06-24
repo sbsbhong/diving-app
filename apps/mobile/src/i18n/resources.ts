@@ -153,6 +153,10 @@ const resources = {
         watchCaptured: '워치 측정값',
         manualSource: '수동',
         watchSource: '워치',
+        sources: {
+          watch: '워치',
+          manual: '수동',
+        },
         modeDetails: '모드별 세부 정보',
         backToList: '목록으로',
         editLog: '기록 수정',
@@ -455,6 +459,10 @@ const resources = {
         watchCaptured: 'Watch-captured',
         manualSource: 'Manual',
         watchSource: 'Watch',
+        sources: {
+          watch: 'Watch',
+          manual: 'Manual',
+        },
         modeDetails: 'Mode details',
         backToList: 'Back to list',
         editLog: 'Edit log',

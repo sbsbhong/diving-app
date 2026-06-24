@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
-import { Box } from '../../components/ui/box';
 import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
@@ -227,7 +227,6 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
                 <SessionListItem
                   key={entry.localId}
                   entry={entry}
-                  selected={entry.localId === selectedEntry?.localId}
                   onPress={() => {
                     setSelectedId(entry.localId);
                     setRoute('detail');
@@ -261,7 +260,6 @@ function EmptyLogbook(): React.JSX.Element {
 
 function SessionListItem(props: {
   entry: DiveLogEntry;
-  selected: boolean;
   onPress: () => void;
 }): React.JSX.Element {
   const session = diveLogEntryToMobileSession(props.entry);
@@ -283,7 +281,9 @@ function SessionListItem(props: {
       <VStack space="sm">
         <HStack className="items-center justify-between">
           <HStack space="md" className="flex-1 items-center pr-2.5">
-            <Box className={`h-2 w-2 rounded-full ${props.selected ? 'bg-primary' : 'bg-muted'}`} />
+            <Text testID={`logbook-list-source-${siteName}`} className={sourceBadgeStyles({ source: props.entry.source })}>
+              {t(`logbook.sources.${props.entry.source}`)}
+            </Text>
             <VStack space="xs" className="flex-1">
               <Text className="text-lg font-semibold text-card-foreground">{siteName}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
@@ -348,3 +348,13 @@ const toVisibleSyncStatus = (syncStatus: DiveLogEntry['syncStatus']): 'synced' |
 
   return 'pending';
 };
+
+const sourceBadgeStyles = tva({
+  base: 'min-w-14 rounded-full px-2.5 py-1 text-center text-xs font-semibold uppercase',
+  variants: {
+    source: {
+      watch: 'bg-primary/10 text-primary',
+      manual: 'bg-muted text-muted-foreground',
+    },
+  },
+});

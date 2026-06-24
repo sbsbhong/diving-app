@@ -409,6 +409,16 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'logbook-list-duration-No Metrics Reef---:--' })).toBeTruthy();
   });
 
+  test('labels logbook rows by source instead of using an ambiguous selected dot', async () => {
+    const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'logbook-list-source-Watch Reef' }).props.children).toBe('Watch');
+    expect(root.findByProps({ testID: 'logbook-list-source-Manual Reef' }).props.children).toBe('Manual');
+    expect(root.findAllByProps({ testID: 'logbook-list-selected-dot' })).toHaveLength(0);
+  });
+
   test('detail distinguishes manual values from watch-captured values', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);
