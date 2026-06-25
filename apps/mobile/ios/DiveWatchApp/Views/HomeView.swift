@@ -39,6 +39,9 @@ struct HomeView: View {
                 .padding(.horizontal, DiveWatchTheme.edgeMargin)
                 .padding(.vertical, 10)
             }
+            .refreshable {
+                await store.refreshFromCompanion()
+            }
             .background(DiveWatchTheme.background.ignoresSafeArea())
             .navigationTitle("Dive Watch")
         }

@@ -134,4 +134,16 @@ describe('WatchConnectivity native source contract', () => {
     expect(home).toContain('RecordingView(store: store, plan: plannedDive.preDivePlan)');
     expect(recorder).toContain('sourcePlanLocalId');
   });
+
+  it('refreshes the watch home view with a top pull gesture', () => {
+    const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
+    const store = readRepoFile('apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift');
+    const transport = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift');
+
+    expect(home).toContain('.refreshable');
+    expect(home).toContain('await store.refreshFromCompanion()');
+    expect(store).toContain('func refreshFromCompanion() async');
+    expect(transport).toContain('func refreshPlannedDives()');
+    expect(transport).toContain('handleReceivedApplicationContext(from: connectivitySession)');
+  });
 });

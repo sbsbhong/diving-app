@@ -59,6 +59,11 @@ final class DiveSessionStore: ObservableObject {
         persistPlannedDives()
     }
 
+    func refreshFromCompanion() async {
+        syncTransport.refreshPlannedDives()
+        retryPendingSyncs()
+    }
+
     private func updateSyncStatus(for sessionId: UUID, to syncStatus: DiveSyncStatus) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else {
             return

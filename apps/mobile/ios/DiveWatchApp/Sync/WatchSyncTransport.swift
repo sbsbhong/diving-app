@@ -8,6 +8,7 @@ protocol WatchSyncTransporting: AnyObject {
 
     func activate()
     func enqueue(session: DiveSession) -> DiveSyncStatus
+    func refreshPlannedDives()
 }
 
 final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelegate {
@@ -42,6 +43,14 @@ final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelega
         } catch {
             return .failed
         }
+    }
+
+    func refreshPlannedDives() {
+        guard let connectivitySession else {
+            return
+        }
+
+        handleReceivedApplicationContext(from: connectivitySession)
     }
 
     func session(
