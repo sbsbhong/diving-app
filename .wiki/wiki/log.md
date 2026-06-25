@@ -1,5 +1,18 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - planned dive context activation retry
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift`
+  - `apps/mobile/__tests__/watch-connectivity-native-source.test.ts`
+- 요약:
+  - 모바일의 planned dive context가 `WCSession` activation 전 전송 시도에서 유실되지 않도록 최신 JSON을 보관했다가 activation/reachability 뒤 다시 application context로 보낸다. Watch 앱도 activation 완료 시 저장된 `receivedApplicationContext`를 읽어 앱 시작 전에 도착한 planned dive 목록을 반영한다.
+
 ## 2026-06-25 - 구조 - pre-device mobile/watch readiness
 
 - 수정:

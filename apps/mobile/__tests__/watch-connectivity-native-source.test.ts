@@ -87,6 +87,18 @@ describe('WatchConnectivity native source contract', () => {
     expect(envelope).toContain('plannedDivesJsonKey');
   });
 
+  it('publishes planned dives after WatchConnectivity activation is ready', () => {
+    const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
+    const transport = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift');
+
+    expect(inbox).toContain('pendingPlannedDivesJson');
+    expect(inbox).toContain('flushPendingPlannedDivesContextOnMainQueue()');
+    expect(inbox).toContain('activationState == .activated');
+    expect(inbox).toContain('func sessionReachabilityDidChange(_ session: WCSession)');
+    expect(transport).toContain('session.receivedApplicationContext');
+    expect(transport).toContain('handleReceivedApplicationContext(from: session)');
+  });
+
   it('exposes linked watch status to the settings screen', () => {
     const mobileNative = readRepoFile('apps/mobile/src/native/watch-connectivity.ts');
     const module = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift');

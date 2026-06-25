@@ -53,6 +53,7 @@ final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelega
             return
         }
 
+        handleReceivedApplicationContext(from: session)
         notifyReadyToRetry()
     }
 
@@ -109,6 +110,10 @@ final class WatchSyncTransport: NSObject, WatchSyncTransporting, WCSessionDelega
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         _ = handlePlannedDives(userInfo: applicationContext)
+    }
+
+    private func handleReceivedApplicationContext(from session: WCSession) {
+        _ = handlePlannedDives(userInfo: session.receivedApplicationContext)
     }
 
     private func handleAcknowledgement(userInfo: [String: Any]) {

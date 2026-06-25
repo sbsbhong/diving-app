@@ -14,6 +14,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
   private let userDefaults: UserDefaults
   private var isActivated = false
   private var pendingPayloads: [PendingWatchConnectivityPayload] = []
+  private var pendingPlannedDivesJson: String?
 
   private override init() {
     connectivitySession = WCSession.isSupported() ? WCSession.default : nil
@@ -89,12 +90,30 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     _ session: WCSession,
     activationDidCompleteWith activationState: WCSessionActivationState,
     error: Error?
-  ) {}
+  ) {
+    guard error == nil, activationState == .activated else {
+      return
+    }
+
+    DispatchQueue.main.async { [weak self] in
+      self?.flushPendingPlannedDivesContextOnMainQueue()
+    }
+  }
 
   func sessionDidBecomeInactive(_ session: WCSession) {}
 
   func sessionDidDeactivate(_ session: WCSession) {
     session.activate()
+  }
+
+  func sessionReachabilityDidChange(_ session: WCSession) {
+    guard session.isReachable else {
+      return
+    }
+
+    DispatchQueue.main.async { [weak self] in
+      self?.flushPendingPlannedDivesContextOnMainQueue()
+    }
   }
 
   func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
@@ -182,7 +201,14 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
   }
 
   private func updatePlannedDivesOnMainQueue(json plannedDivesJson: String) {
-    guard let connectivitySession else {
+    pendingPlannedDivesJson = plannedDivesJson
+    flushPendingPlannedDivesContextOnMainQueue()
+  }
+
+  private func flushPendingPlannedDivesContextOnMainQueue() {
+    guard let connectivitySession,
+          connectivitySession.activationState == .activated,
+          let plannedDivesJson = pendingPlannedDivesJson else {
       return
     }
 
@@ -198,6 +224,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
 
     do {
       try connectivitySession.updateApplicationContext(context)
+      pendingPlannedDivesJson = nil
     } catch {
       assertionFailure("Failed to update watch planned dives: \(error)")
     }
