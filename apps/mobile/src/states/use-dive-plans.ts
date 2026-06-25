@@ -1,5 +1,5 @@
 import React from 'react';
-import { updatePlannedWatchDives } from '../native/watch-connectivity';
+import { updatePlannedWatchDives, type PlannedWatchDivesUpdateStatus } from '../native/watch-connectivity';
 import type { DivePlan } from '../types/dive-plan';
 import type { DivePlanRepository } from '../repositories/dive-plan-repository';
 import { defaultDivePlanRepository } from '../repositories/default-dive-plan-repository';
@@ -33,14 +33,27 @@ export const useDivePlans = (options: UseDivePlansOptions = {}) => {
   const savePlanMutation = useSaveDivePlanMutation(repository, { queryScope: options.queryScope });
   const deletePlanMutation = useDeleteDivePlanMutation(repository, { queryScope: options.queryScope });
   const plans = plansQuery.data ?? initialPlans ?? [];
+  const [plannedWatchSyncStatus, setPlannedWatchSyncStatus] = React.useState<PlannedWatchDivesUpdateStatus | undefined>();
   const refresh = React.useCallback(async () => {
     await plansQuery.refetch();
   }, [plansQuery]);
 
   React.useEffect(() => {
-    void updatePlannedWatchDives(plans).catch(error => {
-      console.warn('Failed to update planned watch dives', error);
-    });
+    let isCurrent = true;
+
+    void updatePlannedWatchDives(plans)
+      .then(status => {
+        if (isCurrent) {
+          setPlannedWatchSyncStatus(status);
+        }
+      })
+      .catch(error => {
+        console.warn('Failed to update planned watch dives', error);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [plans]);
 
   return {
@@ -52,6 +65,7 @@ export const useDivePlans = (options: UseDivePlansOptions = {}) => {
     isRefreshing: plansQuery.isRefetching,
     isSaving: savePlanMutation.isPending,
     isDeleting: deletePlanMutation.isPending,
+    plannedWatchSyncStatus,
     listError: plansQuery.error,
     saveError: savePlanMutation.error,
     deleteError: deletePlanMutation.error,

@@ -21,7 +21,16 @@ describe('updatePlannedWatchDives', () => {
   });
 
   it('sends unexecuted draft and planned dives to the watch companion', async () => {
-    const updatePlannedDives = jest.fn().mockResolvedValue(undefined);
+    const updatePlannedDives = jest.fn().mockResolvedValue({
+      nativeBridgeAvailable: true,
+      isSupported: true,
+      activationState: 'activated',
+      isPaired: true,
+      isWatchAppInstalled: true,
+      isReachable: false,
+      payloadCount: 2,
+      queuedCount: 1,
+    });
 
     jest.doMock('react-native', () => ({
       NativeEventEmitter: jest.fn(),
@@ -37,7 +46,7 @@ describe('updatePlannedWatchDives', () => {
 
     const { updatePlannedWatchDives } = require('../src/native/watch-connectivity') as typeof import('../src/native/watch-connectivity');
 
-    await updatePlannedWatchDives([
+    const status = await updatePlannedWatchDives([
       basePlan({ localId: 'draft-plan', status: 'draft', title: 'Draft plan' }),
       basePlan({ localId: 'planned-plan', status: 'planned', title: 'Planned plan' }),
       basePlan({ localId: 'completed-plan', status: 'completed', title: 'Completed plan' }),
@@ -47,5 +56,11 @@ describe('updatePlannedWatchDives', () => {
     expect(updatePlannedDives).toHaveBeenCalledTimes(1);
     const payload = JSON.parse(updatePlannedDives.mock.calls[0][0]) as Array<{ localId: string }>;
     expect(payload.map(plan => plan.localId)).toEqual(['draft-plan', 'planned-plan']);
+    expect(status).toMatchObject({
+      nativeBridgeAvailable: true,
+      activationState: 'activated',
+      payloadCount: 2,
+      queuedCount: 1,
+    });
   });
 });

@@ -1,5 +1,19 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - planned watch log completion
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/domains/dive-planning.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/utils/enrich-watch-log-with-plan.ts`
+  - `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+  - `packages/contracts/schemas/watch-session.schema.json`
+- 요약:
+  - 모바일 계획으로 시작한 watch session이 `sourcePlanLocalId`와 `planTitle`을 유지하고, 모바일 import 시 원본 계획 metadata를 로그 manual overlay에 합친 뒤 원본 계획을 완료 상태와 `convertedLogLocalId`로 갱신하는 흐름을 기록했다.
+
 ## 2026-06-25 - 구조 - watch preferred dive mode and auto start
 
 - 수정:

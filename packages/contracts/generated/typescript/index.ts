@@ -11,6 +11,8 @@ export interface WatchSession {
   gasLabel?: string;
   siteId?: string;
   siteName?: string;
+  sourcePlanLocalId?: string;
+  planTitle?: string;
   buddyIds?: string[];
   gearIds?: string[];
   tags?: string[];

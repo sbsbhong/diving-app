@@ -17,6 +17,7 @@ export const divePlanToDiveLogEntryDraft = (
     ...entry,
     manual: {
       ...entry.manual,
+      title: plan.title,
       entryStyle: plan.entryStyle,
       site: {
         siteId: plan.site.siteId,
@@ -37,7 +38,7 @@ export const divePlanToDiveLogEntryDraft = (
   };
 };
 
-function buildPlanNotes(plan: DivePlan): string | undefined {
+export function buildPlanNotes(plan: DivePlan): string | undefined {
   const notes = [plan.objective, plan.plannedValues.trainingFocus, plan.notes]
     .map(value => value?.trim())
     .filter((value): value is string => Boolean(value));

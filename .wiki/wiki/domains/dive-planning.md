@@ -20,6 +20,8 @@ Planbook editor는 `diveMode`별로 다른 입력 section을 보여준다. Pool 
 
 계획에서 Logbook 초안으로 복사하는 값은 site, buddy, gear, tags, dive mode, optional `entryStyle`, gas label, objective/training focus/notes 같은 metadata로 제한한다. 계획 최대 수심, 계획 시간, 예상 시야, 예상 난이도, checklist 상태는 실제 측정값이 아니므로 Logbook measured value에 복사하지 않는다. 초안은 Logbook editor에서 사용자가 확인하고 저장해야 실제 `DiveLogEntry`가 된다.
 
+Watch 앱에서 모바일 계획을 선택해 기록을 시작하면 watch session은 `sourcePlanLocalId`와 `planTitle`을 함께 저장한다. 모바일 import는 이 id로 원본 계획을 찾아 계획 title, site, buddy, gear, tags, notes, dive mode, gas label, training metadata를 imported log의 manual overlay에 합치고, 원본 계획을 `completed` 상태와 `convertedLogLocalId`로 갱신한다. 이때 watch가 측정한 수심, 시간, 수온, sample profile은 watch capture 기준으로 유지하며 계획값으로 덮어쓰지 않는다.
+
 현재 Planbook 저장소는 production persistence가 아니다. 앱 실행 중 React Query와 local repository가 상태를 들고 있으며, Supabase나 device storage가 생기기 전까지 앱 재시작 뒤 계획 보존은 제공하지 않는다.
 
 ## 관련 문서

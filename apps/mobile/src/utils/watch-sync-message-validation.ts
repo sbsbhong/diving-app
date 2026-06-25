@@ -26,6 +26,8 @@ const sessionKeys = [
   'gasLabel',
   'siteId',
   'siteName',
+  'sourcePlanLocalId',
+  'planTitle',
   'buddyIds',
   'gearIds',
   'tags',
@@ -173,7 +175,7 @@ function parseWatchSession(value: unknown, path: string): ValidationResult<Watch
   }
   assignOptional(session, 'diveMode', diveMode.value);
 
-  for (const key of ['gasLabel', 'siteId', 'siteName', 'notes'] as const) {
+  for (const key of ['gasLabel', 'siteId', 'siteName', 'sourcePlanLocalId', 'planTitle', 'notes'] as const) {
     const result = readString(objectResult.value, key, path);
     if (!result.ok) {
       return result;

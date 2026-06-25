@@ -3,6 +3,7 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import metadataRichFixture from '../../../packages/contracts/fixtures/metadata-rich-watch-sync-message.json';
 import { LocalDiveLogRepository } from '../src/repositories/local-dive-log-repository';
+import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
 import { diveLogbookQueryKeys } from '../src/states/use-dive-logbook-queries';
 import { WatchConnectivitySyncProvider } from '../src/states/watch-connectivity-sync';
 
@@ -148,6 +149,101 @@ describe('WatchConnectivitySyncProvider', () => {
       localId: entries[0].localId,
       syncStatus: 'synced',
     }));
+  });
+
+  it('enriches planned watch logs and completes the source mobile plan', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const planRepository = new LocalDivePlanRepository([
+      {
+        localId: 'plan-1',
+        status: 'planned',
+        createdAt: 1781350000,
+        updatedAt: 1781351000,
+        plannedAt: 1781352000,
+        title: 'Blue Wall morning',
+        diveMode: 'scuba',
+        entryStyle: 'boat',
+        site: { siteId: 'site-blue-wall', name: 'Blue Wall' },
+        buddyIds: ['Mina'],
+        gearIds: ['bcd-1'],
+        tags: ['reef'],
+        objective: 'Buoyancy check',
+        notes: 'Review current before entering.',
+        plannedValues: {
+          gasLabel: 'EAN32',
+          trainingFocus: 'hovering',
+        },
+        checklistItems: [],
+      },
+    ]);
+    const queryClient = createQueryClient();
+    let listener: ((payload: { payloadJson: string; localSessionId?: string; receivedAt?: number }) => void) | undefined;
+    const fixture = {
+      ...metadataRichFixture,
+      session: {
+        ...metadataRichFixture.session,
+        localSessionId: 'planned-watch-session',
+        sourcePlanLocalId: 'plan-1',
+        planTitle: 'Blue Wall morning',
+        siteName: 'Blue Wall',
+        notes: 'Watch quick note.',
+        endedAt: 1781357600,
+        samples: metadataRichFixture.session.samples.map(sample => ({
+          ...sample,
+          localSessionId: 'planned-watch-session',
+        })),
+      },
+    };
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            planRepository={planRepository}
+            drainPendingPayloads={async () => []}
+            acknowledgePayloads={jest.fn()}
+            subscribeToPayloads={handler => {
+              listener = handler;
+              return { remove: jest.fn() };
+            }}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    await ReactTestRenderer.act(async () => {
+      listener?.({
+        payloadJson: JSON.stringify(fixture),
+        localSessionId: 'planned-watch-session',
+        receivedAt: 1781357600,
+      });
+      await flushPromises();
+    });
+
+    const [entry] = await repository.list();
+    expect(entry.manual).toMatchObject({
+      title: 'Blue Wall morning',
+      entryStyle: 'boat',
+      site: { siteId: 'site-blue-wall', name: 'Blue Wall' },
+      notes: 'Buoyancy check\nhovering\nReview current before entering.\nWatch quick note.',
+      measuredValues: {
+        diveMode: 'scuba',
+        gasLabel: 'EAN32',
+        trainingFocus: 'hovering',
+      },
+    });
+    expect(entry.manual.buddyIds).toEqual(expect.arrayContaining(['Mina', 'buddy-hana']));
+    expect(entry.manual.gearIds).toEqual(expect.arrayContaining(['bcd-1', 'mask-primary', 'bcd-travel']));
+    expect(entry.manual.tags).toEqual(expect.arrayContaining(['reef', 'training', 'clear-water']));
+
+    const completedPlan = await planRepository.get('plan-1');
+    expect(completedPlan).toMatchObject({
+      status: 'completed',
+      completedAt: 1781357600,
+      convertedLogLocalId: entry.localId,
+    });
   });
 
   it('ignores payloads that fail the watch sync contract validator', async () => {

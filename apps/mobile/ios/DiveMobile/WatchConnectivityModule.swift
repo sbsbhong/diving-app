@@ -76,8 +76,7 @@ final class WatchConnectivityModule: RCTEventEmitter {
     resolver resolve: RCTPromiseResolveBlock,
     rejecter reject: RCTPromiseRejectBlock
   ) {
-    WatchConnectivityInbox.shared.updatePlannedDives(json: plannedDivesJson)
-    resolve(nil)
+    resolve(WatchConnectivityInbox.shared.updatePlannedDives(json: plannedDivesJson))
   }
 
   @objc(getLinkedWatchInfo:rejecter:)

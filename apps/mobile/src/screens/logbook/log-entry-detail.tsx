@@ -15,6 +15,7 @@ import {
   formatRating,
   formatTemperature,
 } from '../../utils/dive-formatters';
+import { firstNonBlankText } from '../../utils/notes';
 
 type LogEntryDetailProps = {
   entry: DiveLogEntry;
@@ -35,13 +36,13 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
   const buddies = props.entry.manual.buddyIds.length ? props.entry.manual.buddyIds.join(', ') : t('logbook.none');
   const marineLife = props.entry.manual.observedMarineLife.length ? props.entry.manual.observedMarineLife.join(', ') : t('logbook.none');
   const sourceLabel = props.entry.source === 'watch' ? t('logbook.watchCaptured') : t('logbook.manualValue');
-  const note = props.entry.manual.notes ?? props.entry.watchCapture?.session.notes ?? t('logbook.noNotes');
+  const note = firstNonBlankText(props.entry.manual.notes, props.entry.watchCapture?.session.notes) ?? t('logbook.noNotes');
 
   return (
     <DiveSummaryCard accent="primary">
       <DiveSummaryCard.Header
         eyebrow={sourceLabel}
-        title={props.entry.manual.site.name ?? t('logbook.detailTitle')}
+        title={props.entry.manual.title ?? props.entry.manual.site.name ?? t('logbook.detailTitle')}
         right={<StatusPill label={props.entry.source === 'watch' ? t('logbook.watchSource') : t('logbook.manualSource')} tone="secondary" />}
       />
       <DiveSummaryCard.Body>

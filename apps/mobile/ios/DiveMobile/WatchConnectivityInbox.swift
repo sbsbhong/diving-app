@@ -67,13 +67,12 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
-  func updatePlannedDives(json plannedDivesJson: String) {
+  func updatePlannedDives(json plannedDivesJson: String) -> [String: Any] {
     if Thread.isMainThread {
-      updatePlannedDivesOnMainQueue(json: plannedDivesJson)
-      return
+      return updatePlannedDivesOnMainQueue(json: plannedDivesJson)
     }
 
-    DispatchQueue.main.sync {
+    return DispatchQueue.main.sync {
       updatePlannedDivesOnMainQueue(json: plannedDivesJson)
     }
   }
@@ -208,10 +207,11 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
-  private func updatePlannedDivesOnMainQueue(json plannedDivesJson: String) {
+  private func updatePlannedDivesOnMainQueue(json plannedDivesJson: String) -> [String: Any] {
     pendingPlannedDivesJson = plannedDivesJson
     userDefaults.set(plannedDivesJson, forKey: Self.plannedDivesContextStorageKey)
     flushPendingPlannedDivesContextOnMainQueue()
+    return plannedDivesStatusOnMainQueue(payloadCount: Self.countPlannedDives(in: plannedDivesJson))
   }
 
   private func flushPendingPlannedDivesContextOnMainQueue() {
@@ -264,6 +264,39 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
 
     return info
+  }
+
+  private func plannedDivesStatusOnMainQueue(payloadCount: Int) -> [String: Any] {
+    var status = linkedWatchInfoOnMainQueue()
+    status["activationState"] = activationStateName(for: connectivitySession?.activationState)
+    status["payloadCount"] = payloadCount
+    status["queuedCount"] = pendingPlannedDivesJson == nil ? 0 : 1
+    status["updatedAt"] = Date().timeIntervalSince1970
+    return status
+  }
+
+  private func activationStateName(for activationState: WCSessionActivationState?) -> String {
+    switch activationState {
+    case .notActivated:
+      return "notActivated"
+    case .inactive:
+      return "inactive"
+    case .activated:
+      return "activated"
+    case nil:
+      return "unsupported"
+    @unknown default:
+      return "unknown"
+    }
+  }
+
+  private static func countPlannedDives(in plannedDivesJson: String) -> Int {
+    guard let data = plannedDivesJson.data(using: .utf8),
+          let items = try? JSONSerialization.jsonObject(with: data) as? [Any] else {
+      return 0
+    }
+
+    return items.count
   }
 
   private func persistPendingPayloads() {

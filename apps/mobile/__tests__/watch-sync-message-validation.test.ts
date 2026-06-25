@@ -40,6 +40,27 @@ describe('watch sync message validation', () => {
     expect(result.message.session.localSessionId).toBe('fixture-minimal-session');
   });
 
+  it('accepts source plan metadata from watch sessions', () => {
+    const result = parseWatchSyncMessageValue({
+      type: 'sessionEnded',
+      session: {
+        localSessionId: 'planned-session-1',
+        sourcePlanLocalId: 'plan-1',
+        planTitle: 'Blue Wall morning',
+        startedAt: 1781352000,
+        endedAt: 1781352600,
+        samples: [{ localSessionId: 'planned-session-1', timestamp: 1781352000, depthMeters: 0 }],
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      throw new Error(result.error.message);
+    }
+    expect(result.message.session.sourcePlanLocalId).toBe('plan-1');
+    expect(result.message.session.planTitle).toBe('Blue Wall morning');
+  });
+
   it('validates arrays for transport batches', () => {
     const result = parseWatchSyncMessagesValue([minimalFixture, metadataRichFixture]);
 

@@ -79,12 +79,16 @@ struct WatchLocation: Codable, Equatable {
 
 struct PreDivePlan: Codable, Equatable {
     var sourcePlanLocalId: String?
+    var title: String = ""
     var diveMode: DiveMode = .scuba
     var gasLabel: String = String(localized: "Air")
     var siteName: String = ""
     var buddyName: String = ""
+    var gearIds: [String] = []
+    var userTags: [String] = []
     var quickNote: String = ""
     var plannedMaxDepthMeters: Double = 18
+    var plannedDurationMinutes: Double?
 
     var buddyIds: [String] {
         normalizedToken(from: buddyName).map { [$0] } ?? []
@@ -92,6 +96,7 @@ struct PreDivePlan: Codable, Equatable {
 
     var tags: [String] {
         var values = ["watch-capture"]
+        values.append(contentsOf: userTags)
         if let sourcePlanLocalId {
             values.append("plan-\(sourcePlanLocalId)")
         }
@@ -119,6 +124,7 @@ struct WatchPlannedDive: Codable, Identifiable, Equatable {
     let plannedDurationMinutes: Double?
     let gasLabel: String?
     let buddyIds: [String]
+    let gearIds: [String]?
     let tags: [String]
     let notes: String?
 
@@ -139,12 +145,16 @@ struct WatchPlannedDive: Codable, Identifiable, Equatable {
     var preDivePlan: PreDivePlan {
         PreDivePlan(
             sourcePlanLocalId: localId,
+            title: title ?? "",
             diveMode: diveMode ?? .scuba,
             gasLabel: gasLabel ?? String(localized: "Air"),
             siteName: siteName ?? "",
             buddyName: buddyIds.joined(separator: ", "),
+            gearIds: gearIds ?? [],
+            userTags: tags,
             quickNote: notes ?? "",
-            plannedMaxDepthMeters: plannedMaxDepthMeters ?? 18
+            plannedMaxDepthMeters: plannedMaxDepthMeters ?? 18,
+            plannedDurationMinutes: plannedDurationMinutes
         )
     }
 }
@@ -156,6 +166,8 @@ struct DiveSession: Codable, Identifiable {
     let gasLabel: String?
     let siteId: String?
     let siteName: String?
+    let sourcePlanLocalId: String?
+    let planTitle: String?
     let buddyIds: [String]
     let gearIds: [String]
     let tags: [String]
@@ -182,6 +194,8 @@ struct DiveSession: Codable, Identifiable {
         gasLabel: String? = nil,
         siteId: String? = nil,
         siteName: String? = nil,
+        sourcePlanLocalId: String? = nil,
+        planTitle: String? = nil,
         buddyIds: [String] = [],
         gearIds: [String] = [],
         tags: [String] = [],
@@ -203,6 +217,8 @@ struct DiveSession: Codable, Identifiable {
         self.gasLabel = gasLabel
         self.siteId = siteId
         self.siteName = siteName
+        self.sourcePlanLocalId = sourcePlanLocalId
+        self.planTitle = planTitle
         self.buddyIds = buddyIds
         self.gearIds = gearIds
         self.tags = tags
@@ -228,6 +244,8 @@ struct DiveSession: Codable, Identifiable {
         gasLabel = try container.decodeIfPresent(String.self, forKey: .gasLabel)
         siteId = try container.decodeIfPresent(String.self, forKey: .siteId)
         siteName = try container.decodeIfPresent(String.self, forKey: .siteName)
+        sourcePlanLocalId = try container.decodeIfPresent(String.self, forKey: .sourcePlanLocalId)
+        planTitle = try container.decodeIfPresent(String.self, forKey: .planTitle)
         buddyIds = try container.decodeIfPresent([String].self, forKey: .buddyIds) ?? []
         gearIds = try container.decodeIfPresent([String].self, forKey: .gearIds) ?? []
         tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
@@ -258,6 +276,8 @@ struct DiveSession: Codable, Identifiable {
             gasLabel: gasLabel,
             siteId: siteId,
             siteName: siteName,
+            sourcePlanLocalId: sourcePlanLocalId,
+            planTitle: planTitle,
             buddyIds: buddyIds,
             gearIds: gearIds,
             tags: tags,
@@ -283,6 +303,8 @@ struct DiveSession: Codable, Identifiable {
             gasLabel: gasLabel,
             siteId: siteId,
             siteName: siteName,
+            sourcePlanLocalId: sourcePlanLocalId,
+            planTitle: planTitle,
             buddyIds: buddyIds,
             gearIds: gearIds,
             tags: tags,
@@ -318,6 +340,8 @@ private struct WatchSessionPayload: Encodable {
     let gasLabel: String?
     let siteId: String?
     let siteName: String?
+    let sourcePlanLocalId: String?
+    let planTitle: String?
     let buddyIds: [String]
     let gearIds: [String]
     let tags: [String]
@@ -344,6 +368,8 @@ private struct WatchSessionPayload: Encodable {
         gasLabel = session.gasLabel
         siteId = session.siteId
         siteName = session.siteName
+        sourcePlanLocalId = session.sourcePlanLocalId
+        planTitle = session.planTitle
         buddyIds = session.buddyIds
         gearIds = session.gearIds
         tags = session.tags

@@ -11,6 +11,7 @@ import {
 import type { DiveLogEntry, DiveLogSyncStatus } from '../types/dive-log-entry';
 import type { DiveSessionFilter, MobileDiveSession } from '../types/dive-session';
 import { importPendingWatchConnectivityPayloads, type WatchConnectivityImportSummary } from './watch-connectivity-sync';
+import { firstNonBlankText } from '../utils/notes';
 
 type UseDiveLogbookOptions = {
   repository?: DiveLogRepository;
@@ -116,12 +117,13 @@ export const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSess
   if (entry.watchCapture) {
     return {
       ...entry.watchCapture.session,
+      planTitle: entry.manual.title ?? entry.watchCapture.session.planTitle,
       siteId: entry.manual.site.siteId ?? entry.watchCapture.session.siteId,
       siteName: entry.manual.site.name ?? entry.watchCapture.session.siteName,
       buddyIds: entry.manual.buddyIds,
       gearIds: entry.manual.gearIds,
       tags: entry.manual.tags,
-      notes: entry.manual.notes ?? entry.watchCapture.session.notes,
+      notes: firstNonBlankText(entry.manual.notes, entry.watchCapture.session.notes),
       rating: entry.manual.rating,
       diveMode: entry.manual.measuredValues.diveMode ?? entry.watchCapture.session.diveMode,
       gasLabel: entry.manual.measuredValues.gasLabel ?? entry.watchCapture.session.gasLabel,

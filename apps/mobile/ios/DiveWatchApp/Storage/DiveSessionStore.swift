@@ -42,7 +42,7 @@ final class DiveSessionStore: ObservableObject {
     func save(_ session: DiveSession) {
         let syncStatus = syncTransport.enqueue(session: session)
         sessions.insert(session.withSyncStatus(syncStatus), at: 0)
-        if let sourcePlanLocalId = session.sourcePlanLocalId {
+        if let sourcePlanLocalId = session.resolvedSourcePlanLocalId {
             markPlanExecuted(sourcePlanLocalId)
         }
         persist()
@@ -178,8 +178,12 @@ final class DiveSessionStore: ObservableObject {
 }
 
 private extension DiveSession {
-    var sourcePlanLocalId: String? {
-        tags
+    var resolvedSourcePlanLocalId: String? {
+        if let sourcePlanLocalId {
+            return sourcePlanLocalId
+        }
+
+        return tags
             .first { $0.hasPrefix("plan-") }
             .map { String($0.dropFirst("plan-".count)) }
     }

@@ -9,15 +9,21 @@ import {
   type WatchConnectivitySubscription,
 } from '../native/watch-connectivity';
 import { defaultDiveLogRepository } from '../repositories/default-dive-log-repository';
+import { defaultDivePlanRepository } from '../repositories/default-dive-plan-repository';
 import type { DiveLogRepository } from '../repositories/dive-log-repository';
+import type { DivePlanRepository } from '../repositories/dive-plan-repository';
 import type { DiveLogEntry } from '../types/dive-log-entry';
+import type { DivePlan } from '../types/dive-plan';
 import type { WatchSyncMessage } from '../types/dive-session';
+import { enrichWatchLogWithSourcePlan, getWatchSessionSourcePlanLocalId } from '../utils/enrich-watch-log-with-plan';
 import { parseWatchSyncMessageJson } from '../utils/watch-sync-message-validation';
 import { diveLogbookQueryKeys } from './use-dive-logbook-queries';
+import { divePlanQueryKeys } from './use-dive-plan-queries';
 
 type WatchConnectivitySyncProviderProps = {
   children?: React.ReactNode;
   repository?: DiveLogRepository;
+  planRepository?: DivePlanRepository;
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
@@ -27,6 +33,7 @@ type WatchConnectivitySyncProviderProps = {
 
 type WatchConnectivityImportOptions = {
   repository: DiveLogRepository;
+  planRepository?: DivePlanRepository;
   queryClient: QueryClient;
   queryScope?: string;
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
@@ -44,6 +51,7 @@ type WatchConnectivityAcknowledgement = (payloadIds: readonly string[]) => Promi
 type WatchConnectivityPayloadImportOptions = {
   payload: WatchConnectivityPayload;
   repository: DiveLogRepository;
+  planRepository: DivePlanRepository;
   queryClient: QueryClient;
   queryScope?: string;
   acknowledgePayloads: WatchConnectivityAcknowledgement;
@@ -53,6 +61,7 @@ type WatchConnectivityPayloadImportOptions = {
 export function WatchConnectivitySyncProvider({
   children,
   repository = defaultDiveLogRepository,
+  planRepository = defaultDivePlanRepository,
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
   acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
   acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
@@ -66,6 +75,7 @@ export function WatchConnectivitySyncProvider({
       const importedEntry = await importWatchConnectivityPayload({
         payload,
         repository,
+        planRepository,
         queryClient,
         acknowledgePayloads,
         acknowledgeImportedPayloads,
@@ -75,7 +85,7 @@ export function WatchConnectivitySyncProvider({
         onImportedEntry?.(importedEntry);
       }
     },
-    [acknowledgeImportedPayloads, acknowledgePayloads, onImportedEntry, queryClient, repository],
+    [acknowledgeImportedPayloads, acknowledgePayloads, onImportedEntry, planRepository, queryClient, repository],
   );
 
   const importPayloadSafely = React.useCallback(
@@ -119,6 +129,7 @@ export function WatchConnectivitySyncProvider({
 
 export async function importPendingWatchConnectivityPayloads({
   repository,
+  planRepository = defaultDivePlanRepository,
   queryClient,
   queryScope,
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
@@ -132,6 +143,7 @@ export async function importPendingWatchConnectivityPayloads({
     const importedEntry = await importWatchConnectivityPayload({
       payload,
       repository,
+      planRepository,
       queryClient,
       queryScope,
       acknowledgePayloads,
@@ -152,6 +164,7 @@ export async function importPendingWatchConnectivityPayloads({
 async function importWatchConnectivityPayload({
   payload,
   repository,
+  planRepository,
   queryClient,
   queryScope,
   acknowledgePayloads,
@@ -166,7 +179,15 @@ async function importWatchConnectivityPayload({
   }
 
   const entries = await repository.importWatchMessages([result.message]);
-  const { importedEntry, syncedEntries } = await markWatchConnectivityImportSynced(repository, entries, result.message, payload);
+  const { importedEntry, syncedEntries } = await markWatchConnectivityImportSynced(
+    repository,
+    planRepository,
+    queryClient,
+    entries,
+    result.message,
+    payload,
+    queryScope,
+  );
   queryClient.setQueryData(diveLogbookQueryKeys.list(repository, queryScope), syncedEntries);
   queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, queryScope) });
   await acknowledgePayload(payload, acknowledgeImportedPayloads);
@@ -186,9 +207,12 @@ async function acknowledgePayload(
 
 async function markWatchConnectivityImportSynced(
   repository: DiveLogRepository,
+  planRepository: DivePlanRepository,
+  queryClient: QueryClient,
   entries: DiveLogEntry[],
   message: WatchSyncMessage,
   payload: WatchConnectivityPayload,
+  queryScope?: string,
 ): Promise<{ importedEntry?: DiveLogEntry; syncedEntries: DiveLogEntry[] }> {
   const importedEntry = entries.find(entry => {
     const session = entry.watchCapture?.session;
@@ -198,12 +222,19 @@ async function markWatchConnectivityImportSynced(
     );
   });
 
-  if (!importedEntry || importedEntry.syncStatus === 'synced') {
+  if (!importedEntry) {
     return { syncedEntries: entries };
   }
 
+  const sourcePlan = await findSourcePlan(planRepository, message);
+  const enrichedEntry = sourcePlan ? enrichWatchLogWithSourcePlan(importedEntry, sourcePlan) : importedEntry;
+
+  if (sourcePlan) {
+    await completeSourcePlan(planRepository, queryClient, sourcePlan, enrichedEntry, message, payload, queryScope);
+  }
+
   const syncedEntry = await repository.save({
-    ...importedEntry,
+    ...enrichedEntry,
     syncStatus: 'synced',
     updatedAt: payload.receivedAt ?? Date.now() / 1000,
   });
@@ -215,4 +246,37 @@ async function markWatchConnectivityImportSynced(
     importedEntry: currentImportedEntry,
     syncedEntries,
   };
+}
+
+async function findSourcePlan(
+  planRepository: DivePlanRepository,
+  message: WatchSyncMessage,
+): Promise<DivePlan | undefined> {
+  const sourcePlanLocalId = getWatchSessionSourcePlanLocalId(message.session);
+  return sourcePlanLocalId ? planRepository.get(sourcePlanLocalId) : undefined;
+}
+
+async function completeSourcePlan(
+  planRepository: DivePlanRepository,
+  queryClient: QueryClient,
+  plan: DivePlan,
+  entry: DiveLogEntry,
+  message: WatchSyncMessage,
+  payload: WatchConnectivityPayload,
+  queryScope?: string,
+): Promise<void> {
+  const completedAt = message.session.endedAt ?? payload.receivedAt ?? Date.now() / 1000;
+  const savedPlan = await planRepository.save({
+    ...plan,
+    status: 'completed',
+    completedAt,
+    convertedLogLocalId: entry.localId,
+    updatedAt: completedAt,
+  });
+
+  queryClient.setQueryData(divePlanQueryKeys.detail(savedPlan.localId, planRepository, queryScope), savedPlan);
+  queryClient.setQueryData<DivePlan[]>(divePlanQueryKeys.list(planRepository, queryScope), currentPlans =>
+    (currentPlans ?? []).map(currentPlan => (currentPlan.localId === savedPlan.localId ? savedPlan : currentPlan)),
+  );
+  queryClient.invalidateQueries({ queryKey: divePlanQueryKeys.all(planRepository, queryScope) });
 }

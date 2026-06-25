@@ -29,6 +29,7 @@ export type DiveLogManualMeasuredValues = {
 };
 
 export type DiveLogManualFields = {
+  title?: string;
   site: DiveLogSite;
   entryStyle?: DiveEntryStyle;
   buddyIds: string[];

@@ -99,4 +99,18 @@ describe('watchSessionToDiveLogEntry', () => {
       measuredValues: 'manual',
     });
   });
+
+  it('maps source plan metadata into the log title overlay', () => {
+    const entry = watchSessionToDiveLogEntry({
+      session: {
+        ...baseSession,
+        sourcePlanLocalId: 'plan-1',
+        planTitle: 'Blue Wall morning',
+      },
+      now: 1781353000,
+    });
+
+    expect(entry.manual.title).toBe('Blue Wall morning');
+    expect(entry.watchCapture?.session.sourcePlanLocalId).toBe('plan-1');
+  });
 });

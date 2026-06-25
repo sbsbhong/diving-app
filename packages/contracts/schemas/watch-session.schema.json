@@ -56,6 +56,12 @@
     "siteName": {
       "type": "string"
     },
+    "sourcePlanLocalId": {
+      "type": "string"
+    },
+    "planTitle": {
+      "type": "string"
+    },
     "buddyIds": {
       "type": "array",
       "items": {

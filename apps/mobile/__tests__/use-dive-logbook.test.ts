@@ -133,4 +133,45 @@ describe('diveLogEntryToMobileSession', () => {
 
     expect(diveLogEntryToMobileSession(entry).notes).toBe('Watch quick note');
   });
+
+  it('falls back to the raw watch note when a watch-backed entry has a blank manual note', () => {
+    const entry: DiveLogEntry = {
+      localId: 'watch:session-blank-manual-note:1781352600',
+      source: 'watch',
+      syncStatus: 'synced',
+      createdAt: 1781353000,
+      updatedAt: 1781354000,
+      manual: {
+        site: {},
+        buddyIds: [],
+        gearIds: [],
+        tags: [],
+        observedMarineLife: [],
+        notes: '',
+        measuredValues: {},
+      },
+      mobile: {
+        mediaPlaceholders: [],
+      },
+      watchCapture: {
+        importKey: 'session-blank-manual-note:1781352600',
+        importedAt: 1781353000,
+        session: {
+          localSessionId: 'session-blank-manual-note',
+          startedAt: 1781352000,
+          endedAt: 1781352600,
+          notes: 'Watch quick note after summary',
+          samples: [],
+        },
+        measuredValues: {
+          startedAt: 1781352000,
+          endedAt: 1781352600,
+        },
+        samples: [],
+      },
+      provenance: {},
+    };
+
+    expect(diveLogEntryToMobileSession(entry).notes).toBe('Watch quick note after summary');
+  });
 });

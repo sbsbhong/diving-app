@@ -66,10 +66,12 @@ public struct WatchSession: Codable {
     public let localSessionId: String
     public let maxDepthMeters: Double?
     public let notes: String?
-    public let perceivedExertion, rating: Int?
+    public let perceivedExertion: Int?
+    public let planTitle: String?
+    public let rating: Int?
     public let samples: [WatchDepthSample]
     public let schemaVersion: Int?
-    public let siteId, siteName: String?
+    public let siteId, siteName, sourcePlanLocalId: String?
     /// Unix timestamp in seconds
     public let startedAt: Double
     public let syncStatus: SyncStatus?
@@ -78,7 +80,7 @@ public struct WatchSession: Codable {
     public let waterCondition: WaterCondition?
     public let waterTemperatureCelsius: Double?
 
-    public init(averageDepthMeters: Double?, buddyIds: [String]?, diveMode: DiveMode?, endedAt: Double?, entryLocation: WatchLocation?, exitLocation: WatchLocation?, gasLabel: String?, gearIds: [String]?, localSessionId: String, maxDepthMeters: Double?, notes: String?, perceivedExertion: Int?, rating: Int?, samples: [WatchDepthSample], schemaVersion: Int?, siteId: String?, siteName: String?, startedAt: Double, syncStatus: SyncStatus?, tags: [String]?, visibilityRating: Int?, waterCondition: WaterCondition?, waterTemperatureCelsius: Double?) {
+    public init(averageDepthMeters: Double?, buddyIds: [String]?, diveMode: DiveMode?, endedAt: Double?, entryLocation: WatchLocation?, exitLocation: WatchLocation?, gasLabel: String?, gearIds: [String]?, localSessionId: String, maxDepthMeters: Double?, notes: String?, perceivedExertion: Int?, planTitle: String?, rating: Int?, samples: [WatchDepthSample], schemaVersion: Int?, siteId: String?, siteName: String?, sourcePlanLocalId: String?, startedAt: Double, syncStatus: SyncStatus?, tags: [String]?, visibilityRating: Int?, waterCondition: WaterCondition?, waterTemperatureCelsius: Double?) {
         self.averageDepthMeters = averageDepthMeters
         self.buddyIds = buddyIds
         self.diveMode = diveMode
@@ -91,11 +93,13 @@ public struct WatchSession: Codable {
         self.maxDepthMeters = maxDepthMeters
         self.notes = notes
         self.perceivedExertion = perceivedExertion
+        self.planTitle = planTitle
         self.rating = rating
         self.samples = samples
         self.schemaVersion = schemaVersion
         self.siteId = siteId
         self.siteName = siteName
+        self.sourcePlanLocalId = sourcePlanLocalId
         self.startedAt = startedAt
         self.syncStatus = syncStatus
         self.tags = tags
@@ -136,11 +140,13 @@ public extension WatchSession {
         maxDepthMeters: Double?? = nil,
         notes: String?? = nil,
         perceivedExertion: Int?? = nil,
+        planTitle: String?? = nil,
         rating: Int?? = nil,
         samples: [WatchDepthSample]? = nil,
         schemaVersion: Int?? = nil,
         siteId: String?? = nil,
         siteName: String?? = nil,
+        sourcePlanLocalId: String?? = nil,
         startedAt: Double? = nil,
         syncStatus: SyncStatus?? = nil,
         tags: [String]?? = nil,
@@ -161,11 +167,13 @@ public extension WatchSession {
             maxDepthMeters: maxDepthMeters ?? self.maxDepthMeters,
             notes: notes ?? self.notes,
             perceivedExertion: perceivedExertion ?? self.perceivedExertion,
+            planTitle: planTitle ?? self.planTitle,
             rating: rating ?? self.rating,
             samples: samples ?? self.samples,
             schemaVersion: schemaVersion ?? self.schemaVersion,
             siteId: siteId ?? self.siteId,
             siteName: siteName ?? self.siteName,
+            sourcePlanLocalId: sourcePlanLocalId ?? self.sourcePlanLocalId,
             startedAt: startedAt ?? self.startedAt,
             syncStatus: syncStatus ?? self.syncStatus,
             tags: tags ?? self.tags,

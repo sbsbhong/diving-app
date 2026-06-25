@@ -22,6 +22,7 @@ export const watchSessionToDiveLogEntry = (options: WatchSessionToDiveLogEntryOp
     createdAt: timestamp,
     updatedAt: timestamp,
     manual: {
+      title: options.session.planTitle,
       site: {
         siteId: options.session.siteId,
         name: options.session.siteName,
