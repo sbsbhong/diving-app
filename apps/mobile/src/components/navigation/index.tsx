@@ -2,6 +2,7 @@ import React from 'react';
 import {
   CommonActions,
   NavigationContainer,
+  StackActions,
   TabActions,
   TabRouter,
   createNavigationContainerRef,
@@ -122,12 +123,13 @@ export default function RootNavigation(): React.JSX.Element {
       return;
     }
 
-    rootStackNavigationRef.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'tabs' }],
-      }),
-    );
+    const rootState = rootStackNavigationRef.getRootState();
+
+    if ((rootState?.index ?? 0) === 0) {
+      return;
+    }
+
+    rootStackNavigationRef.dispatch(StackActions.popToTop());
   }, []);
 
   const openTab = React.useCallback(

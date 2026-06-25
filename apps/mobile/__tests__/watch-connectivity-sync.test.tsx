@@ -246,6 +246,156 @@ describe('WatchConnectivitySyncProvider', () => {
     });
   });
 
+  it('keeps the watch log import acknowledged when source plan completion fails', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const planRepository = new LocalDivePlanRepository([
+      {
+        localId: 'plan-save-fails',
+        status: 'planned',
+        createdAt: 1781350000,
+        updatedAt: 1781351000,
+        plannedAt: 1781352000,
+        title: 'Plan save fails',
+        diveMode: 'scuba',
+        site: { name: 'Failure Reef' },
+        buddyIds: [],
+        gearIds: [],
+        tags: ['planned'],
+        objective: 'Keep import durable',
+        plannedValues: {
+          gasLabel: 'Air',
+        },
+        checklistItems: [],
+      },
+    ]);
+    const queryClient = createQueryClient();
+    const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(planRepository, 'save').mockRejectedValue(new Error('plan storage unavailable'));
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const fixture = {
+      ...metadataRichFixture,
+      session: {
+        ...metadataRichFixture.session,
+        localSessionId: 'plan-save-fails-session',
+        sourcePlanLocalId: 'plan-save-fails',
+        planTitle: 'Plan save fails',
+        endedAt: 1781357600,
+        samples: metadataRichFixture.session.samples.map(sample => ({
+          ...sample,
+          localSessionId: 'plan-save-fails-session',
+        })),
+      },
+    };
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            planRepository={planRepository}
+            drainPendingPayloads={async () => [
+              {
+                payloadId: 'plan-save-fails-payload',
+                payloadJson: JSON.stringify(fixture),
+                localSessionId: 'plan-save-fails-session',
+                receivedAt: 1781357600,
+              },
+            ]}
+            acknowledgePayloads={jest.fn()}
+            acknowledgeImportedPayloads={acknowledgeImportedPayloads}
+            subscribeToPayloads={() => ({ remove: jest.fn() })}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    const [entry] = await repository.list();
+    expect(entry.syncStatus).toBe('synced');
+    expect(entry.manual.title).toBe('Plan save fails');
+    expect(acknowledgeImportedPayloads).toHaveBeenCalledWith(['plan-save-fails-payload']);
+    const originalPlan = await planRepository.get('plan-save-fails');
+    expect(originalPlan?.status).toBe('planned');
+    expect(originalPlan?.convertedLogLocalId).toBeUndefined();
+    expect(console.warn).toHaveBeenCalledWith(
+      'Failed to complete source dive plan after watch import',
+      expect.any(Error),
+    );
+  });
+
+  it('does not complete a source plan when the final synced log save fails', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const planRepository = new LocalDivePlanRepository([
+      {
+        localId: 'log-save-fails',
+        status: 'planned',
+        createdAt: 1781350000,
+        updatedAt: 1781351000,
+        plannedAt: 1781352000,
+        title: 'Log save fails',
+        diveMode: 'scuba',
+        site: { name: 'Retry Reef' },
+        buddyIds: [],
+        gearIds: [],
+        tags: ['planned'],
+        objective: 'Retry import later',
+        plannedValues: {
+          gasLabel: 'Air',
+        },
+        checklistItems: [],
+      },
+    ]);
+    const queryClient = createQueryClient();
+    const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
+    const planSaveSpy = jest.spyOn(planRepository, 'save');
+    jest.spyOn(repository, 'save').mockRejectedValue(new Error('final log save failed'));
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const fixture = {
+      ...metadataRichFixture,
+      session: {
+        ...metadataRichFixture.session,
+        localSessionId: 'log-save-fails-session',
+        sourcePlanLocalId: 'log-save-fails',
+        planTitle: 'Log save fails',
+        endedAt: 1781357600,
+        samples: metadataRichFixture.session.samples.map(sample => ({
+          ...sample,
+          localSessionId: 'log-save-fails-session',
+        })),
+      },
+    };
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            planRepository={planRepository}
+            drainPendingPayloads={async () => [
+              {
+                payloadId: 'log-save-fails-payload',
+                payloadJson: JSON.stringify(fixture),
+                localSessionId: 'log-save-fails-session',
+                receivedAt: 1781357600,
+              },
+            ]}
+            acknowledgePayloads={jest.fn()}
+            acknowledgeImportedPayloads={acknowledgeImportedPayloads}
+            subscribeToPayloads={() => ({ remove: jest.fn() })}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    expect(planSaveSpy).not.toHaveBeenCalled();
+    expect(acknowledgeImportedPayloads).not.toHaveBeenCalled();
+    const retryPlan = await planRepository.get('log-save-fails');
+    expect(retryPlan?.status).toBe('planned');
+    expect(retryPlan?.convertedLogLocalId).toBeUndefined();
+    expect(console.warn).toHaveBeenCalledWith('Failed to import watch sync payload', expect.any(Error));
+  });
+
   it('ignores payloads that fail the watch sync contract validator', async () => {
     const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
     const queryClient = createQueryClient();

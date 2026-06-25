@@ -18,6 +18,7 @@
 		65B418949D09CE62247AEB33 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE02CFF90DFD4AE52C7E631 /* SummaryView.swift */; };
 		6839BFC6D39D48C6E24E65FB /* WatchSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB8558F91BE7C8E9EA22C1A /* WatchSyncTransport.swift */; };
 		6D05BB5FE2EB6EE8C69CBDD5 /* MockDepthSensorProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39957D0BC852B0FDF38FABA2 /* MockDepthSensorProvider.swift */; };
+		72F99C297E562922D87444A0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		775F06ECDC0D3A395069DC74 /* DiveWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895332B886DE77424F1410C1 /* DiveWatchApp.swift */; };
 		8097168CBD59D256F2B105FC /* DiveFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A61ED43A6E3C7D8E1961D9A /* DiveFormatters.swift */; };
@@ -363,6 +364,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5B140EA62C6109A50CDBD42 /* Localizable.xcstrings in Resources */,
+				72F99C297E562922D87444A0 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -250,7 +250,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
           </VStack>
         ) : null}
 
-        <InstrumentButton label={t('planning.openLogbook')} onPress={props.onOpenLogbook} />
+        <InstrumentButton testID="planning-open-logbook-action" label={t('planning.openLogbook')} onPress={props.onOpenLogbook} />
         <SafetyText>{t('planning.safetyText')}</SafetyText>
       </VStack>
     </KeyboardAwareScrollView>

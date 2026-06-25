@@ -100,8 +100,13 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
         </DiveSummaryCard>
 
         <VStack space="md">
-          <InstrumentButton label={t('home.openLogbook')} variant="primary" onPress={props.onOpenLogbook} />
-          <InstrumentButton label={t('home.planNextDive')} onPress={props.onOpenPlanning} />
+          <InstrumentButton
+            testID="home-open-logbook-action"
+            label={t('home.openLogbook')}
+            variant="primary"
+            onPress={props.onOpenLogbook}
+          />
+          <InstrumentButton testID="home-open-planning-action" label={t('home.planNextDive')} onPress={props.onOpenPlanning} />
         </VStack>
 
         <SafetyText>{t('home.safetyText')}</SafetyText>

@@ -229,15 +229,15 @@ async function markWatchConnectivityImportSynced(
   const sourcePlan = await findSourcePlan(planRepository, message);
   const enrichedEntry = sourcePlan ? enrichWatchLogWithSourcePlan(importedEntry, sourcePlan) : importedEntry;
 
-  if (sourcePlan) {
-    await completeSourcePlan(planRepository, queryClient, sourcePlan, enrichedEntry, message, payload, queryScope);
-  }
-
   const syncedEntry = await repository.save({
     ...enrichedEntry,
     syncStatus: 'synced',
     updatedAt: payload.receivedAt ?? Date.now() / 1000,
   });
+
+  if (sourcePlan) {
+    await completeSourcePlanSafely(planRepository, queryClient, sourcePlan, syncedEntry, message, payload, queryScope);
+  }
 
   const syncedEntries = await repository.list();
   const currentImportedEntry = syncedEntries.find(entry => entry.localId === syncedEntry.localId) ?? syncedEntry;
@@ -254,6 +254,22 @@ async function findSourcePlan(
 ): Promise<DivePlan | undefined> {
   const sourcePlanLocalId = getWatchSessionSourcePlanLocalId(message.session);
   return sourcePlanLocalId ? planRepository.get(sourcePlanLocalId) : undefined;
+}
+
+async function completeSourcePlanSafely(
+  planRepository: DivePlanRepository,
+  queryClient: QueryClient,
+  plan: DivePlan,
+  entry: DiveLogEntry,
+  message: WatchSyncMessage,
+  payload: WatchConnectivityPayload,
+  queryScope?: string,
+): Promise<void> {
+  try {
+    await completeSourcePlan(planRepository, queryClient, plan, entry, message, payload, queryScope);
+  } catch (error) {
+    console.warn('Failed to complete source dive plan after watch import', error);
+  }
 }
 
 async function completeSourcePlan(

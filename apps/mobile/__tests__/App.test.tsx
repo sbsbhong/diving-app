@@ -202,6 +202,7 @@ describe('App navigation', () => {
     expect(packageJson).toContain('"@react-navigation/native-stack"');
     expect(packageJson).toContain('"react-native-screens"');
     expect(navigationSource).toContain("from '@react-navigation/native-stack'");
+    expect(navigationSource).toContain('StackActions.popToTop()');
     expect(navigationSource).toContain('createNativeStackNavigator<RootStackParamList>()');
     expect(navigationSource).toContain('gestureEnabled: true');
     expect(navigationSource).toContain('rootStackNavigationRef.getRootState()');
@@ -209,6 +210,29 @@ describe('App navigation', () => {
     expect(navigationSource).toContain('planningCreate');
     expect(navigationSource).not.toContain('type AppDetailRoute');
     expect(navigationSource).not.toContain('detailRoute');
+  });
+
+  test('home and planning actions preserve the requested tab when returning to tabs', async () => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
+    });
+
+    const root = renderer!.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'home-open-planning-action' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'planning-create-action' })).toBeTruthy();
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'planning-open-logbook-action' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'logbook-create-action' })).toBeTruthy();
   });
 
   test('switches language from the restored Home language menu', async () => {
