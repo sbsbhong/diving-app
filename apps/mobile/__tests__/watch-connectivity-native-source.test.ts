@@ -99,6 +99,20 @@ describe('WatchConnectivity native source contract', () => {
     expect(transport).toContain('handleReceivedApplicationContext(from: session)');
   });
 
+  it('keeps the latest planned dive payload durable and sends it through a queued fallback', () => {
+    const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
+    const transport = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift');
+
+    expect(inbox).toContain('plannedDivesContextStorageKey');
+    expect(inbox).toContain('userDefaults.string(forKey: Self.plannedDivesContextStorageKey)');
+    expect(inbox).toContain('userDefaults.set(plannedDivesJson, forKey: Self.plannedDivesContextStorageKey)');
+    expect(inbox).toContain('connectivitySession.transferUserInfo(context)');
+    expect(inbox).not.toContain('pendingPlannedDivesJson = nil');
+    expect(inbox).toContain('func sessionWatchStateDidChange(_ session: WCSession)');
+    expect(transport).toContain('didReceiveUserInfo userInfo');
+    expect(transport).toContain('handlePlannedDives(userInfo: userInfo)');
+  });
+
   it('exposes linked watch status to the settings screen', () => {
     const mobileNative = readRepoFile('apps/mobile/src/native/watch-connectivity.ts');
     const module = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift');
@@ -132,6 +146,8 @@ describe('WatchConnectivity native source contract', () => {
     expect(home).toContain('PlannedDivesSection');
     expect(home).toContain('Start Planned Dive');
     expect(home).toContain('RecordingView(store: store, plan: plannedDive.preDivePlan)');
+    expect(home).toContain('ForEach(plannedDives)');
+    expect(home).not.toContain('plannedDives.prefix(3)');
     expect(recorder).toContain('sourcePlanLocalId');
   });
 

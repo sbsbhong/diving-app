@@ -157,7 +157,7 @@ private struct PlannedDivesSection: View {
                     .font(DiveWatchTheme.labelFont())
                     .foregroundStyle(DiveWatchTheme.primary)
 
-                ForEach(plannedDives.prefix(3)) { plannedDive in
+                ForEach(plannedDives) { plannedDive in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(plannedDive.displayTitle)
                             .font(.system(size: 14, weight: .semibold))
@@ -185,7 +185,7 @@ private struct PlannedDivesSection: View {
                         .buttonStyle(DiveActionButtonStyle(kind: .primary))
                     }
 
-                    if plannedDive.id != plannedDives.prefix(3).last?.id {
+                    if plannedDive.id != plannedDives.last?.id {
                         Divider().opacity(0.35)
                     }
                 }

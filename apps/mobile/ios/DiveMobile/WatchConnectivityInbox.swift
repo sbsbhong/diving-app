@@ -9,6 +9,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
   static let shared = WatchConnectivityInbox()
 
   private static let storageKey = "watchConnectivityPendingPayloads"
+  private static let plannedDivesContextStorageKey = "watchConnectivityLatestPlannedDivesJson"
 
   private let connectivitySession: WCSession?
   private let userDefaults: UserDefaults
@@ -21,6 +22,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     userDefaults = .standard
     super.init()
     pendingPayloads = Self.loadPendingPayloads(from: userDefaults)
+    pendingPlannedDivesJson = userDefaults.string(forKey: Self.plannedDivesContextStorageKey)
     connectivitySession?.delegate = self
   }
 
@@ -116,6 +118,12 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
   }
 
+  func sessionWatchStateDidChange(_ session: WCSession) {
+    DispatchQueue.main.async { [weak self] in
+      self?.flushPendingPlannedDivesContextOnMainQueue()
+    }
+  }
+
   func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
     enqueuePendingPayload(from: userInfo)
   }
@@ -202,6 +210,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
 
   private func updatePlannedDivesOnMainQueue(json plannedDivesJson: String) {
     pendingPlannedDivesJson = plannedDivesJson
+    userDefaults.set(plannedDivesJson, forKey: Self.plannedDivesContextStorageKey)
     flushPendingPlannedDivesContextOnMainQueue()
   }
 
@@ -221,10 +230,10 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     if connectivitySession.isReachable {
       connectivitySession.sendMessage(context, replyHandler: nil) { _ in }
     }
+    connectivitySession.transferUserInfo(context)
 
     do {
       try connectivitySession.updateApplicationContext(context)
-      pendingPlannedDivesJson = nil
     } catch {
       assertionFailure("Failed to update watch planned dives: \(error)")
     }
