@@ -44,7 +44,7 @@ Mobile import 동작은 다음과 같다.
 - `DiveLogRepository.importWatchMessages`는 validator를 통과해 typed `WatchSyncMessage[]`가 된 payload를 import한다.
 - Import는 `localSessionId`와 `endedAt` 기반 key로 deduplicate하고, 기존 manual/mobile field와 `importedAt`을 보존하며, 누락된 watch 동기화 상태를 `pending`으로 기본값 처리하고, 최신 항목이 먼저 오도록 정렬한다.
 - `useDiveLogbook`은 React Query hook을 통해 repository list/save/delete/import mutation을 호출한다.
-- `useDivePlans`는 현재 `planned` 상태이고 로그로 전환되지 않은 `DivePlan`만 watch에 전달한다. 모바일 payload는 plan local id, title, site, dive mode, entry style, planned timestamp, planned max depth, planned duration, gas label, buddy ids, tags, notes를 포함한다.
+- `useDivePlans`는 아직 완료되지 않았고 로그로 전환되지 않은 `DivePlan`을 watch에 전달한다. `draft`와 `planned` 상태는 watch Home의 실행 전 계획 후보가 되고, `completed`나 `convertedLogLocalId`가 있는 계획은 제외된다. 모바일 payload는 plan local id, title, site, dive mode, entry style, planned timestamp, planned max depth, planned duration, gas label, buddy ids, tags, notes를 포함한다.
 
 WatchConnectivity PoC 동작은 다음과 같다.
 

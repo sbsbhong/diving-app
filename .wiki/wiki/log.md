@@ -1,5 +1,16 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - watch visible unexecuted plans
+
+- 수정:
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/src/native/watch-connectivity.ts`
+  - `apps/mobile/__tests__/watch-connectivity-plans.test.ts`
+- 요약:
+  - 모바일에서 watch로 보내는 계획 목록을 `planned` 상태로만 제한하지 않고, 아직 완료되지 않았고 로그로 전환되지 않은 `draft`와 `planned` 계획으로 확장했다. `completed` 상태와 `convertedLogLocalId`가 있는 계획은 watch Home 후보에서 제외한다.
+
 ## 2026-06-25 - 구조 - planned dive context activation retry
 
 - 수정:

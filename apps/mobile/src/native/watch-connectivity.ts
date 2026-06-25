@@ -116,7 +116,7 @@ export function subscribeToWatchConnectivityPayloads(
 }
 
 function isWatchVisiblePlan(plan: DivePlan): boolean {
-  return plan.status === 'planned' && !plan.convertedLogLocalId;
+  return plan.status !== 'completed' && !plan.convertedLogLocalId;
 }
 
 function toWatchPlannedDivePayload(plan: DivePlan): WatchPlannedDivePayload {
