@@ -64,29 +64,9 @@ struct SummaryView: View {
                             .font(DiveWatchTheme.labelFont())
                             .foregroundStyle(DiveWatchTheme.secondary)
 
-                        Picker("Rating", selection: $rating) {
-                            ForEach(1...5, id: \.self) { value in
-                                Text("\(value) ★").tag(value)
-                            }
-                        }
-                        .labelsHidden()
-                        .frame(height: 56)
-
-                        Picker("Exertion", selection: $perceivedExertion) {
-                            ForEach(1...5, id: \.self) { value in
-                                Text("\(String(localized: "Effort")) \(value)").tag(value)
-                            }
-                        }
-                        .labelsHidden()
-                        .frame(height: 56)
-
-                        Picker("Visibility", selection: $visibilityRating) {
-                            ForEach(1...5, id: \.self) { value in
-                                Text("\(String(localized: "Vis")) \(value)").tag(value)
-                            }
-                        }
-                        .labelsHidden()
-                        .frame(height: 56)
+                        StarRatingControl(title: String(localized: "Rating"), value: $rating)
+                        StarRatingControl(title: String(localized: "Effort"), value: $perceivedExertion)
+                        StarRatingControl(title: String(localized: "Visibility"), value: $visibilityRating)
 
                         Picker("Water", selection: $waterCondition) {
                             ForEach(WaterCondition.allCases) { condition in
@@ -144,5 +124,46 @@ struct SummaryView: View {
             waterCondition = session.waterCondition
             notes = session.notes ?? ""
         }
+    }
+}
+
+private struct StarRatingControl: View {
+    let title: String
+    @Binding var value: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text(title.uppercased())
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.mutedText)
+                Spacer(minLength: 4)
+                Text("\(value)/5")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.primary)
+                    .monospacedDigit()
+            }
+
+            HStack(spacing: 4) {
+                ForEach(1...5, id: \.self) { star in
+                    Button {
+                        value = star
+                    } label: {
+                        Image(systemName: star <= value ? "star.fill" : "star")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(star <= value ? DiveWatchTheme.primary : DiveWatchTheme.mutedText)
+                            .frame(maxWidth: .infinity, minHeight: 30)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(title) \(star)")
+                }
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 7)
+        .background(
+            RoundedRectangle(cornerRadius: DiveWatchTheme.cardRadius, style: .continuous)
+                .fill(DiveWatchTheme.surfaceRaised.opacity(0.72))
+        )
     }
 }

@@ -194,4 +194,17 @@ describe('WatchConnectivity native source contract', () => {
     expect(home).toContain('.navigationDestination(item: $automaticDiveStartRequest)');
     expect(home).toContain('RecordingView(store: store, plan: request.plan)');
   });
+
+  it('uses app-store style stars for post-dive rating fields', () => {
+    const summary = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/SummaryView.swift');
+
+    expect(summary).toContain('private struct StarRatingControl');
+    expect(summary).toContain('Image(systemName: star <= value ? "star.fill" : "star")');
+    expect(summary).toContain('StarRatingControl(title: String(localized: "Rating"), value: $rating)');
+    expect(summary).toContain('StarRatingControl(title: String(localized: "Effort"), value: $perceivedExertion)');
+    expect(summary).toContain('StarRatingControl(title: String(localized: "Visibility"), value: $visibilityRating)');
+    expect(summary).not.toContain('Picker("Rating"');
+    expect(summary).not.toContain('Picker("Exertion"');
+    expect(summary).not.toContain('Picker("Visibility"');
+  });
 });
