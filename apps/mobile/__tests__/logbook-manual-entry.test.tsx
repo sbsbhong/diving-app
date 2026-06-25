@@ -137,12 +137,13 @@ type HarnessProps = {
   };
   onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
   onOpenEntry?: (entry: DiveLogEntry) => void;
+  onCreateEntry?: () => void;
 };
 
 const queryClients: QueryClient[] = [];
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
-function Harness({ repository, pendingDraft, onPendingDraftSave, onOpenEntry }: HarnessProps): React.JSX.Element {
+function Harness({ repository, pendingDraft, onPendingDraftSave, onOpenEntry, onCreateEntry }: HarnessProps): React.JSX.Element {
   const logbook = useDiveLogbook({ repository, queryScope: 'manual-entry-test' });
 
   return (
@@ -160,6 +161,7 @@ function Harness({ repository, pendingDraft, onPendingDraftSave, onOpenEntry }: 
       pendingDraft={pendingDraft}
       onPendingDraftSave={onPendingDraftSave}
       onOpenEntry={onOpenEntry}
+      onCreateEntry={onCreateEntry}
     />
   );
 }
@@ -173,6 +175,7 @@ const renderLogbook = async (
     };
     onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
     onOpenEntry?: (entry: DiveLogEntry) => void;
+    onCreateEntry?: () => void;
     reselectToken?: number;
     onRefresh?: () => void | Promise<void>;
   } = {},
@@ -195,6 +198,7 @@ const renderLogbook = async (
           pendingDraft={options.pendingDraft}
           onPendingDraftSave={options.onPendingDraftSave}
           onOpenEntry={options.onOpenEntry}
+          onCreateEntry={options.onCreateEntry}
         />
       </QueryClientProvider>,
     );
@@ -497,6 +501,18 @@ describe('Logbook manual entry flow', () => {
     expect(root.findAllByProps({ testID: 'log-entry-detail-provenance-max-depth-manual' })).toHaveLength(0);
   });
 
+  test('delegates log creation to the app route when provided', async () => {
+    const onCreateEntry = jest.fn();
+    const repository = new LocalDiveLogRepository([manualEntry]);
+    const renderer = await renderLogbook(repository, { onCreateEntry });
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+
+    expect(onCreateEntry).toHaveBeenCalledTimes(1);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-title' })).toHaveLength(0);
+  });
+
   test('detail distinguishes manual values from watch-captured values', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);
@@ -539,7 +555,7 @@ describe('Logbook manual entry flow', () => {
       manual: {
         ...watchEntry.manual,
         site: { name: 'Profile Reef' },
-        notes: undefined,
+        notes: '',
       },
       watchCapture: {
         ...watchEntry.watchCapture!,

@@ -99,6 +99,8 @@ const resources = {
       watchSync: {
         autoImportedTitle: '워치 기록이 동기화됨',
         autoImportedBody: '{{siteName}} 기록을 열어보세요.',
+        openImportedLog: '로그 작성',
+        dismiss: '닫기',
       },
       logbook: {
         reviewEyebrow: '로그 리뷰',
@@ -423,6 +425,8 @@ const resources = {
       watchSync: {
         autoImportedTitle: 'Watch log synced',
         autoImportedBody: 'Open {{siteName}}.',
+        openImportedLog: 'Write log',
+        dismiss: 'Close',
       },
       logbook: {
         reviewEyebrow: 'Log review',

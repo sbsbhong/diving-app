@@ -11,9 +11,44 @@ import { Menu } from '../src/components/ui/menu';
 import i18n from '../src/i18n';
 import { defaultDiveLogRepository } from '../src/repositories/default-dive-log-repository';
 
+const readRepoFile = (path: string) => {
+  const nodeRequire = require as (moduleName: string) => {
+    readFileSync: (filePath: string, encoding: 'utf8') => string;
+  };
+  const fs = nodeRequire('fs');
+  const cwd = (globalThis as unknown as { process: { cwd: () => string } }).process.cwd();
+
+  return fs.readFileSync(`${cwd}/../../${path}`, 'utf8');
+};
+
+const waitForTestID = async (root: ReactTestRenderer.ReactTestInstance, testID: string) => {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    if (root.findAllByProps({ testID }).length > 0) {
+      return;
+    }
+
+    await ReactTestRenderer.act(async () => {
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+    });
+  }
+};
+
+const waitForWatchConnectivitySubscription = async () => {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    if (mockWatchConnectivityHandler) {
+      return;
+    }
+
+    await ReactTestRenderer.act(async () => {
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+    });
+  }
+};
+
 const mockDrainPendingWatchConnectivityPayloads = jest.fn();
 const mockAcknowledgeWatchConnectivityPayloads = jest.fn();
 const mockAcknowledgeImportedWatchConnectivityPayloads = jest.fn();
+const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 let mockWatchConnectivityHandler:
   | ((payload: { payloadId?: string; payloadJson: string; localSessionId?: string; receivedAt?: number }) => void)
   | undefined;
@@ -96,6 +131,11 @@ jest.mock('nativewind', () => {
 
 describe('App navigation', () => {
   beforeEach(async () => {
+    const asyncStorageMock = jest.requireMock('@react-native-async-storage/async-storage') as {
+      __resetAsyncStorageMock: () => void;
+    };
+
+    asyncStorageMock.__resetAsyncStorageMock();
     mockDrainPendingWatchConnectivityPayloads.mockResolvedValue([]);
     mockAcknowledgeWatchConnectivityPayloads.mockResolvedValue(undefined);
     mockAcknowledgeImportedWatchConnectivityPayloads.mockResolvedValue(undefined);
@@ -106,9 +146,17 @@ describe('App navigation', () => {
     });
   });
 
+  afterEach(async () => {
+    await ReactTestRenderer.act(async () => {
+      for (const renderer of renderers.splice(0)) {
+        renderer.unmount();
+      }
+    });
+  });
+
   test('renders correctly', async () => {
     await ReactTestRenderer.act(async () => {
-      ReactTestRenderer.create(<App />);
+      renderers.push(ReactTestRenderer.create(<App />));
     });
   });
 
@@ -117,6 +165,7 @@ describe('App navigation', () => {
 
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
     });
 
     const root = renderer!.root;
@@ -140,9 +189,26 @@ describe('App navigation', () => {
 
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
     });
 
     expect(renderer!.root.findByType(NavigationContainer)).toBeTruthy();
+  });
+
+  test('routes detail and create screens through the native iOS stack', () => {
+    const navigationSource = readRepoFile('apps/mobile/src/components/navigation/index.tsx');
+    const packageJson = readRepoFile('apps/mobile/package.json');
+
+    expect(packageJson).toContain('"@react-navigation/native-stack"');
+    expect(packageJson).toContain('"react-native-screens"');
+    expect(navigationSource).toContain("from '@react-navigation/native-stack'");
+    expect(navigationSource).toContain('createNativeStackNavigator<RootStackParamList>()');
+    expect(navigationSource).toContain('gestureEnabled: true');
+    expect(navigationSource).toContain('rootStackNavigationRef.getRootState()');
+    expect(navigationSource).toContain('logbookCreate');
+    expect(navigationSource).toContain('planningCreate');
+    expect(navigationSource).not.toContain('type AppDetailRoute');
+    expect(navigationSource).not.toContain('detailRoute');
   });
 
   test('switches language from the restored Home language menu', async () => {
@@ -150,6 +216,7 @@ describe('App navigation', () => {
 
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
     });
 
     const root = renderer!.root;
@@ -173,6 +240,7 @@ describe('App navigation', () => {
 
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
     });
 
     expect(renderer!.root.findByType(Menu)).toBeTruthy();
@@ -196,10 +264,13 @@ describe('App navigation', () => {
 
     await ReactTestRenderer.act(async () => {
       renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
       await new Promise<void>(resolve => setTimeout(resolve, 0));
     });
 
     const root = renderer!.root;
+    await waitForWatchConnectivitySubscription();
+    expect(mockWatchConnectivityHandler).toBeTruthy();
 
     await ReactTestRenderer.act(async () => {
       mockWatchConnectivityHandler?.({
@@ -208,14 +279,20 @@ describe('App navigation', () => {
         localSessionId: 'app-toast-session',
         receivedAt: 1781357600,
       });
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
     });
+    await waitForTestID(root, 'watch-auto-import-toast');
+
+    const importedToastEntry = (await defaultDiveLogRepository.list()).find(
+      entry => entry.watchCapture?.session.localSessionId === 'app-toast-session',
+    );
+    expect(importedToastEntry?.syncStatus).toBe('synced');
 
     expect(root.findByProps({ testID: 'watch-auto-import-toast' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'watch-auto-import-open-log' }).props.label).toBe('로그 작성');
+    expect(root.findByProps({ testID: 'watch-auto-import-dismiss' }).props.label).toBe('닫기');
 
     await ReactTestRenderer.act(async () => {
-      await root.findByProps({ testID: 'watch-auto-import-toast' }).props.onPress();
+      await root.findByProps({ testID: 'watch-auto-import-open-log' }).props.onPress();
       await new Promise<void>(resolve => setTimeout(resolve, 0));
     });
 

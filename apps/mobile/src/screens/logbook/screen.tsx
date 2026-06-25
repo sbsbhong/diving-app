@@ -31,6 +31,7 @@ type LogbookScreenProps = {
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
   onOpenEntry?: (entry: DiveLogEntry) => void;
+  onCreateEntry?: () => void;
   pendingDraft?: {
     entry: DiveLogEntry;
     sourcePlanLocalId?: string;
@@ -107,9 +108,14 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
   }, [props]);
 
   const openCreate = React.useCallback(() => {
+    if (props.onCreateEntry) {
+      props.onCreateEntry();
+      return;
+    }
+
     setDraftEntry(createBlankDiveLogEntry());
     setRoute('create');
-  }, []);
+  }, [props]);
 
   const openEdit = React.useCallback((entry: DiveLogEntry) => {
     setDraftEntry(entry);
@@ -302,6 +308,7 @@ function SessionListItem(props: {
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const tags = session.tags?.length ? session.tags.join(', ') : t('logbook.noTags');
   const siteName = session.siteName ?? t('logbook.untitledDive');
+  const title = props.entry.manual.title ?? siteName;
   const maxDepthLabel = formatDepth(listMetrics.maxDepthMeters);
   const durationLabel = formatListDuration(listMetrics.durationSeconds);
 
@@ -318,7 +325,7 @@ function SessionListItem(props: {
               {t(`logbook.sources.${props.entry.source}`)}
             </Text>
             <VStack space="xs" className="flex-1">
-              <Text className="text-lg font-semibold text-card-foreground">{siteName}</Text>
+              <Text className="text-lg font-semibold text-card-foreground">{title}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
                 {formatDate(session.startedAt, locale, t('formatters.unknownDate'))}
               </Text>
