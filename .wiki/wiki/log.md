@@ -1,5 +1,18 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - watch preferred dive mode and auto start
+
+- 수정:
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/domains/safety-rules.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveWatchApp/Views/HomeView.swift`
+  - `apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift`
+  - `apps/mobile/ios/DiveWatchApp/Sensors/RealDepthSensorProvider.swift`
+- 요약:
+  - Watch Home의 선호 다이빙 형태 저장과 fallback, 수심 3m 이상 자동 기록 시작 trigger, 그리고 이 trigger가 safety 판단이 아니라 기록 편의 기능이라는 경계를 기록했다.
+
 ## 2026-06-25 - 구조 - compact watch pre-dive plan card
 
 - 수정:

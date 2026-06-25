@@ -5,10 +5,12 @@ import Foundation
 final class DiveSessionStore: ObservableObject {
     @Published private(set) var sessions: [DiveSession] = []
     @Published private(set) var plannedDives: [WatchPlannedDive] = []
+    @Published var preferredDiveMode: DiveMode
 
     private let storageKey = "savedDiveSessions"
     private let plannedDivesStorageKey = "savedWatchPlannedDives"
     private let executedPlanIdsStorageKey = "executedWatchPlanIds"
+    private static let preferredDiveModeStorageKey = "preferredDiveMode"
     private let syncTransport: WatchSyncTransporting
     private let userDefaults: UserDefaults
     private var executedPlanIds = Set<String>()
@@ -16,6 +18,7 @@ final class DiveSessionStore: ObservableObject {
     init(userDefaults: UserDefaults = .standard, syncTransport: WatchSyncTransporting = WatchSyncTransport()) {
         self.userDefaults = userDefaults
         self.syncTransport = syncTransport
+        preferredDiveMode = Self.loadPreferredDiveMode(from: userDefaults)
         load()
         loadPlannedDives()
         self.syncTransport.onTransferStatusChanged = { [weak self] sessionId, syncStatus in
@@ -62,6 +65,15 @@ final class DiveSessionStore: ObservableObject {
     func refreshFromCompanion() async {
         syncTransport.refreshPlannedDives()
         retryPendingSyncs()
+    }
+
+    func updatePreferredDiveMode(_ nextDiveMode: DiveMode) {
+        guard nextDiveMode != .unknown else {
+            return
+        }
+
+        preferredDiveMode = nextDiveMode
+        userDefaults.set(nextDiveMode.rawValue, forKey: Self.preferredDiveModeStorageKey)
     }
 
     private func updateSyncStatus(for sessionId: UUID, to syncStatus: DiveSyncStatus) {
@@ -152,6 +164,16 @@ final class DiveSessionStore: ObservableObject {
 
     private func persistExecutedPlanIds() {
         userDefaults.set(Array(executedPlanIds), forKey: executedPlanIdsStorageKey)
+    }
+
+    private static func loadPreferredDiveMode(from userDefaults: UserDefaults) -> DiveMode {
+        guard let rawValue = userDefaults.string(forKey: preferredDiveModeStorageKey),
+              let diveMode = DiveMode(rawValue: rawValue),
+              diveMode != .unknown else {
+            return .scuba
+        }
+
+        return diveMode
     }
 }
 

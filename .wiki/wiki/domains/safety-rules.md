@@ -32,6 +32,8 @@
 
 현재 watch/mobile 화면은 ascent, safety stop, surface interval, no-fly concept을 assistant, 확인 상태, 수동 계획 알림으로만 언급한다. Planbook의 planned max depth, planned duration, water condition, visibility expectation 같은 값은 사용자의 의도와 준비 메모이지 실제 측정값이나 안전 계산 결과가 아니다. 이 경계는 UI copy와 documentation에서 명시적으로 유지해야 한다.
 
+Watch Home의 수심 3m 이상 자동 기록 시작은 사용자가 시작 버튼을 누르지 못했을 때 기록을 시작하기 위한 편의 trigger다. 이 trigger는 다이빙 시작 여부의 certified 판단, 안전 안내, 비상 판단, 감압 계산과 연결하지 않는다.
+
 실제 underwater Apple Watch sensor behavior는 공개 배포 전에 지원되는 hardware에서 수동 검증해야 한다. Simulator나 mock sensor behavior는 실제 underwater correctness의 증거가 아니다.
 
 Decompression planning, air integration, tank pressure, emergency decision, certified dive-computer behavior는 별도 high-risk work다. 구현 전 명시적인 제품, 검증, 책임 범위 결정이 필요하다.

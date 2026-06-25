@@ -2,8 +2,10 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var store: DiveSessionStore
+    @StateObject private var autoStartMonitor = DiveAutoStartMonitor(sensorProvider: RealDepthSensorProvider())
     @State private var plan = PreDivePlan()
     @State private var isPreDivePlanExpanded = false
+    @State private var automaticDiveStartRequest: AutomaticDiveStartRequest?
 
     var body: some View {
         NavigationStack {
@@ -19,7 +21,13 @@ struct HomeView: View {
                         PlannedDivesSection(store: store, plannedDives: store.plannedDives)
                     }
 
-                    PreDivePlanForm(plan: $plan, isExpanded: $isPreDivePlanExpanded)
+                    PreDivePlanForm(
+                        plan: $plan,
+                        isExpanded: $isPreDivePlanExpanded,
+                        onDiveModeChanged: { nextMode in
+                            store.updatePreferredDiveMode(nextMode)
+                        }
+                    )
 
                     NavigationLink {
                         RecordingView(store: store, plan: plan)
@@ -45,7 +53,96 @@ struct HomeView: View {
             }
             .background(DiveWatchTheme.background.ignoresSafeArea())
             .navigationTitle("Dive Watch")
+            .navigationDestination(item: $automaticDiveStartRequest) { request in
+                RecordingView(store: store, plan: request.plan)
+            }
+            .onAppear {
+                applyPreferredDiveMode()
+                autoStartMonitor.onAutoStart = {
+                    startAutomaticDive()
+                }
+                autoStartMonitor.startMonitoring()
+            }
+            .onDisappear {
+                autoStartMonitor.stopMonitoring()
+            }
         }
+    }
+
+    private func applyPreferredDiveMode() {
+        plan.diveMode = store.preferredDiveMode
+    }
+
+    private func startAutomaticDive() {
+        store.updatePreferredDiveMode(plan.diveMode)
+        automaticDiveStartRequest = AutomaticDiveStartRequest(plan: plan)
+    }
+}
+
+private struct AutomaticDiveStartRequest: Identifiable, Hashable {
+    let id = UUID()
+    let plan: PreDivePlan
+
+    static func == (lhs: AutomaticDiveStartRequest, rhs: AutomaticDiveStartRequest) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+@MainActor
+private final class DiveAutoStartMonitor: ObservableObject {
+    @Published private(set) var latestDepthMeters: Double = 0
+
+    var onAutoStart: (() -> Void)?
+
+    private let sensorProvider: DepthSensorProvider
+    private let activationDepthMeters: Double
+    private var isMonitoring = false
+    private var didTrigger = false
+
+    init(sensorProvider: DepthSensorProvider, activationDepthMeters: Double = 3) {
+        self.sensorProvider = sensorProvider
+        self.activationDepthMeters = activationDepthMeters
+    }
+
+    func startMonitoring() {
+        guard !isMonitoring else {
+            return
+        }
+
+        isMonitoring = true
+        didTrigger = false
+        sensorProvider.onSample = { [weak self] sample in
+            Task { @MainActor in
+                self?.handle(sample)
+            }
+        }
+        sensorProvider.start()
+    }
+
+    func stopMonitoring() {
+        guard isMonitoring else {
+            return
+        }
+
+        sensorProvider.stop()
+        sensorProvider.onSample = nil
+        isMonitoring = false
+    }
+
+    private func handle(_ sample: DepthSample) {
+        latestDepthMeters = sample.depthMeters
+
+        guard !didTrigger, sample.depthMeters >= activationDepthMeters else {
+            return
+        }
+
+        didTrigger = true
+        stopMonitoring()
+        onAutoStart?()
     }
 }
 
@@ -210,6 +307,7 @@ private struct LatestMetric: View {
 private struct PreDivePlanForm: View {
     @Binding var plan: PreDivePlan
     @Binding var isExpanded: Bool
+    let onDiveModeChanged: (DiveMode) -> Void
 
     var body: some View {
         InstrumentCard(accent: DiveWatchTheme.secondary) {
@@ -243,7 +341,7 @@ private struct PreDivePlanForm: View {
 
                 if isExpanded {
                     VStack(alignment: .leading, spacing: 8) {
-                        Picker("Mode", selection: $plan.diveMode) {
+                        Picker("Mode", selection: diveModeSelection) {
                             ForEach(DiveMode.allCases) { mode in
                                 Text(mode.label).tag(mode)
                             }
@@ -272,6 +370,16 @@ private struct PreDivePlanForm: View {
                 }
             }
         }
+    }
+
+    private var diveModeSelection: Binding<DiveMode> {
+        Binding(
+            get: { plan.diveMode },
+            set: { nextMode in
+                plan.diveMode = nextMode
+                onDiveModeChanged(nextMode)
+            }
+        )
     }
 }
 

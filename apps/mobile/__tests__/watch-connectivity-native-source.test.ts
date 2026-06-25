@@ -151,10 +151,27 @@ describe('WatchConnectivity native source contract', () => {
     const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
 
     expect(home).toContain('@State private var isPreDivePlanExpanded = false');
-    expect(home).toContain('PreDivePlanForm(plan: $plan, isExpanded: $isPreDivePlanExpanded)');
+    expect(home).toContain('PreDivePlanForm(');
+    expect(home).toContain('isExpanded: $isPreDivePlanExpanded');
     expect(home).toContain('@Binding var isExpanded: Bool');
     expect(home).toContain('withAnimation(.easeInOut(duration: 0.18))');
     expect(home).toContain('if isExpanded');
     expect(home).toContain('Image(systemName: isExpanded ? "chevron.up" : "chevron.down")');
+  });
+
+  it('persists the preferred watch dive mode and auto-starts recording below the depth threshold', () => {
+    const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
+    const store = readRepoFile('apps/mobile/ios/DiveWatchApp/Storage/DiveSessionStore.swift');
+
+    expect(store).toContain('@Published var preferredDiveMode: DiveMode');
+    expect(store).toContain('preferredDiveModeStorageKey');
+    expect(store).toContain('func updatePreferredDiveMode(_ nextDiveMode: DiveMode)');
+    expect(store).toContain('private static func loadPreferredDiveMode');
+    expect(home).toContain('DiveAutoStartMonitor(sensorProvider: RealDepthSensorProvider())');
+    expect(home).toContain('activationDepthMeters: Double = 3');
+    expect(home).toContain('sample.depthMeters >= activationDepthMeters');
+    expect(home).toContain('store.updatePreferredDiveMode(nextMode)');
+    expect(home).toContain('.navigationDestination(item: $automaticDiveStartRequest)');
+    expect(home).toContain('RecordingView(store: store, plan: request.plan)');
   });
 });
