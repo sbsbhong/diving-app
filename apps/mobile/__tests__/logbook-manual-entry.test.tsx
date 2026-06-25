@@ -469,6 +469,14 @@ describe('Logbook manual entry flow', () => {
     expect(root.findAllByProps({ testID: 'logbook-list-selected-dot' })).toHaveLength(0);
   });
 
+  test('labels manual local-only rows as locally saved instead of pending sync', async () => {
+    const repository = new LocalDiveLogRepository([manualEntry]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'logbook-list-status-Manual Reef' }).props.label).toBe('Local');
+  });
+
   test('detail distinguishes manual values from watch-captured values', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);

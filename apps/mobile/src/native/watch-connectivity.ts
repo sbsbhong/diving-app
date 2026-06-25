@@ -15,6 +15,7 @@ export type WatchConnectivitySubscription = {
 };
 
 export type LinkedWatchInfo = {
+  nativeBridgeAvailable?: boolean;
   isSupported: boolean;
   isPaired: boolean;
   isWatchAppInstalled: boolean;
@@ -92,6 +93,7 @@ export async function updatePlannedWatchDives(plans: readonly DivePlan[]): Promi
 export async function getLinkedWatchInfo(): Promise<LinkedWatchInfo> {
   if (!nativeModule?.getLinkedWatchInfo) {
     return {
+      nativeBridgeAvailable: false,
       isSupported: false,
       isPaired: false,
       isWatchAppInstalled: false,

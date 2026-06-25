@@ -34,6 +34,7 @@ const resources = {
           appleWatch: 'Apple Watch',
           status: {
             checking: '확인 중',
+            bridgeUnavailable: '워치 연동 모듈을 반영하려면 iOS 앱을 다시 빌드하세요',
             unsupported: '이 기기에서 워치 연동을 지원하지 않음',
             notPaired: '연동된 워치 없음',
             appNotInstalled: '워치 앱 미설치',
@@ -44,6 +45,7 @@ const resources = {
       },
       status: {
         watchAssistant: '워치 보조 도구',
+        localOnly: '로컬 저장',
         pending: '대기 중',
         synced: '동기화됨',
         failed: '동기화 실패',
@@ -352,6 +354,7 @@ const resources = {
           appleWatch: 'Apple Watch',
           status: {
             checking: 'Checking',
+            bridgeUnavailable: 'Rebuild the iOS app to include the watch sync module',
             unsupported: 'Watch pairing is not supported on this device',
             notPaired: 'No paired watch',
             appNotInstalled: 'Watch app not installed',
@@ -362,6 +365,7 @@ const resources = {
       },
       status: {
         watchAssistant: 'Watch assistant',
+        localOnly: 'Local',
         pending: 'Pending',
         synced: 'Synced',
         failed: 'Sync failed',

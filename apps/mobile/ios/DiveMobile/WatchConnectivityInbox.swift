@@ -207,6 +207,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     guard WCSession.isSupported(),
           let connectivitySession else {
       return [
+        "nativeBridgeAvailable": true,
         "isSupported": false,
         "isPaired": false,
         "isWatchAppInstalled": false,
@@ -215,6 +216,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     }
 
     var info: [String: Any] = [
+      "nativeBridgeAvailable": true,
       "isSupported": true,
       "isPaired": connectivitySession.isPaired,
       "isWatchAppInstalled": connectivitySession.isWatchAppInstalled,

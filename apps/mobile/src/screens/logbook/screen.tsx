@@ -40,6 +40,7 @@ type LogbookScreenProps = {
 };
 
 type SyncFilter = 'all' | 'synced' | 'pending';
+type VisibleSyncStatus = 'localOnly' | 'synced' | 'pending' | 'failed';
 type LocalRoute = 'list' | 'create' | 'detail' | 'edit';
 
 export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Element {
@@ -312,7 +313,11 @@ function SessionListItem(props: {
             </VStack>
           </HStack>
           <VStack space="xs" className="items-end">
-            <StatusPill label={t(`status.${status}`, { defaultValue: status })} tone={syncStatusTone(status)} />
+            <StatusPill
+              testID={`logbook-list-status-${siteName}`}
+              label={t(`status.${status}`, { defaultValue: status })}
+              tone={syncStatusTone(status)}
+            />
             <Text testID={`logbook-list-max-depth-${siteName}-${toTestIdValue(maxDepthLabel)}`} className="text-lg font-semibold text-card-foreground">
               {maxDepthLabel}
             </Text>
@@ -349,7 +354,7 @@ function toTestIdValue(value: string): string {
   return value.replace(/\s+/g, '');
 }
 
-const syncStatusTone = (status: string): InstrumentTone => {
+const syncStatusTone = (status: VisibleSyncStatus): InstrumentTone => {
   if (status === 'synced') {
     return 'primary';
   }
@@ -358,10 +363,14 @@ const syncStatusTone = (status: string): InstrumentTone => {
     return 'danger';
   }
 
-  return 'secondary';
+  return status === 'localOnly' ? 'muted' : 'secondary';
 };
 
-const toVisibleSyncStatus = (syncStatus: DiveLogEntry['syncStatus']): 'synced' | 'pending' | 'failed' => {
+const toVisibleSyncStatus = (syncStatus: DiveLogEntry['syncStatus']): VisibleSyncStatus => {
+  if (syncStatus === 'localOnly') {
+    return 'localOnly';
+  }
+
   if (syncStatus === 'synced' || syncStatus === 'failed') {
     return syncStatus;
   }

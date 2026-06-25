@@ -10,6 +10,7 @@ type StatusPillProps = {
   tone?: InstrumentTone;
   className?: string;
   style?: StyleProp<TextStyle>;
+  testID?: string;
 };
 
 const pillStyles = tva({
@@ -31,7 +32,11 @@ const pillStyles = tva({
 
 export function StatusPill(props: StatusPillProps): React.JSX.Element {
   return (
-    <Text className={pillStyles({ tone: props.tone, class: props.className })} style={props.style}>
+    <Text
+      testID={props.testID}
+      accessibilityLabel={props.label}
+      className={pillStyles({ tone: props.tone, class: props.className })}
+      style={props.style}>
       {props.label.toUpperCase()}
     </Text>
   );

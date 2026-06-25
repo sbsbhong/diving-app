@@ -70,6 +70,24 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('연동된 워치 없음');
   });
 
+  test('explains when the iOS native watch bridge is missing from the installed app', async () => {
+    const renderer = await renderSettings({
+      loadLinkedWatchInfo: () =>
+        Promise.resolve({
+          nativeBridgeAvailable: false,
+          isSupported: false,
+          isPaired: false,
+          isWatchAppInstalled: false,
+          isReachable: false,
+        }),
+    });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe(
+      '워치 연동 모듈을 반영하려면 iOS 앱을 다시 빌드하세요',
+    );
+  });
+
   test('stretches index row content so labels and values sit at opposite edges', async () => {
     const renderer = await renderSettings();
     const root = renderer.root;

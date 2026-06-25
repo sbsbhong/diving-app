@@ -61,6 +61,7 @@ export default function SettingsScreen({
       .catch(() => {
         if (isMounted) {
           setLinkedWatchInfo({
+            nativeBridgeAvailable: false,
             isSupported: false,
             isPaired: false,
             isWatchAppInstalled: false,
@@ -303,6 +304,10 @@ function getLinkedWatchStatusLabel(
 ): string {
   if (!linkedWatchInfo) {
     return t('settings.devices.status.checking');
+  }
+
+  if (linkedWatchInfo.nativeBridgeAvailable === false) {
+    return t('settings.devices.status.bridgeUnavailable');
   }
 
   if (!linkedWatchInfo.isSupported) {
