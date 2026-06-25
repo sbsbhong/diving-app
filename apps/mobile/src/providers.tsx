@@ -4,7 +4,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GluestackUIProvider } from './components/ui/gluestack-ui-provider';
 import { AppPreferencesProvider, useAppPreferences } from './states/app-preferences';
-import { WatchConnectivitySyncProvider } from './states/watch-connectivity-sync';
 
 type ProvidersProps = {
   children?: React.ReactNode;
@@ -15,13 +14,11 @@ export default function Providers(props: ProvidersProps): React.JSX.Element {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WatchConnectivitySyncProvider>
-        <SafeAreaProvider>
-          <AppPreferencesProvider>
-            <ThemedProviders>{props.children}</ThemedProviders>
-          </AppPreferencesProvider>
-        </SafeAreaProvider>
-      </WatchConnectivitySyncProvider>
+      <SafeAreaProvider>
+        <AppPreferencesProvider>
+          <ThemedProviders>{props.children}</ThemedProviders>
+        </AppPreferencesProvider>
+      </SafeAreaProvider>
     </QueryClientProvider>
   );
 }

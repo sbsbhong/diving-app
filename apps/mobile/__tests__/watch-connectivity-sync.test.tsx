@@ -111,6 +111,7 @@ describe('WatchConnectivitySyncProvider', () => {
   it('imports valid event payloads delivered after subscription', async () => {
     const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
     const queryClient = createQueryClient();
+    const onImportedEntry = jest.fn();
     let listener: ((payload: { payloadJson: string; localSessionId?: string; receivedAt?: number }) => void) | undefined;
 
     await ReactTestRenderer.act(async () => {
@@ -120,6 +121,7 @@ describe('WatchConnectivitySyncProvider', () => {
             repository={repository}
             drainPendingPayloads={async () => []}
             acknowledgePayloads={jest.fn()}
+            onImportedEntry={onImportedEntry}
             subscribeToPayloads={handler => {
               listener = handler;
               return { remove: jest.fn() };
@@ -142,6 +144,10 @@ describe('WatchConnectivitySyncProvider', () => {
     const entries = await repository.list();
     expect(entries).toHaveLength(1);
     expect(entries[0].watchCapture?.session.localSessionId).toBe('fixture-rich-session');
+    expect(onImportedEntry).toHaveBeenCalledWith(expect.objectContaining({
+      localId: entries[0].localId,
+      syncStatus: 'synced',
+    }));
   });
 
   it('ignores payloads that fail the watch sync contract validator', async () => {

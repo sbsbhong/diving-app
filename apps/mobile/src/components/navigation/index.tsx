@@ -16,6 +16,7 @@ import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { DivePlan } from '../../types/dive-plan';
 import { useDiveLogbook } from '../../states/use-dive-logbook';
 import { useDivePlans } from '../../states/use-dive-plans';
+import { WatchConnectivitySyncProvider } from '../../states/watch-connectivity-sync';
 import { createBlankDivePlan } from '../../utils/create-dive-plan';
 import { divePlanToDiveLogEntryDraft } from '../../utils/dive-plan-to-log-entry';
 import { Box } from '../ui/box';
@@ -57,6 +58,11 @@ type AppDetailRoute =
   | { name: 'planningEdit'; localId: string }
   | { name: 'settingsDetail'; route: Exclude<SettingsRoute, 'index'> };
 
+type AutoImportToast = {
+  entryLocalId: string;
+  siteName: string;
+};
+
 type AppTabNavigatorProps = {
   children: React.ReactNode;
   detailScreen?: React.ReactNode;
@@ -72,7 +78,9 @@ type AppTabScreenProps = {
 const AppTabs = createNavigatorFactory(AppTabNavigator)();
 
 export default function RootNavigation(): React.JSX.Element {
+  const { t } = useTranslation();
   const [detailRoute, setDetailRoute] = React.useState<AppDetailRoute | undefined>();
+  const [autoImportToast, setAutoImportToast] = React.useState<AutoImportToast | undefined>();
   const [pendingLogDraft, setPendingLogDraft] = React.useState<
     | {
         entry: DiveLogEntry;
@@ -90,6 +98,20 @@ export default function RootNavigation(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
   const planning = useDivePlans();
+
+  React.useEffect(() => {
+    if (!autoImportToast) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setAutoImportToast(undefined);
+    }, 6000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [autoImportToast]);
 
   const openTab = React.useCallback((routeName: NavigationRouteName) => {
     setDetailRoute(undefined);
@@ -141,6 +163,26 @@ export default function RootNavigation(): React.JSX.Element {
     setDetailRoute({ name: 'logbookDetail', localId: entry.localId });
   }, []);
 
+  const openImportedLogToast = React.useCallback(() => {
+    if (!autoImportToast) {
+      return;
+    }
+
+    rootNavigationActions.current?.navigate('logbook');
+    setDetailRoute({ name: 'logbookDetail', localId: autoImportToast.entryLocalId });
+    setAutoImportToast(undefined);
+  }, [autoImportToast]);
+
+  const showImportedEntryToast = React.useCallback(
+    (entry: DiveLogEntry) => {
+      setAutoImportToast({
+        entryLocalId: entry.localId,
+        siteName: entry.manual.site.name ?? entry.watchCapture?.session.siteName ?? t('logbook.untitledDive'),
+      });
+    },
+    [t],
+  );
+
   const openPlanDetail = React.useCallback((plan: DivePlan) => {
     rootNavigationActions.current?.navigate('planning');
     setDetailRoute({ name: 'planningDetail', localId: plan.localId });
@@ -181,78 +223,104 @@ export default function RootNavigation(): React.JSX.Element {
   ) : undefined;
 
   return (
-    <VStack
-      className="flex-1 bg-background"
-      style={{
-        paddingTop: insets.top,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}>
-      <NavigationContainer>
-        <AppTabs.Navigator initialRouteName="home" detailScreen={detailScreen} onRouteReselect={reselectRoute}>
-          <AppTabs.Screen name="home">
-            {() => (
-              <HomeScreen
-                sessions={logbook.sessions}
-                onOpenLogbook={openLogbook}
-                onOpenPlanning={openPlanning}
-                onRefresh={logbook.refresh}
-                isRefreshing={logbook.isRefreshing}
-                reselectToken={reselectTokens.home}
-              />
-            )}
-          </AppTabs.Screen>
-          <AppTabs.Screen name="logbook">
-            {() => (
-              <LogbookScreen
-                entries={logbook.filteredEntries}
-                filter={logbook.filter}
-                onFilterChange={logbook.setFilter}
-                onSyncWatch={logbook.syncWatchPayloads}
-                onRefresh={logbook.refresh}
-                isRefreshing={logbook.isRefreshing}
-                reselectToken={reselectTokens.logbook}
-                onSaveEntry={logbook.saveEntry}
-                onDeleteEntry={logbook.deleteEntry}
-                saveError={logbook.saveError}
-                isSaving={logbook.isSaving}
-                pendingDraft={pendingLogDraft}
-                onPendingDraftSave={markPendingDraftSaved}
-                onOpenEntry={openLogEntryDetail}
-              />
-            )}
-          </AppTabs.Screen>
-          <AppTabs.Screen name="planning">
-            {() => (
-              <PlanningScreen
-                sessions={logbook.sessions}
-                plans={planning.plans}
-                onRefresh={planning.refresh}
-                isRefreshing={planning.isRefreshing}
-                reselectToken={reselectTokens.planning}
-                onSavePlan={planning.savePlan}
-                onDeletePlan={planning.deletePlan}
-                saveError={planning.saveError}
-                isSaving={planning.isSaving}
-                onCreatePlan={openPlanCreate}
-                onOpenPlan={openPlanDetail}
-                onCreateLogFromPlan={createLogFromPlan}
-                onOpenLogbook={openLogbook}
-                completedPromptPlan={completedPromptPlan}
-                onCompletedPromptLater={() => setCompletedPromptPlan(undefined)}
-                onCreateLogFromCompletedPlan={plan => {
-                  setCompletedPromptPlan(undefined);
-                  createLogFromPlan(plan);
-                }}
-              />
-            )}
-          </AppTabs.Screen>
-          <AppTabs.Screen name="settings">
-            {() => <SettingsScreen route="index" onOpenRoute={openSettingsDetail} />}
-          </AppTabs.Screen>
-        </AppTabs.Navigator>
-      </NavigationContainer>
-    </VStack>
+    <WatchConnectivitySyncProvider onImportedEntry={showImportedEntryToast}>
+      <VStack
+        className="flex-1 bg-background"
+        style={{
+          paddingTop: insets.top,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        }}>
+        <NavigationContainer>
+          <AppTabs.Navigator initialRouteName="home" detailScreen={detailScreen} onRouteReselect={reselectRoute}>
+            <AppTabs.Screen name="home">
+              {() => (
+                <HomeScreen
+                  sessions={logbook.sessions}
+                  onOpenLogbook={openLogbook}
+                  onOpenPlanning={openPlanning}
+                  onRefresh={logbook.refresh}
+                  isRefreshing={logbook.isRefreshing}
+                  reselectToken={reselectTokens.home}
+                />
+              )}
+            </AppTabs.Screen>
+            <AppTabs.Screen name="logbook">
+              {() => (
+                <LogbookScreen
+                  entries={logbook.filteredEntries}
+                  filter={logbook.filter}
+                  onFilterChange={logbook.setFilter}
+                  onSyncWatch={logbook.syncWatchPayloads}
+                  onRefresh={logbook.refresh}
+                  isRefreshing={logbook.isRefreshing}
+                  reselectToken={reselectTokens.logbook}
+                  onSaveEntry={logbook.saveEntry}
+                  onDeleteEntry={logbook.deleteEntry}
+                  saveError={logbook.saveError}
+                  isSaving={logbook.isSaving}
+                  pendingDraft={pendingLogDraft}
+                  onPendingDraftSave={markPendingDraftSaved}
+                  onOpenEntry={openLogEntryDetail}
+                />
+              )}
+            </AppTabs.Screen>
+            <AppTabs.Screen name="planning">
+              {() => (
+                <PlanningScreen
+                  sessions={logbook.sessions}
+                  plans={planning.plans}
+                  onRefresh={planning.refresh}
+                  isRefreshing={planning.isRefreshing}
+                  reselectToken={reselectTokens.planning}
+                  onSavePlan={planning.savePlan}
+                  onDeletePlan={planning.deletePlan}
+                  saveError={planning.saveError}
+                  isSaving={planning.isSaving}
+                  onCreatePlan={openPlanCreate}
+                  onOpenPlan={openPlanDetail}
+                  onCreateLogFromPlan={createLogFromPlan}
+                  onOpenLogbook={openLogbook}
+                  completedPromptPlan={completedPromptPlan}
+                  onCompletedPromptLater={() => setCompletedPromptPlan(undefined)}
+                  onCreateLogFromCompletedPlan={plan => {
+                    setCompletedPromptPlan(undefined);
+                    createLogFromPlan(plan);
+                  }}
+                />
+              )}
+            </AppTabs.Screen>
+            <AppTabs.Screen name="settings">
+              {() => <SettingsScreen route="index" onOpenRoute={openSettingsDetail} />}
+            </AppTabs.Screen>
+          </AppTabs.Navigator>
+        </NavigationContainer>
+        {autoImportToast ? (
+          <Pressable
+            testID="watch-auto-import-toast"
+            onPress={openImportedLogToast}
+            className="absolute left-4 right-4 z-10 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm"
+            style={({ pressed }) => [
+              {
+                bottom: Math.max(insets.bottom, 12) + (detailRoute ? 12 : 64),
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              },
+            ]}>
+            <VStack space="xs">
+              <Text className="text-sm font-semibold text-card-foreground">
+                {t('watchSync.autoImportedTitle', { defaultValue: 'Watch log synced' })}
+              </Text>
+              <Text className="text-sm leading-5 text-muted-foreground">
+                {t('watchSync.autoImportedBody', {
+                  defaultValue: 'Open {{siteName}}.',
+                  siteName: autoImportToast.siteName,
+                })}
+              </Text>
+            </VStack>
+          </Pressable>
+        ) : null}
+      </VStack>
+    </WatchConnectivitySyncProvider>
   );
 }
 

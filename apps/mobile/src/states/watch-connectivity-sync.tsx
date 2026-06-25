@@ -21,6 +21,7 @@ type WatchConnectivitySyncProviderProps = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
+  onImportedEntry?: (entry: DiveLogEntry) => void;
   subscribeToPayloads?: (handler: (payload: WatchConnectivityPayload) => void) => WatchConnectivitySubscription;
 };
 
@@ -55,21 +56,26 @@ export function WatchConnectivitySyncProvider({
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
   acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
   acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
+  onImportedEntry,
   subscribeToPayloads = subscribeToWatchConnectivityPayloads,
 }: WatchConnectivitySyncProviderProps): React.JSX.Element {
   const queryClient = useQueryClient();
 
   const importPayload = React.useCallback(
     async (payload: WatchConnectivityPayload) => {
-      await importWatchConnectivityPayload({
+      const importedEntry = await importWatchConnectivityPayload({
         payload,
         repository,
         queryClient,
         acknowledgePayloads,
         acknowledgeImportedPayloads,
       });
+
+      if (importedEntry) {
+        onImportedEntry?.(importedEntry);
+      }
     },
-    [acknowledgeImportedPayloads, acknowledgePayloads, queryClient, repository],
+    [acknowledgeImportedPayloads, acknowledgePayloads, onImportedEntry, queryClient, repository],
   );
 
   const importPayloadSafely = React.useCallback(
@@ -123,7 +129,7 @@ export async function importPendingWatchConnectivityPayloads({
   let importedCount = 0;
 
   for (const payload of payloads) {
-    const imported = await importWatchConnectivityPayload({
+    const importedEntry = await importWatchConnectivityPayload({
       payload,
       repository,
       queryClient,
@@ -132,7 +138,7 @@ export async function importPendingWatchConnectivityPayloads({
       acknowledgeImportedPayloads,
     });
 
-    if (imported) {
+    if (importedEntry) {
       importedCount += 1;
     }
   }
@@ -150,21 +156,21 @@ async function importWatchConnectivityPayload({
   queryScope,
   acknowledgePayloads,
   acknowledgeImportedPayloads,
-}: WatchConnectivityPayloadImportOptions): Promise<boolean> {
+}: WatchConnectivityPayloadImportOptions): Promise<DiveLogEntry | undefined> {
   const result = parseWatchSyncMessageJson(payload.payloadJson);
 
   if (!result.ok) {
     console.warn('Dropped invalid watch sync payload', result.error);
     await acknowledgePayload(payload, acknowledgePayloads);
-    return false;
+    return undefined;
   }
 
   const entries = await repository.importWatchMessages([result.message]);
-  const syncedEntries = await markWatchConnectivityImportSynced(repository, entries, result.message, payload);
+  const { importedEntry, syncedEntries } = await markWatchConnectivityImportSynced(repository, entries, result.message, payload);
   queryClient.setQueryData(diveLogbookQueryKeys.list(repository, queryScope), syncedEntries);
   queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, queryScope) });
   await acknowledgePayload(payload, acknowledgeImportedPayloads);
-  return true;
+  return importedEntry;
 }
 
 async function acknowledgePayload(
@@ -183,7 +189,7 @@ async function markWatchConnectivityImportSynced(
   entries: DiveLogEntry[],
   message: WatchSyncMessage,
   payload: WatchConnectivityPayload,
-): Promise<DiveLogEntry[]> {
+): Promise<{ importedEntry?: DiveLogEntry; syncedEntries: DiveLogEntry[] }> {
   const importedEntry = entries.find(entry => {
     const session = entry.watchCapture?.session;
     return (
@@ -193,14 +199,20 @@ async function markWatchConnectivityImportSynced(
   });
 
   if (!importedEntry || importedEntry.syncStatus === 'synced') {
-    return entries;
+    return { syncedEntries: entries };
   }
 
-  await repository.save({
+  const syncedEntry = await repository.save({
     ...importedEntry,
     syncStatus: 'synced',
     updatedAt: payload.receivedAt ?? Date.now() / 1000,
   });
 
-  return repository.list();
+  const syncedEntries = await repository.list();
+  const currentImportedEntry = syncedEntries.find(entry => entry.localId === syncedEntry.localId) ?? syncedEntry;
+
+  return {
+    importedEntry: currentImportedEntry,
+    syncedEntries,
+  };
 }

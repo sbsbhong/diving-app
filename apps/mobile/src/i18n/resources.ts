@@ -96,6 +96,10 @@ const resources = {
         previewMemory: '메모리 미리보기',
         safetyText: '레크리에이션 기록 전용. 인증된 장비가 아닌 보조 도구.',
       },
+      watchSync: {
+        autoImportedTitle: '워치 기록이 동기화됨',
+        autoImportedBody: '{{siteName}} 기록을 열어보세요.',
+      },
       logbook: {
         reviewEyebrow: '로그 리뷰',
         title: '로그북',
@@ -415,6 +419,10 @@ const resources = {
         planNextDive: 'Plan Next Dive',
         previewMemory: 'Preview Memory',
         safetyText: 'RECREATIONAL USE ONLY. NON-CERTIFIED ASSISTANT.',
+      },
+      watchSync: {
+        autoImportedTitle: 'Watch log synced',
+        autoImportedBody: 'Open {{siteName}}.',
       },
       logbook: {
         reviewEyebrow: 'Log review',
