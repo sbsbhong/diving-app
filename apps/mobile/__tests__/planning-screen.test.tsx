@@ -24,13 +24,15 @@ const plan = (overrides: Partial<DivePlan>): DivePlan => ({
 
 type HarnessProps = {
   repository: LocalDivePlanRepository;
+  onCreatePlan?: () => void;
+  onOpenPlan?: (plan: DivePlan) => void;
   onCreateLogFromPlan?: (plan: DivePlan) => void;
 };
 
 const queryClients: QueryClient[] = [];
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
-function Harness({ repository, onCreateLogFromPlan = jest.fn() }: HarnessProps): React.JSX.Element {
+function Harness({ repository, onCreateLogFromPlan = jest.fn(), onCreatePlan, onOpenPlan }: HarnessProps): React.JSX.Element {
   const plans = useDivePlans({ repository, queryScope: 'planning-screen-test' });
 
   return (
@@ -43,13 +45,25 @@ function Harness({ repository, onCreateLogFromPlan = jest.fn() }: HarnessProps):
       onDeletePlan={plans.deletePlan}
       saveError={plans.saveError}
       isSaving={plans.isSaving}
+      onCreatePlan={onCreatePlan}
+      onOpenPlan={onOpenPlan}
       onCreateLogFromPlan={onCreateLogFromPlan}
       onOpenLogbook={jest.fn()}
     />
   );
 }
 
-const renderPlanning = async (repository: LocalDivePlanRepository, onCreateLogFromPlan?: (plan: DivePlan) => void) => {
+const renderPlanning = async (
+  repository: LocalDivePlanRepository,
+  options:
+    | ((plan: DivePlan) => void)
+    | {
+        onCreateLogFromPlan?: (plan: DivePlan) => void;
+        onCreatePlan?: () => void;
+        onOpenPlan?: (plan: DivePlan) => void;
+      } = {},
+) => {
+  const props = typeof options === 'function' ? { onCreateLogFromPlan: options } : options;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { gcTime: Infinity, retry: false },
@@ -63,7 +77,12 @@ const renderPlanning = async (repository: LocalDivePlanRepository, onCreateLogFr
     await i18n.changeLanguage('en');
     renderer = ReactTestRenderer.create(
       <QueryClientProvider client={queryClient}>
-        <Harness repository={repository} onCreateLogFromPlan={onCreateLogFromPlan} />
+        <Harness
+          repository={repository}
+          onCreateLogFromPlan={props.onCreateLogFromPlan}
+          onCreatePlan={props.onCreatePlan}
+          onOpenPlan={props.onOpenPlan}
+        />
       </QueryClientProvider>,
     );
   });
@@ -211,6 +230,29 @@ describe('Planning screen planbook flow', () => {
       objective: 'Line practice',
     });
     expect(root.findByProps({ testID: 'planning-plan-row-Edited Reef' })).toBeTruthy();
+  });
+
+  it('delegates plan detail and creation to the app route when provided', async () => {
+    const onCreatePlan = jest.fn();
+    const onOpenPlan = jest.fn();
+    const repository = new LocalDivePlanRepository([
+      plan({
+        localId: 'plan-1',
+        status: 'planned',
+        title: 'Route plan',
+        site: { name: 'Route Reef' },
+      }),
+    ]);
+    const renderer = await renderPlanning(repository, { onCreatePlan, onOpenPlan });
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+    expect(onCreatePlan).toHaveBeenCalledTimes(1);
+    expect(root.findAllByProps({ testID: 'planning-editor-title' })).toHaveLength(0);
+
+    await press(root, 'planning-plan-row-Route Reef');
+    expect(onOpenPlan).toHaveBeenCalledWith(expect.objectContaining({ localId: 'plan-1' }));
+    expect(root.findAllByProps({ testID: 'planning-detail-edit' })).toHaveLength(0);
   });
 
   it('completes a plan and lets the user choose Later', async () => {

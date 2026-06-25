@@ -4,6 +4,7 @@ import { Box } from '../../components/ui/box';
 import { Button, ButtonText } from '../../components/ui/button';
 import { HStack } from '../../components/ui/hstack';
 import { CircleIcon, Icon, WatchIcon } from '../../components/ui/icon';
+import { Pressable } from '../../components/ui/pressable';
 import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '../../components/ui/radio';
 import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
@@ -12,7 +13,7 @@ import type { SupportedLanguage } from '../../i18n';
 import { getLinkedWatchInfo, type LinkedWatchInfo } from '../../native/watch-connectivity';
 import { useAppPreferences, type ThemePreference } from '../../states/app-preferences';
 
-type SettingsRoute = 'index' | 'theme' | 'language';
+export type SettingsRoute = 'index' | 'theme' | 'language' | 'devices';
 
 type SettingRowProps = {
   label: string;
@@ -33,6 +34,9 @@ type OptionRowProps = {
 
 type SettingsScreenProps = {
   loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo>;
+  route?: SettingsRoute;
+  onBack?: () => void;
+  onOpenRoute?: (route: Exclude<SettingsRoute, 'index'>) => void;
 };
 
 const themeOptions: ThemePreference[] = ['system', 'light', 'dark'];
@@ -40,14 +44,37 @@ const languageOptions: SupportedLanguage[] = ['ko', 'en'];
 
 export default function SettingsScreen({
   loadLinkedWatchInfo = getLinkedWatchInfo,
+  onBack,
+  onOpenRoute,
+  route: controlledRoute,
 }: SettingsScreenProps): React.JSX.Element {
   const { t } = useTranslation();
   const { language, setLanguage, setThemePreference, themePreference } = useAppPreferences();
-  const [route, setRoute] = React.useState<SettingsRoute>('index');
+  const [localRoute, setLocalRoute] = React.useState<SettingsRoute>('index');
   const [linkedWatchInfo, setLinkedWatchInfo] = React.useState<LinkedWatchInfo | undefined>();
+  const route = controlledRoute ?? localRoute;
 
   const themeLabel = getThemeLabel(themePreference, t);
   const languageLabel = getLanguageLabel(language, t);
+  const openRoute = React.useCallback(
+    (nextRoute: Exclude<SettingsRoute, 'index'>) => {
+      if (onOpenRoute) {
+        onOpenRoute(nextRoute);
+        return;
+      }
+
+      setLocalRoute(nextRoute);
+    },
+    [onOpenRoute],
+  );
+  const closeRoute = React.useCallback(() => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+
+    setLocalRoute('index');
+  }, [onBack]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -78,7 +105,7 @@ export default function SettingsScreen({
   if (route === 'theme') {
     return (
       <SettingsScaffold>
-        <DetailHeader title={t('settings.theme.title')} onBack={() => setRoute('index')} />
+        <DetailHeader title={t('settings.theme.title')} onBack={closeRoute} />
         <Text size="sm" className="leading-5 text-muted-foreground">
           {t('settings.theme.subtitle')}
         </Text>
@@ -103,7 +130,7 @@ export default function SettingsScreen({
   if (route === 'language') {
     return (
       <SettingsScaffold>
-        <DetailHeader title={t('settings.language.title')} onBack={() => setRoute('index')} />
+        <DetailHeader title={t('settings.language.title')} onBack={closeRoute} />
         <Text size="sm" className="leading-5 text-muted-foreground">
           {t('settings.language.subtitle')}
         </Text>
@@ -124,6 +151,15 @@ export default function SettingsScreen({
             />
           ))}
         </OptionGroup>
+      </SettingsScaffold>
+    );
+  }
+
+  if (route === 'devices') {
+    return (
+      <SettingsScaffold>
+        <DetailHeader title={t('settings.devices.title')} onBack={closeRoute} />
+        <LinkedWatchCard linkedWatchInfo={linkedWatchInfo} />
       </SettingsScaffold>
     );
   }
@@ -149,7 +185,7 @@ export default function SettingsScreen({
             label={t('settings.theme.title')}
             value={themeLabel}
             valueTestID="settings-current-theme"
-            onPress={() => setRoute('theme')}
+            onPress={() => openRoute('theme')}
           />
           <Box className="h-px bg-border" />
           <SettingRow
@@ -157,7 +193,7 @@ export default function SettingsScreen({
             label={t('settings.language.title')}
             value={languageLabel}
             valueTestID="settings-current-language"
-            onPress={() => setRoute('language')}
+            onPress={() => openRoute('language')}
           />
         </VStack>
       </VStack>
@@ -166,7 +202,12 @@ export default function SettingsScreen({
         <Text testID="settings-section-devices" size="xs" className="font-semibold uppercase text-muted-foreground">
           {t('settings.devices.title')}
         </Text>
-        <LinkedWatchCard linkedWatchInfo={linkedWatchInfo} />
+        <Pressable
+          testID="settings-row-devices"
+          onPress={() => openRoute('devices')}
+          style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+          <LinkedWatchCard linkedWatchInfo={linkedWatchInfo} showsDisclosure />
+        </Pressable>
       </VStack>
     </SettingsScaffold>
   );
@@ -269,7 +310,7 @@ function OptionRow(props: OptionRowProps): React.JSX.Element {
   );
 }
 
-function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo }): React.JSX.Element {
+function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo; showsDisclosure?: boolean }): React.JSX.Element {
   const { t } = useTranslation();
   const watchName = props.linkedWatchInfo?.name ?? t('settings.devices.appleWatch');
 
@@ -286,6 +327,11 @@ function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo }): React.JS
           {getLinkedWatchStatusLabel(props.linkedWatchInfo, t)}
         </Text>
       </VStack>
+      {props.showsDisclosure ? (
+        <Text className="text-xl text-muted-foreground">
+          ›
+        </Text>
+      ) : null}
     </HStack>
   );
 }

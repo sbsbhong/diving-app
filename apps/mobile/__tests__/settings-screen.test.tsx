@@ -3,7 +3,7 @@ import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
 import { HStack } from '../src/components/ui/hstack';
 import { AppPreferencesProvider } from '../src/states/app-preferences';
-import SettingsScreen from '../src/screens/settings/screen';
+import SettingsScreen, { type SettingsRoute } from '../src/screens/settings/screen';
 import type { LinkedWatchInfo } from '../src/native/watch-connectivity';
 
 const linkedWatchInfo: LinkedWatchInfo = {
@@ -14,13 +14,23 @@ const linkedWatchInfo: LinkedWatchInfo = {
   name: 'Seongbin Apple Watch',
 };
 
-const renderSettings = async (options?: { loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo> }) => {
+const renderSettings = async (options?: {
+  loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo>;
+  onBack?: () => void;
+  onOpenRoute?: (route: Exclude<SettingsRoute, 'index'>) => void;
+  route?: SettingsRoute;
+}) => {
   let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
   await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(
       <AppPreferencesProvider>
-        <SettingsScreen loadLinkedWatchInfo={options?.loadLinkedWatchInfo ?? (() => Promise.resolve(linkedWatchInfo))} />
+        <SettingsScreen
+          loadLinkedWatchInfo={options?.loadLinkedWatchInfo ?? (() => Promise.resolve(linkedWatchInfo))}
+          route={options?.route}
+          onBack={options?.onBack}
+          onOpenRoute={options?.onOpenRoute}
+        />
       </AppPreferencesProvider>,
     );
   });
@@ -52,6 +62,32 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-linked-watch-icon' })).toBeTruthy();
     expect(root.findByProps({ testID: 'settings-linked-watch-name' }).props.children).toBe('Seongbin Apple Watch');
     expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('연결됨');
+  });
+
+  test('delegates setting detail opening to the app route when provided', async () => {
+    const onOpenRoute = jest.fn();
+    const renderer = await renderSettings({ onOpenRoute });
+    const root = renderer.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'settings-row-theme' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'settings-row-devices' }).props.onPress();
+    });
+
+    expect(onOpenRoute).toHaveBeenNthCalledWith(1, 'theme');
+    expect(onOpenRoute).toHaveBeenNthCalledWith(2, 'devices');
+    expect(root.findAllByProps({ testID: 'settings-detail-title' })).toHaveLength(0);
+  });
+
+  test('renders device management as a detail screen', async () => {
+    const renderer = await renderSettings({ route: 'devices' });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-detail-title' }).props.children).toBe('기기 관리');
+    expect(root.findByProps({ testID: 'settings-linked-watch-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'settings-linked-watch-name' }).props.children).toBe('Seongbin Apple Watch');
   });
 
   test('explains when no watch is paired', async () => {

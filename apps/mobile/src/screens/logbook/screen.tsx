@@ -30,6 +30,7 @@ type LogbookScreenProps = {
   reselectToken?: number;
   onSaveEntry: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
   onDeleteEntry: (localId: string) => Promise<void>;
+  onOpenEntry?: (entry: DiveLogEntry) => void;
   pendingDraft?: {
     entry: DiveLogEntry;
     sourcePlanLocalId?: string;
@@ -114,6 +115,20 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     setDraftEntry(entry);
     setRoute('edit');
   }, []);
+
+  const openDetail = React.useCallback(
+    (entry: DiveLogEntry) => {
+      setSelectedId(entry.localId);
+
+      if (props.onOpenEntry) {
+        props.onOpenEntry(entry);
+        return;
+      }
+
+      setRoute('detail');
+    },
+    [props],
+  );
 
   const saveDraft = React.useCallback(
     async (entry: DiveLogEntry) => {
@@ -248,10 +263,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
                 <SessionListItem
                   key={entry.localId}
                   entry={entry}
-                  onPress={() => {
-                    setSelectedId(entry.localId);
-                    setRoute('detail');
-                  }}
+                  onPress={() => openDetail(entry)}
                 />
               ))}
             </VStack>

@@ -25,8 +25,13 @@ type PlanningScreenProps = {
   reselectToken?: number;
   onSavePlan?: (plan: DivePlan) => Promise<DivePlan>;
   onDeletePlan?: (localId: string) => Promise<void>;
+  onCreatePlan?: () => void;
+  onOpenPlan?: (plan: DivePlan) => void;
   onCreateLogFromPlan?: (plan: DivePlan) => void;
   onOpenLogbook: () => void;
+  completedPromptPlan?: DivePlan;
+  onCompletedPromptLater?: () => void;
+  onCreateLogFromCompletedPlan?: (plan: DivePlan) => void;
   saveError?: Error | null;
   isSaving?: boolean;
 };
@@ -42,12 +47,13 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
   const [filter, setFilter] = React.useState<PlanFilter>('all');
   const [selectedId, setSelectedId] = React.useState(plans[0]?.localId);
   const [draftPlan, setDraftPlan] = React.useState<DivePlan | undefined>();
-  const [completedPromptPlan, setCompletedPromptPlan] = React.useState<DivePlan | undefined>();
+  const [localCompletedPromptPlan, setLocalCompletedPromptPlan] = React.useState<DivePlan | undefined>();
   const scrollViewRef = React.useRef<React.ComponentRef<typeof KeyboardAwareScrollView>>(null);
   const previousReselectToken = React.useRef(props.reselectToken ?? 0);
   const visiblePlans = React.useMemo(() => (filter === 'all' ? plans : plans.filter(plan => plan.status === filter)), [filter, plans]);
   const selectedPlan = plans.find(plan => plan.localId === selectedId);
   const activePlan = React.useMemo(() => selectActivePlan(plans), [plans]);
+  const completedPromptPlan = props.completedPromptPlan ?? localCompletedPromptPlan;
 
   React.useEffect(() => {
     if (selectedPlan) {
@@ -76,14 +82,25 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
   }, [props]);
 
   const openCreate = React.useCallback(() => {
+    if (props.onCreatePlan) {
+      props.onCreatePlan();
+      return;
+    }
+
     setDraftPlan(createBlankDivePlan());
     setRoute('create');
-  }, []);
+  }, [props]);
 
   const openDetail = React.useCallback((plan: DivePlan) => {
     setSelectedId(plan.localId);
+
+    if (props.onOpenPlan) {
+      props.onOpenPlan(plan);
+      return;
+    }
+
     setRoute('detail');
-  }, []);
+  }, [props]);
 
   const openEdit = React.useCallback((plan: DivePlan) => {
     setDraftPlan(plan);
@@ -121,7 +138,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
       });
       setRoute('detail');
       setSelectedId(savedPlan.localId);
-      setCompletedPromptPlan(savedPlan);
+      setLocalCompletedPromptPlan(savedPlan);
     },
     [savePlan],
   );
@@ -153,10 +170,22 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
         {completedPromptPlan ? (
           <CompletionPrompt
             plan={completedPromptPlan}
-            onLater={() => setCompletedPromptPlan(undefined)}
+            onLater={() => {
+              if (props.onCompletedPromptLater) {
+                props.onCompletedPromptLater();
+                return;
+              }
+
+              setLocalCompletedPromptPlan(undefined);
+            }}
             onCreateLog={() => {
+              if (props.onCreateLogFromCompletedPlan) {
+                props.onCreateLogFromCompletedPlan(completedPromptPlan);
+                return;
+              }
+
               createLogFromPlan(completedPromptPlan);
-              setCompletedPromptPlan(undefined);
+              setLocalCompletedPromptPlan(undefined);
             }}
           />
         ) : null}

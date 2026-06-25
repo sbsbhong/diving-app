@@ -136,12 +136,13 @@ type HarnessProps = {
     sourcePlanLocalId?: string;
   };
   onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
+  onOpenEntry?: (entry: DiveLogEntry) => void;
 };
 
 const queryClients: QueryClient[] = [];
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
-function Harness({ repository, pendingDraft, onPendingDraftSave }: HarnessProps): React.JSX.Element {
+function Harness({ repository, pendingDraft, onPendingDraftSave, onOpenEntry }: HarnessProps): React.JSX.Element {
   const logbook = useDiveLogbook({ repository, queryScope: 'manual-entry-test' });
 
   return (
@@ -158,6 +159,7 @@ function Harness({ repository, pendingDraft, onPendingDraftSave }: HarnessProps)
       isSaving={logbook.isSaving}
       pendingDraft={pendingDraft}
       onPendingDraftSave={onPendingDraftSave}
+      onOpenEntry={onOpenEntry}
     />
   );
 }
@@ -170,6 +172,7 @@ const renderLogbook = async (
       sourcePlanLocalId?: string;
     };
     onPendingDraftSave?: (entry: DiveLogEntry, sourcePlanLocalId?: string) => void;
+    onOpenEntry?: (entry: DiveLogEntry) => void;
     reselectToken?: number;
     onRefresh?: () => void | Promise<void>;
   } = {},
@@ -187,7 +190,12 @@ const renderLogbook = async (
     await i18n.changeLanguage('en');
     renderer = ReactTestRenderer.create(
       <QueryClientProvider client={queryClient}>
-        <Harness repository={repository} pendingDraft={options.pendingDraft} onPendingDraftSave={options.onPendingDraftSave} />
+        <Harness
+          repository={repository}
+          pendingDraft={options.pendingDraft}
+          onPendingDraftSave={options.onPendingDraftSave}
+          onOpenEntry={options.onOpenEntry}
+        />
       </QueryClientProvider>,
     );
   });
@@ -475,6 +483,18 @@ describe('Logbook manual entry flow', () => {
     const root = renderer.root;
 
     expect(root.findByProps({ testID: 'logbook-list-status-Manual Reef' }).props.label).toBe('Local');
+  });
+
+  test('delegates log detail opening to the app route when provided', async () => {
+    const onOpenEntry = jest.fn();
+    const repository = new LocalDiveLogRepository([manualEntry]);
+    const renderer = await renderLogbook(repository, { onOpenEntry });
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Manual Reef');
+
+    expect(onOpenEntry).toHaveBeenCalledWith(expect.objectContaining({ localId: 'manual-entry-1' }));
+    expect(root.findAllByProps({ testID: 'log-entry-detail-provenance-max-depth-manual' })).toHaveLength(0);
   });
 
   test('detail distinguishes manual values from watch-captured values', async () => {
