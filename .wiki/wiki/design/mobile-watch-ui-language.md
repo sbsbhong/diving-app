@@ -20,6 +20,7 @@ watchOS 앱의 기준은 다음과 같다.
 - iPhone의 흰 grouped list를 그대로 옮기지 않는다.
 - watchOS에서는 black canvas, compact rounded surface, 짧은 label/value, 큰 recording metric 하나를 중심으로 한다.
 - recording 화면은 현재 수심, 경과 시간, 상태처럼 즉시 읽어야 하는 정보 하나를 우선한다.
+- Home은 반복 사용자가 바로 시작할 수 있도록 선택 가능한 입력을 dive type 하나로 제한하고, 세부 plan 편집과 모바일 planned dive 선택은 별도 Dive Plan 화면으로 보낸다.
 - saved session과 detail 화면은 compact summary, mini profile, 필요한 action 정도만 둔다.
 
 ## 상세
@@ -82,6 +83,7 @@ watchOS는 같은 제품 언어를 더 압축해서 쓴다.
 - surface는 작은 rounded tile 또는 row로 제한한다.
 - recording 중에는 한 화면에서 하나의 주요 metric만 강하게 보이게 한다.
 - action은 watchOS control 크기에 맞추되, 한 화면에 과도하게 많이 두지 않는다.
+- post-dive rating, effort, visibility처럼 1-5 정수 평가를 받는 값은 watch에서 긴 wheel picker보다 짧은 별점 row를 우선한다.
 - safety stop, ascent, no-fly 관련 표현은 인증된 판단이 아니라 assistant/reminder 상태로만 둔다.
 
 ### 회귀 방지

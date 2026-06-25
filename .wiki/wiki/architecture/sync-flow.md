@@ -2,7 +2,7 @@
 
 ## 요약
 
-현재 동기화 모델은 계약을 먼저 정의하는 방식이다. `packages/contracts`가 watch sync message를 정의하고, watch 앱은 동기화 가능한 JSON을 encode한 뒤 WatchConnectivity `transferUserInfo` envelope로 enqueue한다. 양쪽 앱이 reachable이면 같은 envelope를 `sendMessage`로도 보내 활성 상태의 수신 지연을 줄인다. 모바일 iOS native code는 WatchConnectivity userInfo와 message를 원시 JSON payload로 복원해 durable inbox에 저장하고 React Native로 전달한다. 모바일 JS는 payload를 실행 시점에 검증한 뒤 `DiveLogEntry`로 변환해 영구 저장 repository에 import하고, import가 끝난 payload는 native inbox에서 제거하면서 watch에 `watchSyncAcknowledgement`를 돌려보낸다. 반대 방향으로는 모바일의 실행하지 않은 planned dive 목록을 `watchPlannedDives` envelope로 watch companion에 전달해 watch Home에서 선택해 recording을 시작할 수 있게 한다.
+현재 동기화 모델은 계약을 먼저 정의하는 방식이다. `packages/contracts`가 watch sync message를 정의하고, watch 앱은 동기화 가능한 JSON을 encode한 뒤 WatchConnectivity `transferUserInfo` envelope로 enqueue한다. 양쪽 앱이 reachable이면 같은 envelope를 `sendMessage`로도 보내 활성 상태의 수신 지연을 줄인다. 모바일 iOS native code는 WatchConnectivity userInfo와 message를 원시 JSON payload로 복원해 durable inbox에 저장하고 React Native로 전달한다. 모바일 JS는 payload를 실행 시점에 검증한 뒤 `DiveLogEntry`로 변환해 영구 저장 repository에 import하고, import가 끝난 payload는 native inbox에서 제거하면서 watch에 `watchSyncAcknowledgement`를 돌려보낸다. 반대 방향으로는 모바일의 실행하지 않은 planned dive 목록을 `watchPlannedDives` envelope로 watch companion에 전달해 watch Dive Plan setup 화면에서 선택해 recording을 시작할 수 있게 한다.
 
 ## 현재 상태
 
@@ -39,7 +39,7 @@ Mobile import 동작은 다음과 같다.
 - `src/utils/watch-sync-message-validation.ts`는 원시 JSON string이나 `unknown` value가 `WatchSyncMessage` contract를 만족하는지 실행 시점에 검증한다.
 - `src/utils/watch-fixtures.ts`는 `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`을 import하고 validator를 통과한 message만 앱 fixture로 export한다.
 - `src/native/watch-connectivity.ts`는 iOS native `WatchConnectivityModule`에서 전달되는 raw JSON payload를 React Native event와 drain method로 받고, 무효 payload drop acknowledge와 import 완료 acknowledge를 구분한다. 또한 planned dive update와 linked watch status query를 노출한다.
-- `src/states/watch-connectivity-sync.tsx`는 pending native payload를 drain하고 새 event를 구독한 뒤, validator를 통과한 payload를 repository import로 넘긴다. 저장에 성공한 WatchConnectivity 수신 항목은 mobile top-level `syncStatus`를 `synced`로 보정하고, raw watch capture 안의 원본 `session.syncStatus`는 보존한다.
+- `src/states/watch-connectivity-sync.tsx`는 pending native payload를 drain하고 새 event를 구독한 뒤, validator를 통과한 payload를 repository import로 넘긴다. 저장에 성공한 WatchConnectivity 수신 항목은 mobile top-level `syncStatus`를 `synced`로 보정하고, raw watch capture 안의 원본 `session.syncStatus`는 보존한다. 새 entry를 자동 import한 경우 root navigation으로 imported entry를 전달해 tappable toast를 띄우고, toast tap은 해당 Logbook detail route로 이동한다.
 - `watch-session-to-dive-log-entry.ts`는 `WatchSession`을 watch source `DiveLogEntry`로 변환한다.
 - `DiveLogRepository.importWatchMessages`는 validator를 통과해 typed `WatchSyncMessage[]`가 된 payload를 import한다.
 - Import는 `localSessionId`와 `endedAt` 기반 key로 deduplicate하고, 기존 manual/mobile field와 `importedAt`을 보존하며, 누락된 watch 동기화 상태를 `pending`으로 기본값 처리하고, 최신 항목이 먼저 오도록 정렬한다.
@@ -52,7 +52,7 @@ WatchConnectivity PoC 동작은 다음과 같다.
 - iOS app의 `WatchConnectivityInbox`는 앱 시작 시 `WCSession`을 activate하고, `didReceiveUserInfo`와 `didReceiveMessage`에서 `kind: watchSyncMessage`와 `payloadBase64` envelope를 해독한다.
 - Native inbox는 pending payload를 `UserDefaults`에 저장하고 payload별 `payloadId`를 붙인다. `WatchConnectivityModule`은 `drainPendingPayloads`, `DiveWatchSyncPayloadReceived` event, `acknowledgePayloads`, `acknowledgeImportedPayloads` method로 JS에 전달한다.
 - JS provider는 repository import 성공 시 `acknowledgeImportedPayloads`를 호출해 mobile inbox에서 payload를 제거하고 watch에 `watchSyncAcknowledgement`를 보낸다. iOS native acknowledgement도 `transferUserInfo`를 기본으로 쓰고, watch가 reachable이면 `sendMessage`로도 보낸다. Watch transport는 acknowledgement를 `didReceiveUserInfo`와 `didReceiveMessage` 양쪽에서 처리한다. Contract validation 실패처럼 재시도해도 의미가 없는 payload는 mobile inbox에서만 acknowledge한다. Repository save/import 실패는 acknowledge하지 않아 앱 재시작 뒤 다시 drain될 수 있다.
-- iOS app의 `WatchConnectivityInbox.updatePlannedDives`는 planned dive JSON을 `watchPlannedDives` application context로 갱신하고, watch가 reachable이면 같은 context를 `sendMessage`로도 보낸다. `WCSession` activation 전이나 일시 실패 시 최신 planned dive JSON을 메모리에 보관했다가 activation 완료 또는 reachability 변경 뒤 다시 application context로 flush한다. Watch app의 `WatchSyncTransport`는 application context와 message 양쪽에서 planned dives를 decode해 `DiveSessionStore`로 넘기며, activation 완료 시 이미 저장된 `receivedApplicationContext`도 한 번 읽어 watch 앱 시작 시점을 놓치지 않게 한다.
+- iOS app의 `WatchConnectivityInbox.updatePlannedDives`는 planned dive JSON을 `watchPlannedDives` application context로 갱신하고, watch가 reachable이면 같은 context를 `sendMessage`로도 보낸다. `WCSession` activation 전이나 일시 실패 시 최신 planned dive JSON을 보관했다가 activation 완료, reachability 변경, watch state 변경 뒤 다시 application context와 queued user info fallback으로 flush한다. Watch app의 `WatchSyncTransport`는 application context와 message 양쪽에서 planned dives를 decode해 `DiveSessionStore`로 넘기며, activation 완료 시 이미 저장된 `receivedApplicationContext`도 한 번 읽어 watch 앱 시작 시점을 놓치지 않게 한다.
 - 활성 iPhone/watch simulator 조합에서는 watch pending 세션의 mobile import, mobile durable inbox 비움, watch `syncStatus: "synced"` acknowledgement까지 확인됐다. 이 경로는 compile과 활성 simulator import behavior를 확인하기 위한 PoC이며, background delivery가 실제 기기에서 검증됐다는 뜻은 아니다.
 
 현재 비어 있는 부분은 다음과 같다.
