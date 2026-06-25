@@ -93,4 +93,44 @@ describe('diveLogEntryToMobileSession', () => {
       maxDepthMeters: 12,
     });
   });
+
+  it('falls back to the raw watch note when a watch-backed entry has no manual note', () => {
+    const entry: DiveLogEntry = {
+      localId: 'watch:session-raw-note:1781352600',
+      source: 'watch',
+      syncStatus: 'synced',
+      createdAt: 1781353000,
+      updatedAt: 1781354000,
+      manual: {
+        site: {},
+        buddyIds: [],
+        gearIds: [],
+        tags: [],
+        observedMarineLife: [],
+        measuredValues: {},
+      },
+      mobile: {
+        mediaPlaceholders: [],
+      },
+      watchCapture: {
+        importKey: 'session-raw-note:1781352600',
+        importedAt: 1781353000,
+        session: {
+          localSessionId: 'session-raw-note',
+          startedAt: 1781352000,
+          endedAt: 1781352600,
+          notes: 'Watch quick note',
+          samples: [],
+        },
+        measuredValues: {
+          startedAt: 1781352000,
+          endedAt: 1781352600,
+        },
+        samples: [],
+      },
+      provenance: {},
+    };
+
+    expect(diveLogEntryToMobileSession(entry).notes).toBe('Watch quick note');
+  });
 });

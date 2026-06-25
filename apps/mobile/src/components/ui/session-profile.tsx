@@ -8,6 +8,7 @@ type SessionProfileProps = {
   samples: WatchDepthSample[];
   title: string;
   kind: 'depth' | 'temperature';
+  testID?: string;
 };
 
 function SessionProfileRoot(props: SessionProfileProps): React.JSX.Element {
@@ -18,7 +19,7 @@ function SessionProfileRoot(props: SessionProfileProps): React.JSX.Element {
   const barClassName = props.kind === 'depth' ? 'bg-primary' : 'bg-primary/70';
 
   return (
-    <VStack space="md" className="rounded-2xl bg-muted px-4 py-4">
+    <VStack testID={props.testID} space="md" className="rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.title}</Text>
       <HStack space="xs" className="h-24 items-end">
         {values.map((value, index) => (

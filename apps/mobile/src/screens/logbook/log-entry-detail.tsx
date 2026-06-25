@@ -35,6 +35,7 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
   const buddies = props.entry.manual.buddyIds.length ? props.entry.manual.buddyIds.join(', ') : t('logbook.none');
   const marineLife = props.entry.manual.observedMarineLife.length ? props.entry.manual.observedMarineLife.join(', ') : t('logbook.none');
   const sourceLabel = props.entry.source === 'watch' ? t('logbook.watchCaptured') : t('logbook.manualValue');
+  const note = props.entry.manual.notes ?? props.entry.watchCapture?.session.notes ?? t('logbook.noNotes');
 
   return (
     <DiveSummaryCard accent="primary">
@@ -76,14 +77,24 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
         </HStack>
         {props.entry.watchCapture?.samples.length ? (
           <>
-            <SessionProfile samples={props.entry.watchCapture.samples} kind="depth" title={t('logbook.depthProfile')} />
-            <SessionProfile samples={props.entry.watchCapture.samples} kind="temperature" title={t('logbook.temperatureProfile')} />
+            <SessionProfile
+              testID="log-entry-detail-depth-profile"
+              samples={props.entry.watchCapture.samples}
+              kind="depth"
+              title={t('logbook.depthProfile')}
+            />
+            <SessionProfile
+              testID="log-entry-detail-temperature-profile"
+              samples={props.entry.watchCapture.samples}
+              kind="temperature"
+              title={t('logbook.temperatureProfile')}
+            />
           </>
         ) : null}
       </DiveSummaryCard.Body>
       <DiveSummaryCard.Footer>
         <VStack space="sm">
-          <Text className="text-sm leading-5 text-card-foreground">{props.entry.manual.notes ?? t('logbook.noNotes')}</Text>
+          <Text testID="log-entry-detail-note" className="text-sm leading-5 text-card-foreground">{note}</Text>
           <Text className="text-sm leading-5 text-muted-foreground">
             {t('logbook.buddyNames')}: {buddies}
           </Text>

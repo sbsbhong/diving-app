@@ -121,7 +121,7 @@ export const diveLogEntryToMobileSession = (entry: DiveLogEntry): MobileDiveSess
       buddyIds: entry.manual.buddyIds,
       gearIds: entry.manual.gearIds,
       tags: entry.manual.tags,
-      notes: entry.manual.notes,
+      notes: entry.manual.notes ?? entry.watchCapture.session.notes,
       rating: entry.manual.rating,
       diveMode: entry.manual.measuredValues.diveMode ?? entry.watchCapture.session.diveMode,
       gasLabel: entry.manual.measuredValues.gasLabel ?? entry.watchCapture.session.gasLabel,

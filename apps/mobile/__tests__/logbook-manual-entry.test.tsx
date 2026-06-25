@@ -512,6 +512,63 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value-19.00m' })).toBeTruthy();
   });
 
+  test('detail shows watch depth profile, temperature profile, and raw quick note fallback', async () => {
+    const watchEntryWithProfiles: DiveLogEntry = {
+      ...watchEntry,
+      localId: 'watch-entry-profiles',
+      manual: {
+        ...watchEntry.manual,
+        site: { name: 'Profile Reef' },
+        notes: undefined,
+      },
+      watchCapture: {
+        ...watchEntry.watchCapture!,
+        session: {
+          ...watchEntry.watchCapture!.session,
+          siteName: 'Profile Reef',
+          notes: 'Watch quick note from pre-dive',
+          samples: [
+            {
+              localSessionId: 'watch-entry-1',
+              timestamp: 1781352000,
+              depthMeters: 0,
+              waterTemperatureCelsius: 25,
+            },
+            {
+              localSessionId: 'watch-entry-1',
+              timestamp: 1781352300,
+              depthMeters: 12,
+              waterTemperatureCelsius: 24,
+            },
+          ],
+        },
+        samples: [
+          {
+            localSessionId: 'watch-entry-1',
+            timestamp: 1781352000,
+            depthMeters: 0,
+            waterTemperatureCelsius: 25,
+          },
+          {
+            localSessionId: 'watch-entry-1',
+            timestamp: 1781352300,
+            depthMeters: 12,
+            waterTemperatureCelsius: 24,
+          },
+        ],
+      },
+    };
+    const repository = new LocalDiveLogRepository([watchEntryWithProfiles]);
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-list-item-Profile Reef');
+
+    expect(root.findByProps({ testID: 'log-entry-detail-depth-profile' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-temperature-profile' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-note' }).props.children).toBe('Watch quick note from pre-dive');
+  });
+
   test('returns to useful list content when filtering removes the selected detail entry', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);

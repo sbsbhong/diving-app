@@ -65,6 +65,11 @@ describe('WatchConnectivitySyncProvider', () => {
     const entries = await repository.list();
     expect(entries).toHaveLength(1);
     expect(entries[0].watchCapture?.session.localSessionId).toBe('fixture-rich-session');
+    expect(entries[0].manual.notes).toBe('Easy recreational checkout dive. Not for decompression planning.');
+    expect(entries[0].watchCapture?.samples[1]).toMatchObject({
+      depthMeters: 13.2,
+      waterTemperatureCelsius: 24.1,
+    });
     expect(entries[0].syncStatus).toBe('synced');
     expect(entries[0].watchCapture?.session.syncStatus).toBe('pending');
     expect(queryClient.getQueryData(diveLogbookQueryKeys.list(repository))).toEqual(entries);
