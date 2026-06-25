@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var store: DiveSessionStore
     @State private var plan = PreDivePlan()
+    @State private var isPreDivePlanExpanded = false
 
     var body: some View {
         NavigationStack {
@@ -18,7 +19,7 @@ struct HomeView: View {
                         PlannedDivesSection(store: store, plannedDives: store.plannedDives)
                     }
 
-                    PreDivePlanForm(plan: $plan)
+                    PreDivePlanForm(plan: $plan, isExpanded: $isPreDivePlanExpanded)
 
                     NavigationLink {
                         RecordingView(store: store, plan: plan)
@@ -208,37 +209,66 @@ private struct LatestMetric: View {
 
 private struct PreDivePlanForm: View {
     @Binding var plan: PreDivePlan
+    @Binding var isExpanded: Bool
 
     var body: some View {
         InstrumentCard(accent: DiveWatchTheme.secondary) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("PRE-DIVE PLAN")
-                    .font(DiveWatchTheme.labelFont())
-                    .foregroundStyle(DiveWatchTheme.secondary)
-
-                Picker("Mode", selection: $plan.diveMode) {
-                    ForEach(DiveMode.allCases) { mode in
-                        Text(mode.label).tag(mode)
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        isExpanded.toggle()
                     }
+                } label: {
+                    HStack(alignment: .center, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("PRE-DIVE PLAN")
+                                .font(DiveWatchTheme.labelFont())
+                                .foregroundStyle(DiveWatchTheme.secondary)
+                            Text("\(plan.diveMode.label) / \(Int(plan.plannedMaxDepthMeters)) m")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(DiveWatchTheme.text)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+
+                        Spacer(minLength: 4)
+
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(DiveWatchTheme.secondary)
+                    }
+                    .contentShape(Rectangle())
                 }
-                .labelsHidden()
-                .frame(height: 58)
+                .buttonStyle(.plain)
 
-                DiveTextField(title: String(localized: "Gas label"), text: $plan.gasLabel)
-                DiveTextField(title: String(localized: "Site"), text: $plan.siteName)
-                DiveTextField(title: String(localized: "Buddy"), text: $plan.buddyName)
-                DiveTextField(title: String(localized: "Quick note"), text: $plan.quickNote)
+                if isExpanded {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Picker("Mode", selection: $plan.diveMode) {
+                            ForEach(DiveMode.allCases) { mode in
+                                Text(mode.label).tag(mode)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(height: 58)
 
-                Stepper(value: $plan.plannedMaxDepthMeters, in: 3...40, step: 1) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text("PLANNED MAX")
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(DiveWatchTheme.mutedText)
-                        Text("\(Int(plan.plannedMaxDepthMeters)) m")
-                            .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
-                            .foregroundStyle(DiveWatchTheme.text)
-                            .monospacedDigit()
+                        DiveTextField(title: String(localized: "Gas label"), text: $plan.gasLabel)
+                        DiveTextField(title: String(localized: "Site"), text: $plan.siteName)
+                        DiveTextField(title: String(localized: "Buddy"), text: $plan.buddyName)
+                        DiveTextField(title: String(localized: "Quick note"), text: $plan.quickNote)
+
+                        Stepper(value: $plan.plannedMaxDepthMeters, in: 3...40, step: 1) {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("PLANNED MAX")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(DiveWatchTheme.mutedText)
+                                Text("\(Int(plan.plannedMaxDepthMeters)) m")
+                                    .font(DiveWatchTheme.metricFont(size: 16, weight: .semibold))
+                                    .foregroundStyle(DiveWatchTheme.text)
+                                    .monospacedDigit()
+                            }
+                        }
                     }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
         }

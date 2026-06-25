@@ -1,5 +1,16 @@
 # Wiki 기록
 
+## 2026-06-25 - 구조 - compact watch pre-dive plan card
+
+- 수정:
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `apps/mobile/ios/DiveWatchApp/Views/HomeView.swift`
+  - `apps/mobile/__tests__/watch-connectivity-native-source.test.ts`
+- 요약:
+  - watch Home의 pre-dive metadata 입력 카드는 기본적으로 접힌 요약 상태로 표시되고, 사용자가 펼칠 때만 세부 입력 필드를 보여준다.
+
 ## 2026-06-25 - 구조 - watch visible unexecuted plans
 
 - 수정:

@@ -146,4 +146,15 @@ describe('WatchConnectivity native source contract', () => {
     expect(transport).toContain('func refreshPlannedDives()');
     expect(transport).toContain('handleReceivedApplicationContext(from: connectivitySession)');
   });
+
+  it('keeps the watch pre-dive plan editor collapsed until the user expands it', () => {
+    const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
+
+    expect(home).toContain('@State private var isPreDivePlanExpanded = false');
+    expect(home).toContain('PreDivePlanForm(plan: $plan, isExpanded: $isPreDivePlanExpanded)');
+    expect(home).toContain('@Binding var isExpanded: Bool');
+    expect(home).toContain('withAnimation(.easeInOut(duration: 0.18))');
+    expect(home).toContain('if isExpanded');
+    expect(home).toContain('Image(systemName: isExpanded ? "chevron.up" : "chevron.down")');
+  });
 });

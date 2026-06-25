@@ -23,7 +23,7 @@ Watch 앱은 더 이상 별도 Yarn workspace나 standalone Xcode project를 사
 
 현재 watch flow는 다음과 같다.
 
-1. Home에서 mode, gas label, site, buddy, quick note, planned max depth 같은 pre-dive metadata를 입력한다. 모바일에서 전달된 실행하지 않은 planned dive가 있으면 Home에 함께 표시하고, 선택한 계획으로 recording을 시작할 수 있다.
+1. Home에서 mode, gas label, site, buddy, quick note, planned max depth 같은 pre-dive metadata를 입력한다. 이 입력 카드는 기본적으로 접힌 요약 상태이며, 필요할 때만 펼쳐 watch 화면 길이를 줄인다. 모바일에서 전달된 실행하지 않은 planned dive가 있으면 Home에 함께 표시하고, 선택한 계획으로 recording을 시작할 수 있다.
 2. `RecordingView`가 나타나면 기록이 자동으로 시작되고, 현재 `MockDepthSensorProvider`를 사용한다.
 3. Recorder는 sample, current depth, max depth, water temperature, elapsed time, ascent-rate reminder state, safety-stop assistant state를 추적한다.
 4. 기록을 끝내면 post-dive rating, exertion, visibility, water condition, note field가 있는 summary를 보여준다.
