@@ -19,58 +19,6 @@ const waterConditionOptions: NonNullable<WatchSession['waterCondition']>[] = ['c
 export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
   const { t } = useTranslation();
 
-  if (props.diveMode === 'pool') {
-    return (
-      <ModeSection title={t('planning.poolSection', { defaultValue: 'Pool plan details' })}>
-        <HStack space="md">
-          <EditorField className="flex-1" label={t('planning.poolLengthMeters', { defaultValue: 'Pool length (m)' })}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="planning-editor-pool-length"
-                value={props.draft.poolLength}
-                onChangeText={value => props.setValue('poolLength', value)}
-                keyboardType="numeric"
-                placeholder="25"
-              />
-            </Input>
-          </EditorField>
-          <EditorField className="flex-1" label={t('planning.lapTarget', { defaultValue: 'Lap target' })}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="planning-editor-lap-target"
-                value={props.draft.lapTarget}
-                onChangeText={value => props.setValue('lapTarget', value)}
-                keyboardType="numeric"
-                placeholder="20"
-              />
-            </Input>
-          </EditorField>
-        </HStack>
-        <EditorField label={t('planning.plannedDurationMinutes', { defaultValue: 'Planned duration (min)' })}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="planning-editor-planned-duration"
-              value={props.draft.plannedDuration}
-              onChangeText={value => props.setValue('plannedDuration', value)}
-              keyboardType="numeric"
-              placeholder="35"
-            />
-          </Input>
-        </EditorField>
-        <EditorField label={t('planning.trainingFocus', { defaultValue: 'Training focus' })}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="planning-editor-training-focus"
-              value={props.draft.trainingFocus}
-              onChangeText={value => props.setValue('trainingFocus', value)}
-              placeholder={t('planning.trainingFocusPlaceholder', { defaultValue: 'e.g. finning drills' })}
-            />
-          </Input>
-        </EditorField>
-      </ModeSection>
-    );
-  }
-
   return (
     <ModeSection title={t(`planning.${props.diveMode}Section`, { defaultValue: `${props.diveMode} plan details` })}>
       <HStack space="md">

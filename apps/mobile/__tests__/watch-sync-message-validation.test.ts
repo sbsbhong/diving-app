@@ -87,6 +87,24 @@ describe('watch sync message validation', () => {
     expect(result.error.message).toContain('session.localSessionId');
   });
 
+  it.each(['snorkel', 'pool', 'unknown'])('rejects removed dive mode %s', diveMode => {
+    const result = parseWatchSyncMessageValue({
+      type: 'sessionEnded',
+      session: {
+        localSessionId: `removed-mode-${diveMode}`,
+        startedAt: 1781352000,
+        diveMode,
+        samples: [{ localSessionId: `removed-mode-${diveMode}`, timestamp: 1781352000, depthMeters: 0 }],
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      throw new Error('expected removed dive mode to be invalid');
+    }
+    expect(result.error.message).toContain('session.diveMode');
+  });
+
   it('builds app fixture messages through the runtime validator', () => {
     expect(watchFixtureMessages.map(message => message.session.localSessionId)).toEqual(['fixture-rich-session']);
   });

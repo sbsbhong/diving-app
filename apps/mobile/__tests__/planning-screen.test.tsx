@@ -151,6 +151,21 @@ describe('Planning screen planbook flow', () => {
     expect(root.findByProps({ testID: 'planning-plan-row-Blue Wall' })).toBeTruthy();
   });
 
+  it('plan editor exposes only scuba and freedive modes', async () => {
+    const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
+    const renderer = await renderPlanning(repository);
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+
+    expect(root.findByProps({ testID: 'planning-editor-mode-scuba' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-mode-freedive' })).toBeTruthy();
+    expect(root.findAllByProps({ testID: 'planning-editor-mode-snorkel' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-mode-pool' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-pool-length' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-lap-target' })).toHaveLength(0);
+  });
+
   it('keeps planning inputs in a keyboard-aware scroll container', async () => {
     const renderer = await renderPlanning(new LocalDivePlanRepository([]));
     const root = renderer.root;
@@ -310,27 +325,4 @@ describe('Planning screen planbook flow', () => {
     });
   });
 
-  it('switches to pool mode and does not persist hidden planned max depth', async () => {
-    const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
-    const renderer = await renderPlanning(repository);
-    const root = renderer.root;
-
-    await press(root, 'planning-create-action');
-    await changeText(root, 'planning-editor-site-name', 'Training Pool');
-    await changeText(root, 'planning-editor-planned-max-depth', '12');
-    await press(root, 'planning-editor-mode-pool');
-
-    expect(root.findByProps({ testID: 'planning-editor-pool-length' })).toBeTruthy();
-    expect(() => root.findByProps({ testID: 'planning-editor-planned-max-depth' })).toThrow();
-
-    await changeText(root, 'planning-editor-pool-length', '25');
-    await changeText(root, 'planning-editor-lap-target', '20');
-    await press(root, 'planning-editor-save-planned');
-
-    const [savedPlan] = await repository.list();
-    expect(savedPlan.diveMode).toBe('pool');
-    expect(savedPlan.plannedValues.plannedMaxDepthMeters).toBeUndefined();
-    expect(savedPlan.plannedValues.poolLengthMeters).toBe(25);
-    expect(savedPlan.plannedValues.lapTarget).toBe(20);
-  });
 });

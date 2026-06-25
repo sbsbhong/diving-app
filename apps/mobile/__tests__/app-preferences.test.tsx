@@ -20,7 +20,7 @@ function Probe(props: { onValue: (value: AppPreferences) => void }): React.JSX.E
 
   return (
     <Text testID="preferences-probe">
-      {`${preferences.themePreference}:${preferences.resolvedTheme}:${preferences.language}`}
+      {`${preferences.themePreference}:${preferences.resolvedTheme}:${preferences.language}:${preferences.watchSyncNotificationsEnabled}`}
     </Text>
   );
 }
@@ -71,7 +71,7 @@ describe('app preferences', () => {
       );
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko:false');
 
     const current = snapshots[snapshots.length - 1];
 
@@ -79,14 +79,14 @@ describe('app preferences', () => {
       current.setThemePreference('dark');
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:ko');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:ko:false');
 
     await ReactTestRenderer.act(async () => {
       await snapshots[snapshots.length - 1].setLanguage('en');
     });
 
     expect(i18n.language).toBe('en');
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en:false');
   });
 
   test('tracks language changes emitted outside the preferences setter', async () => {
@@ -100,13 +100,13 @@ describe('app preferences', () => {
       );
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko:false');
 
     await ReactTestRenderer.act(async () => {
       await i18n.changeLanguage('en');
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:en');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:en:false');
   });
 
   test('keeps the current language when a language change rejects', async () => {
@@ -121,7 +121,7 @@ describe('app preferences', () => {
       );
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko:false');
 
     const changeLanguageSpy = jest
       .spyOn(i18n, 'changeLanguage')
@@ -135,7 +135,7 @@ describe('app preferences', () => {
       ).resolves.toBeUndefined();
 
       expect(i18n.language).toBe('ko');
-      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko:false');
     } finally {
       changeLanguageSpy.mockRestore();
     }
@@ -159,7 +159,7 @@ describe('app preferences', () => {
 
   test('restores saved preferences from persistent storage', async () => {
     const storage = createAppPreferencesStorage({ storage: new InMemoryKeyValueStore(), now: () => 1000 });
-    await storage.save({ themePreference: 'dark', language: 'en' });
+    await storage.save({ themePreference: 'dark', language: 'en', watchSyncNotificationsEnabled: true });
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
     await ReactTestRenderer.act(async () => {
@@ -170,7 +170,7 @@ describe('app preferences', () => {
       );
     });
 
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en:true');
     expect(i18n.language).toBe('en');
   });
 
@@ -193,9 +193,16 @@ describe('app preferences', () => {
     await ReactTestRenderer.act(async () => {
       await snapshots[snapshots.length - 1].setLanguage('en');
     });
+    await ReactTestRenderer.act(async () => {
+      await snapshots[snapshots.length - 1].setWatchSyncNotificationsEnabled(true);
+    });
 
-    expect(await storage.load()).toEqual({ themePreference: 'dark', language: 'en' });
-    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en');
+    expect(await storage.load()).toEqual({
+      themePreference: 'dark',
+      language: 'en',
+      watchSyncNotificationsEnabled: true,
+    });
+    expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('dark:dark:en:true');
   });
 
   test('does not persist a language selection when i18next rejects it', async () => {
@@ -220,8 +227,12 @@ describe('app preferences', () => {
         await snapshots[snapshots.length - 1].setLanguage('en');
       });
 
-      expect(await storage.load()).toEqual({ themePreference: 'system', language: 'ko' });
-      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko');
+      expect(await storage.load()).toEqual({
+        themePreference: 'system',
+        language: 'ko',
+        watchSyncNotificationsEnabled: false,
+      });
+      expect(renderer!.root.findByProps({ testID: 'preferences-probe' }).props.children).toBe('system:light:ko:false');
     } finally {
       changeLanguageSpy.mockRestore();
     }

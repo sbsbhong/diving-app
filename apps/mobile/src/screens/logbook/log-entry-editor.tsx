@@ -20,7 +20,7 @@ type LogEntryEditorProps = {
   onSave: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
 };
 
-const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive', 'snorkel', 'pool'];
+const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive'];
 const entryStyles: DiveEntryStyle[] = ['shore', 'boat', 'pool'];
 const waterConditions: NonNullable<WatchSession['waterCondition']>[] = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'];
 type TouchedEditorFields = ReadonlySet<keyof LogEntryEditorState>;
@@ -111,44 +111,30 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
             />
           </Input>
         </EditorField>
-        {activeDiveMode === 'pool' ? (
-          <EditorField label={t('logbook.durationMinutes')}>
+        <HStack space="md">
+          <EditorField className="flex-1" label={t('logbook.durationMinutes')}>
             <Input className="h-11 rounded-xl bg-background">
               <InputField
                 testID="log-entry-editor-duration"
                 value={draft.duration}
                 onChangeText={value => setValue('duration', value)}
                 keyboardType="numeric"
-                placeholder="35"
+                placeholder="47"
               />
             </Input>
           </EditorField>
-        ) : (
-          <HStack space="md">
-            <EditorField className="flex-1" label={t('logbook.durationMinutes')}>
-              <Input className="h-11 rounded-xl bg-background">
-                <InputField
-                  testID="log-entry-editor-duration"
-                  value={draft.duration}
-                  onChangeText={value => setValue('duration', value)}
-                  keyboardType="numeric"
-                  placeholder="47"
-                />
-              </Input>
-            </EditorField>
-            <EditorField className="flex-1" label={t('logbook.maxDepthMeters')}>
-              <Input className="h-11 rounded-xl bg-background">
-                <InputField
-                  testID="log-entry-editor-max-depth"
-                  value={draft.maxDepth}
-                  onChangeText={value => setValue('maxDepth', value)}
-                  keyboardType="numeric"
-                  placeholder="18.6"
-                />
-              </Input>
-            </EditorField>
-          </HStack>
-        )}
+          <EditorField className="flex-1" label={t('logbook.maxDepthMeters')}>
+            <Input className="h-11 rounded-xl bg-background">
+              <InputField
+                testID="log-entry-editor-max-depth"
+                value={draft.maxDepth}
+                onChangeText={value => setValue('maxDepth', value)}
+                keyboardType="numeric"
+                placeholder="18.6"
+              />
+            </Input>
+          </EditorField>
+        </HStack>
         <ModeSpecificFields draft={draft} diveMode={activeDiveMode} setValue={setValue} />
         <EditorField label={t('logbook.buddyNames')}>
           <Input className="h-11 rounded-xl bg-background">
@@ -234,8 +220,6 @@ function entryToEditorState(entry: DiveLogEntry): LogEntryEditorState {
     perceivedExertion: numberToText(entry.manual.measuredValues.perceivedExertion),
     repetitionCount: numberToText(entry.manual.measuredValues.repetitionCount),
     trainingFocus: entry.manual.measuredValues.trainingFocus ?? '',
-    poolLength: numberToText(entry.manual.measuredValues.poolLengthMeters),
-    lapCount: numberToText(entry.manual.measuredValues.lapCount),
     buddies: entry.manual.buddyIds.join(', '),
     tags: entry.manual.tags.join(', '),
     observedMarineLife: entry.manual.observedMarineLife.join(', '),
@@ -277,7 +261,7 @@ function editorStateToEntry(entry: DiveLogEntry, draft: LogEntryEditorState, tou
     draftKey: 'maxDepth',
     value: textToNonNegativeNumber(draft.maxDepth),
     touchedFields,
-    visible: diveMode !== 'pool',
+    visible: true,
   });
   applyModeSpecificValues(entry, measuredValues, provenance, draft, diveMode, touchedFields);
 
@@ -419,9 +403,7 @@ type ModeSpecificMeasuredField =
   | 'visibilityRating'
   | 'waterCondition'
   | 'repetitionCount'
-  | 'trainingFocus'
-  | 'poolLengthMeters'
-  | 'lapCount';
+  | 'trainingFocus';
 
 function applyModeMeasuredValue<Field extends ModeSpecificMeasuredField>(
   entry: DiveLogEntry,
@@ -514,48 +496,6 @@ function applyModeSpecificValues(
     );
   }
 
-  if (diveMode === 'snorkel') {
-    applyModeMeasuredValue(
-      entry,
-      measuredValues,
-      provenance,
-      touchedFields,
-      'waterCondition',
-      'waterCondition',
-      textToWaterCondition(draft.waterCondition),
-    );
-    applyModeMeasuredValue(
-      entry,
-      measuredValues,
-      provenance,
-      touchedFields,
-      'visibilityRating',
-      'visibilityRating',
-      textToRating(draft.visibilityRating),
-    );
-  }
-
-  if (diveMode === 'pool') {
-    applyModeMeasuredValue(
-      entry,
-      measuredValues,
-      provenance,
-      touchedFields,
-      'poolLengthMeters',
-      'poolLength',
-      textToNonNegativeNumber(draft.poolLength),
-    );
-    applyModeMeasuredValue(entry, measuredValues, provenance, touchedFields, 'lapCount', 'lapCount', textToNonNegativeInteger(draft.lapCount));
-    applyModeMeasuredValue(
-      entry,
-      measuredValues,
-      provenance,
-      touchedFields,
-      'trainingFocus',
-      'trainingFocus',
-      emptyToUndefined(draft.trainingFocus),
-    );
-  }
 }
 
 function splitCommaList(value: string): string[] {

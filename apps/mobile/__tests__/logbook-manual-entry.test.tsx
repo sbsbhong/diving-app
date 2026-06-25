@@ -98,20 +98,6 @@ scubaEntry.manual = {
   },
 };
 
-const poolEntry = createBlankDiveLogEntry({ localId: 'manual-entry-pool', now: 1781351000 });
-poolEntry.manual = {
-  ...poolEntry.manual,
-  site: { name: 'Pool Metadata Session' },
-  measuredValues: {
-    startedAt: 1781350200,
-    durationSeconds: 1800,
-    diveMode: 'pool',
-    poolLengthMeters: 25,
-    lapCount: 18,
-    trainingFocus: 'streamline practice',
-  },
-};
-
 const hybridWatchEntry: DiveLogEntry = {
   ...watchEntry,
   localId: 'watch-entry-hybrid',
@@ -278,6 +264,20 @@ describe('Logbook manual entry flow', () => {
 
     expect(root.findByProps({ testID: 'log-entry-editor-site-name' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-save' })).toBeTruthy();
+  });
+
+  test('manual editor exposes only scuba and freedive modes', async () => {
+    const renderer = await renderLogbook(new LocalDiveLogRepository([]));
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+
+    expect(root.findByProps({ testID: 'log-entry-editor-mode-scuba' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-editor-mode-freedive' })).toBeTruthy();
+    expect(root.findAllByProps({ testID: 'log-entry-editor-mode-snorkel' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-mode-pool' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-pool-length' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-lap-count' })).toHaveLength(0);
   });
 
   test('uses clearer logbook action labels', async () => {
@@ -846,39 +846,6 @@ describe('Logbook manual entry flow', () => {
     expect(savedEntry?.manual.measuredValues.gasLabel).toBeUndefined();
   });
 
-  test('shows a pool-specific form without depth fields and saves pool metrics', async () => {
-    const repository = new LocalDiveLogRepository([]);
-    const renderer = await renderLogbook(repository);
-    const root = renderer.root;
-
-    await press(root, 'logbook-create-action');
-    await press(root, 'log-entry-editor-mode-pool');
-
-    expect(root.findByProps({ testID: 'log-entry-editor-pool-length' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-editor-lap-count' })).toBeTruthy();
-    expect(() => root.findByProps({ testID: 'log-entry-editor-max-depth' })).toThrow();
-
-    await fillManualDraft(root, {
-      'log-entry-editor-site-name': 'Training Pool',
-      'log-entry-editor-duration': '35',
-    }, 'pool');
-    await changeText(root, 'log-entry-editor-pool-length', '25');
-    await changeText(root, 'log-entry-editor-lap-count', '20');
-    await changeText(root, 'log-entry-editor-training-focus', 'finning drills');
-    await press(root, 'log-entry-editor-save');
-
-    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Training Pool');
-
-    expect(savedEntry?.manual.measuredValues).toMatchObject({
-      diveMode: 'pool',
-      durationSeconds: 2100,
-      poolLengthMeters: 25,
-      lapCount: 20,
-      trainingFocus: 'finning drills',
-    });
-    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
-  });
-
   test('detail displays scuba-specific metadata', async () => {
     const repository = new LocalDiveLogRepository([scubaEntry]);
     const renderer = await renderLogbook(repository);
@@ -889,18 +856,5 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gas-label-EAN32' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gear-bcd-1,computer-1' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-water-condition-mild' })).toBeTruthy();
-  });
-
-  test('detail displays pool-specific metadata without a max-depth value', async () => {
-    const repository = new LocalDiveLogRepository([poolEntry]);
-    const renderer = await renderLogbook(repository);
-    const root = renderer.root;
-
-    await press(root, 'logbook-list-item-Pool Metadata Session');
-
-    expect(root.findByProps({ testID: 'log-entry-detail-max-depth-value---.--m' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-pool-length-25.00m' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-lap-count-18' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-training-focus-streamlinepractice' })).toBeTruthy();
   });
 });

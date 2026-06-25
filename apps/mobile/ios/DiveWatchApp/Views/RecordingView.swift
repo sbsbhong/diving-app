@@ -53,17 +53,25 @@ struct RecordingView: View {
                     maxDepth: DiveFormatters.depth(recorder.maxDepth)
                 )
 
+                if plan.diveMode == .scuba {
+                    ScubaRecordingStatus(
+                        ascentRate: recorder.latestAscentRateMetersPerMinute,
+                        ascentWarningActive: recorder.ascentWarningActive,
+                        safetyStopActive: recorder.safetyStopActive,
+                        safetyStopRemainingSeconds: recorder.safetyStopRemainingSeconds
+                    )
+                } else {
+                    FreediveRecordingStatus(
+                        elapsed: recorder.elapsedTime,
+                        maxDepth: recorder.maxDepth,
+                        trainingFocus: plan.quickNote
+                    )
+                }
+
                 HStack(spacing: 8) {
                     CompactMetric(title: String(localized: "Temp"), value: DiveFormatters.temperature(recorder.waterTemperatureCelsius))
                     CompactMetric(title: String(localized: "Mode"), value: plan.diveMode.label)
                 }
-
-                AssistantBlock(
-                    ascentRate: recorder.latestAscentRateMetersPerMinute,
-                    ascentWarningActive: recorder.ascentWarningActive,
-                    safetyStopActive: recorder.safetyStopActive,
-                    safetyStopRemainingSeconds: recorder.safetyStopRemainingSeconds
-                )
 
                 Button(role: .destructive) {
                     completedSession = recorder.stopSession()
@@ -151,7 +159,7 @@ private struct CompactMetric: View {
     }
 }
 
-private struct AssistantBlock: View {
+private struct ScubaRecordingStatus: View {
     let ascentRate: Double
     let ascentWarningActive: Bool
     let safetyStopActive: Bool
@@ -193,6 +201,47 @@ private struct AssistantBlock: View {
                     value: safetyStopActive ? DiveFormatters.duration(safetyStopRemainingSeconds) : String(localized: "Planning reminder"),
                     accent: safetyStopActive ? DiveWatchTheme.primary : nil
                 )
+
+                Text("Air scuba reminder, not a dive computer.")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.mutedText)
+                    .lineLimit(2)
+            }
+        }
+    }
+}
+
+private struct FreediveRecordingStatus: View {
+    let elapsed: TimeInterval
+    let maxDepth: Double
+    let trainingFocus: String
+
+    var body: some View {
+        InstrumentCard(accent: DiveWatchTheme.secondary) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
+                    StatusPill(title: String(localized: "Freedive session"))
+
+                    Spacer(minLength: 4)
+
+                    Text(DiveFormatters.duration(elapsed))
+                        .font(DiveWatchTheme.metricFont(size: 15, weight: .semibold))
+                        .foregroundStyle(DiveWatchTheme.secondary)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                }
+
+                SummaryRow(title: String(localized: "Session time"), value: DiveFormatters.duration(elapsed), accent: DiveWatchTheme.secondary)
+                SummaryRow(title: String(localized: "Max"), value: DiveFormatters.depth(maxDepth))
+
+                if !trainingFocus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    SummaryRow(title: String(localized: "Training"), value: trainingFocus)
+                }
+
+                Text("Freedive training reference only.")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(DiveWatchTheme.mutedText)
+                    .lineLimit(2)
             }
         }
     }

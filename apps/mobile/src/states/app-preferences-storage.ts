@@ -7,6 +7,7 @@ import type { ThemePreference } from './app-preferences';
 export type StoredAppPreferences = {
   themePreference: ThemePreference;
   language: SupportedLanguage;
+  watchSyncNotificationsEnabled: boolean;
 };
 
 export type AppPreferencesStorage = {
@@ -23,6 +24,7 @@ export type AppPreferencesStorageOptions = {
 const DEFAULT_APP_PREFERENCES: StoredAppPreferences = {
   themePreference: 'system',
   language: 'ko',
+  watchSyncNotificationsEnabled: false,
 };
 
 export const createAppPreferencesStorage = (options: AppPreferencesStorageOptions = {}): AppPreferencesStorage => {
@@ -48,6 +50,7 @@ function normalizePreferences(preferences: StoredAppPreferences): StoredAppPrefe
   return {
     themePreference: normalizeThemePreference(preferences.themePreference),
     language: resolveSupportedLanguage(preferences.language),
+    watchSyncNotificationsEnabled: preferences.watchSyncNotificationsEnabled === true,
   };
 }
 

@@ -329,7 +329,7 @@ function PlanRow(props: { plan: DivePlan; locale: string; onPress: () => void })
           <StatusPill label={t(`planning.status.${props.plan.status}`, { defaultValue: props.plan.status })} tone={statusTone(props.plan.status)} />
         </HStack>
         <Text className="pl-5 text-sm leading-5 text-muted-foreground">
-          {t(`diveModes.${props.plan.diveMode ?? 'unknown'}`, { defaultValue: props.plan.diveMode ?? t('diveModes.unknown') })} ·{' '}
+          {props.plan.diveMode ? t(`diveModes.${props.plan.diveMode}`) : t('diveModes.notSet')} ·{' '}
           {props.plan.entryStyle ? t(`entryStyles.${props.plan.entryStyle}`, { defaultValue: props.plan.entryStyle }) : t('logbook.none')}
         </Text>
       </VStack>

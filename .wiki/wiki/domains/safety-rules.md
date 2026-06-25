@@ -32,6 +32,12 @@
 
 현재 watch/mobile 화면은 ascent, safety stop, surface interval, no-fly concept을 assistant, 확인 상태, 수동 계획 알림으로만 언급한다. Planbook의 planned max depth, planned duration, water condition, visibility expectation 같은 값은 사용자의 의도와 준비 메모이지 실제 측정값이나 안전 계산 결과가 아니다. 이 경계는 UI copy와 documentation에서 명시적으로 유지해야 한다.
 
+Scuba UX는 air scuba reference assistant를 둘 수 있지만, 이는 세이프티 스톱과 상승 속도를 참고 상태로 보여주는 범위에 한정한다. `safe to ascend`, `no decompression required`, `required stop`처럼 certified dive computer나 감압 판단처럼 읽히는 문구는 쓰지 않는다. Freedive UX도 training reference 범위에 머물러야 한다.
+
+Home 위치 조건 UI는 도시명, local time, 기온, 해안 수온 같은 현재 맥락을 보여주는 mock/provider interface다. 이 정보로 dive suitability score, weather alert, tide/current warning, route planning, no-fly 판단, emergency recommendation을 제공하지 않는다.
+
+Watch sync notification은 local repository 저장 결과를 알려주는 기능이다. Supabase sync, cloud backup, certified dive computer data verification, 안전 검증 완료처럼 표현하지 않는다.
+
 Watch Home의 수심 3m 이상 자동 기록 시작은 사용자가 시작 버튼을 누르지 못했을 때 기록을 시작하기 위한 편의 trigger다. 이 trigger는 다이빙 시작 여부의 certified 판단, 안전 안내, 비상 판단, 감압 계산과 연결하지 않는다.
 
 실제 underwater Apple Watch sensor behavior는 공개 배포 전에 지원되는 hardware에서 수동 검증해야 한다. Simulator나 mock sensor behavior는 실제 underwater correctness의 증거가 아니다.

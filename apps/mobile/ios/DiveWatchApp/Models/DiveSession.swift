@@ -3,9 +3,6 @@ import Foundation
 enum DiveMode: String, Codable, CaseIterable, Identifiable {
     case scuba
     case freedive
-    case snorkel
-    case pool
-    case unknown
 
     var id: String { rawValue }
 
@@ -15,13 +12,15 @@ enum DiveMode: String, Codable, CaseIterable, Identifiable {
             return String(localized: "Scuba")
         case .freedive:
             return String(localized: "Freedive")
-        case .snorkel:
-            return String(localized: "Snorkel")
-        case .pool:
-            return String(localized: "Pool")
-        case .unknown:
-            return String(localized: "Unknown")
         }
+    }
+
+    static func defaultingRemovedDiveModeToScuba(_ rawValue: String?) -> DiveMode {
+        guard let rawValue, let diveMode = DiveMode(rawValue: rawValue) else {
+            return .scuba
+        }
+
+        return diveMode
     }
 }
 
@@ -190,7 +189,7 @@ struct DiveSession: Codable, Identifiable {
     init(
         id: UUID = UUID(),
         schemaVersion: Int = 1,
-        diveMode: DiveMode = .unknown,
+        diveMode: DiveMode = .scuba,
         gasLabel: String? = nil,
         siteId: String? = nil,
         siteName: String? = nil,
@@ -240,7 +239,7 @@ struct DiveSession: Codable, Identifiable {
 
         id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        diveMode = try container.decodeIfPresent(DiveMode.self, forKey: .diveMode) ?? .unknown
+        diveMode = DiveMode.defaultingRemovedDiveModeToScuba(try container.decodeIfPresent(String.self, forKey: .diveMode))
         gasLabel = try container.decodeIfPresent(String.self, forKey: .gasLabel)
         siteId = try container.decodeIfPresent(String.self, forKey: .siteId)
         siteName = try container.decodeIfPresent(String.self, forKey: .siteName)

@@ -343,7 +343,7 @@ function SessionListItem(props: {
           </VStack>
         </HStack>
         <Text className="pl-5 text-sm leading-5 text-muted-foreground">
-          {t(`diveModes.${session.diveMode ?? 'unknown'}`, { defaultValue: session.diveMode ?? t('diveModes.unknown') })} ·{' '}
+          {session.diveMode ? t(`diveModes.${session.diveMode}`) : t('diveModes.notSet')} ·{' '}
           <Text testID={`logbook-list-duration-${siteName}-${toTestIdValue(durationLabel)}`}>{durationLabel}</Text> · {tags}
         </Text>
       </VStack>

@@ -114,4 +114,20 @@ describe('PersistentDiveLogRepository', () => {
 
     expect((await repository.get('manual-1'))?.manual.site.name).toBe('Manual Reef');
   });
+
+  it('does not load pre-reset v1 logbook entries', async () => {
+    const storage = new InMemoryKeyValueStore();
+    await storage.setString(
+      'dive-app:logbook:v1',
+      JSON.stringify({
+        schemaVersion: 1,
+        updatedAt: 500,
+        value: [manualEntry({ localId: 'legacy-v1-entry' })],
+      }),
+    );
+
+    const repository = new PersistentDiveLogRepository({ storage, now: () => 500 });
+
+    expect(await repository.list()).toEqual([]);
+  });
 });

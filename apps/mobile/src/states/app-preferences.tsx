@@ -13,8 +13,10 @@ export type AppPreferences = {
   themePreference: ThemePreference;
   resolvedTheme: ResolvedTheme;
   language: SupportedLanguage;
+  watchSyncNotificationsEnabled: boolean;
   setThemePreference: (themePreference: ThemePreference) => void;
   setLanguage: (language: SupportedLanguage) => Promise<void>;
+  setWatchSyncNotificationsEnabled: (enabled: boolean) => Promise<void>;
 };
 
 type AppPreferencesProviderProps = {
@@ -43,6 +45,7 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
   const storage = props.storage ?? defaultAppPreferencesStorage;
   const [themePreference, setThemePreferenceState] = React.useState<ThemePreference>('system');
   const [language, setLanguageState] = React.useState<SupportedLanguage>(resolveInitialLanguage);
+  const [watchSyncNotificationsEnabled, setWatchSyncNotificationsEnabledState] = React.useState(false);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -55,6 +58,7 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
         }
 
         setThemePreferenceState(storedPreferences.themePreference);
+        setWatchSyncNotificationsEnabledState(storedPreferences.watchSyncNotificationsEnabled);
         await i18n.changeLanguage(storedPreferences.language);
 
         if (isMounted) {
@@ -83,9 +87,13 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
   const setThemePreference = React.useCallback(
     (nextThemePreference: ThemePreference) => {
       setThemePreferenceState(nextThemePreference);
-      void storage.save({ themePreference: nextThemePreference, language });
+      void storage.save({
+        themePreference: nextThemePreference,
+        language,
+        watchSyncNotificationsEnabled,
+      });
     },
-    [language, storage],
+    [language, storage, watchSyncNotificationsEnabled],
   );
 
   const setLanguage = React.useCallback(
@@ -95,12 +103,28 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
       try {
         await i18n.changeLanguage(supportedLanguage);
         setLanguageState(supportedLanguage);
-        await storage.save({ themePreference, language: supportedLanguage });
+        await storage.save({
+          themePreference,
+          language: supportedLanguage,
+          watchSyncNotificationsEnabled,
+        });
       } catch {
         // Keep the previous language selection when i18next rejects the change.
       }
     },
-    [storage, themePreference],
+    [storage, themePreference, watchSyncNotificationsEnabled],
+  );
+
+  const setWatchSyncNotificationsEnabled = React.useCallback(
+    async (enabled: boolean) => {
+      setWatchSyncNotificationsEnabledState(enabled);
+      await storage.save({
+        themePreference,
+        language,
+        watchSyncNotificationsEnabled: enabled,
+      });
+    },
+    [language, storage, themePreference],
   );
 
   const resolvedTheme = React.useMemo(
@@ -113,10 +137,20 @@ export function AppPreferencesProvider(props: AppPreferencesProviderProps): Reac
       themePreference,
       resolvedTheme,
       language,
+      watchSyncNotificationsEnabled,
       setThemePreference,
       setLanguage,
+      setWatchSyncNotificationsEnabled,
     }),
-    [language, resolvedTheme, setLanguage, setThemePreference, themePreference],
+    [
+      language,
+      resolvedTheme,
+      setLanguage,
+      setThemePreference,
+      setWatchSyncNotificationsEnabled,
+      themePreference,
+      watchSyncNotificationsEnabled,
+    ],
   );
 
   return <AppPreferencesContext.Provider value={value}>{props.children}</AppPreferencesContext.Provider>;

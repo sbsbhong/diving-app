@@ -326,6 +326,12 @@ describe('App navigation', () => {
     expect(root.findByProps({ testID: 'log-entry-detail-depth-profile' })).toBeTruthy();
   });
 
+  test('does not auto-dismiss automatic watch import toasts on a timer', () => {
+    expect(readRepoFile('apps/mobile/src/components/navigation/index.tsx')).not.toMatch(
+      /setTimeout\(\s*\(\)\s*=>\s*\{\s*setAutoImportToast\(undefined\)/,
+    );
+  });
+
   test('uses the persistent default logbook repository', async () => {
     const entries = await defaultDiveLogRepository.list();
 

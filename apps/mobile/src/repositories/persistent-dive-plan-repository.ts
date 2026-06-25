@@ -21,9 +21,9 @@ export class PersistentDivePlanRepository implements DivePlanRepository {
     this.now = options.now ?? getCurrentTimestampSeconds;
     this.store = new PersistentJsonStore<DivePlan[]>({
       key: mobileStorageKeys.planbook,
-      schemaVersion: 1,
+      schemaVersion: 2,
       defaultValue: () => initialPlans.map(cloneDivePlan),
-      migrate: envelope => migrateVersionedValue<DivePlan[]>(mobileStorageKeys.planbook, 1, envelope),
+      migrate: envelope => migrateVersionedValue<DivePlan[]>(mobileStorageKeys.planbook, 2, envelope),
       storage: options.storage ?? createAsyncStorageKeyValueStore(),
       now: this.now,
       onReadError: options.onReadError,

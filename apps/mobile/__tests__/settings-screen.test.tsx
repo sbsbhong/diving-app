@@ -18,6 +18,7 @@ const renderSettings = async (options?: {
   loadLinkedWatchInfo?: () => Promise<LinkedWatchInfo>;
   onBack?: () => void;
   onOpenRoute?: (route: Exclude<SettingsRoute, 'index'>) => void;
+  requestWatchSyncNotificationPermission?: () => Promise<boolean>;
   route?: SettingsRoute;
 }) => {
   let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
@@ -27,6 +28,7 @@ const renderSettings = async (options?: {
       <AppPreferencesProvider>
         <SettingsScreen
           loadLinkedWatchInfo={options?.loadLinkedWatchInfo ?? (() => Promise.resolve(linkedWatchInfo))}
+          requestWatchSyncNotificationPermission={options?.requestWatchSyncNotificationPermission}
           route={options?.route}
           onBack={options?.onBack}
           onOpenRoute={options?.onOpenRoute}
@@ -40,6 +42,12 @@ const renderSettings = async (options?: {
 
 describe('SettingsScreen', () => {
   beforeEach(async () => {
+    const asyncStorageMock = jest.requireMock('@react-native-async-storage/async-storage') as {
+      __resetAsyncStorageMock: () => void;
+    };
+
+    asyncStorageMock.__resetAsyncStorageMock();
+
     await ReactTestRenderer.act(async () => {
       await i18n.changeLanguage('ko');
     });
@@ -52,6 +60,7 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-screen-title' }).props.children).toBe('설정');
     expect(root.findByProps({ testID: 'settings-current-theme' }).props.children).toBe('시스템 기본값');
     expect(root.findByProps({ testID: 'settings-current-language' }).props.children).toBe('한국어');
+    expect(root.findByProps({ testID: 'settings-current-watch-sync-notifications' }).props.children).toBe('꺼짐');
   });
 
   test('shows linked watch in device management with icon and status', async () => {
@@ -75,10 +84,56 @@ describe('SettingsScreen', () => {
     await ReactTestRenderer.act(async () => {
       root.findByProps({ testID: 'settings-row-devices' }).props.onPress();
     });
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'settings-row-notifications' }).props.onPress();
+    });
 
     expect(onOpenRoute).toHaveBeenNthCalledWith(1, 'theme');
     expect(onOpenRoute).toHaveBeenNthCalledWith(2, 'devices');
+    expect(onOpenRoute).toHaveBeenNthCalledWith(3, 'notifications');
     expect(root.findAllByProps({ testID: 'settings-detail-title' })).toHaveLength(0);
+  });
+
+  test('opens notification detail and enables watch sync notifications after permission is granted', async () => {
+    const requestWatchSyncNotificationPermission = jest.fn().mockResolvedValue(true);
+    const renderer = await renderSettings({ requestWatchSyncNotificationPermission });
+    const root = renderer.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'settings-row-notifications' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'settings-detail-title' }).props.children).toBe('알림');
+    expect(root.findByProps({ testID: 'settings-option-watch-sync-notifications' }).props.accessibilityState.selected).toBe(false);
+
+    await ReactTestRenderer.act(async () => {
+      await root.findByProps({ testID: 'settings-option-watch-sync-notifications' }).props.onPress();
+    });
+
+    expect(requestWatchSyncNotificationPermission).toHaveBeenCalledTimes(1);
+    expect(root.findByProps({ testID: 'settings-option-watch-sync-notifications' }).props.accessibilityState.selected).toBe(true);
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'settings-back' }).props.onPress();
+    });
+
+    expect(root.findByProps({ testID: 'settings-current-watch-sync-notifications' }).props.children).toBe('켜짐');
+  });
+
+  test('keeps watch sync notifications disabled when permission is denied', async () => {
+    const requestWatchSyncNotificationPermission = jest.fn().mockResolvedValue(false);
+    const renderer = await renderSettings({
+      requestWatchSyncNotificationPermission,
+      route: 'notifications',
+    });
+    const root = renderer.root;
+
+    await ReactTestRenderer.act(async () => {
+      await root.findByProps({ testID: 'settings-option-watch-sync-notifications' }).props.onPress();
+    });
+
+    expect(requestWatchSyncNotificationPermission).toHaveBeenCalledTimes(1);
+    expect(root.findByProps({ testID: 'settings-option-watch-sync-notifications' }).props.accessibilityState.selected).toBe(false);
   });
 
   test('renders device management as a detail screen', async () => {
@@ -132,7 +187,7 @@ describe('SettingsScreen', () => {
       .findAllByType(HStack)
       .filter(node => typeof node.props.className === 'string' && node.props.className.includes('justify-between'));
 
-    expect(indexRows).toHaveLength(2);
+    expect(indexRows).toHaveLength(3);
     indexRows.forEach(row => {
       expect(row.props.className).toEqual(expect.stringContaining('flex-1'));
     });

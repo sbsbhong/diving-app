@@ -47,17 +47,17 @@
 
 Watch-captured field는 원본을 덮어쓰지 않는다. 사용자가 틀렸다고 느끼는 경우에는 원본 수정 대신 메모, 표시 제외, 또는 별도 보정 계층을 검토한다.
 
-모바일 수동 로그는 site, date/time, dive mode, duration, max depth, buddy, gear, tags, observed marine life, notes, rating 같은 field를 우선 다룬다. 입력 form은 dive mode별로 달라진다. Scuba, freedive, snorkel, pool은 서로 다른 보조 metadata를 저장하지만, 모두 과거 기록과 리뷰용 metadata이며 감압이나 안전 판단 계산으로 확장하지 않는다. 모바일 위치 정보는 제안값일 뿐이며 로그 작성의 필수 조건이 아니다.
+모바일 수동 로그는 site, date/time, dive mode, duration, max depth, buddy, gear, tags, observed marine life, notes, rating 같은 field를 우선 다룬다. 입력 form은 dive mode별로 달라진다. 현재 새 로그의 active dive mode는 scuba와 freedive 두 가지이며, 모두 과거 기록과 리뷰용 metadata이고 감압이나 안전 판단 계산으로 확장하지 않는다. 모바일 위치 정보는 제안값일 뿐이며 로그 작성의 필수 조건이 아니다.
 
 React Query는 durable store가 아니다. `useQuery`와 `useMutation`은 `DiveLogRepository`를 호출하고 cache invalidation, loading state, error state를 관리한다. 로컬 저장소와 future Supabase row가 실제 데이터 보관 책임을 갖는다.
 
-현재 앱 기본 저장소는 AsyncStorage 기반 persistent repository다. `DiveLogEntry[]`는 `dive-app:logbook:v1`, `DivePlan[]`는 `dive-app:planbook:v1`, 설정 선호는 `dive-app:preferences:v1` key에 versioned JSON envelope로 저장된다. React Query는 여전히 cache와 mutation orchestration만 맡고, 실제 보관 책임은 persistent repository와 future Supabase row가 갖는다.
+현재 앱 기본 저장소는 AsyncStorage 기반 persistent repository다. Two-mode reset 이후 `DiveLogEntry[]`는 `dive-app:logbook:v2`, `DivePlan[]`는 `dive-app:planbook:v2`, 설정 선호는 `dive-app:preferences:v1` key에 versioned JSON envelope로 저장된다. React Query는 여전히 cache와 mutation orchestration만 맡고, 실제 보관 책임은 persistent repository와 future Supabase row가 갖는다.
 
 Watch sync payload는 모바일에서 실행 시점 검증을 거친다. `watch-sync-message-validation.ts`는 원시 JSON string이나 `unknown` value를 `WatchSyncMessage` contract로 검증하고, 통과한 payload만 기존 repository import 흐름으로 넘긴다. 현재 앱 fixture도 `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`을 validator에 통과시켜 만든다.
 
 WatchConnectivity PoC에서는 iOS native `WatchConnectivityModule`이 전달한 raw JSON payload도 같은 validator와 repository import 경로를 사용한다. Native inbox는 pending payload를 `UserDefaults`에 보존하고, JS import 성공 뒤 acknowledge된 항목만 제거한다. 이 경로는 실제 paired-device 전송 성공이나 background retry를 보장하지 않는다.
 
-현재 storage schema는 version 1이다. 향후 로그 모델, 계획 모델, 설정값이 변경되면 migration function을 추가해야 한다. Supabase는 모델과 로컬 저장이 안정된 뒤 도입한다. Mobile code는 direct SQL을 사용하지 않고 repository 함수를 통해 접근한다. Public schema table을 만들 경우 RLS와 user ownership policy가 함께 필요하다.
+Logbook/Planbook은 현재 v2 key namespace를 사용하고, 설정 선호 store는 version 1 envelope를 사용한다. 향후 로그 모델, 계획 모델, 설정값이 변경되면 migration function을 추가해야 한다. Supabase는 모델과 로컬 저장이 안정된 뒤 도입한다. Mobile code는 direct SQL을 사용하지 않고 repository 함수를 통해 접근한다. Public schema table을 만들 경우 RLS와 user ownership policy가 함께 필요하다.
 
 ## 관련 문서
 

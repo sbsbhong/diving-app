@@ -49,3 +49,30 @@ jest.mock('@react-native-async-storage/async-storage', () => {
     },
   };
 });
+
+jest.mock('@notifee/react-native', () => {
+  const notifee = {
+    createChannel: jest.fn(async () => 'watch-sync-imports'),
+    displayNotification: jest.fn(async () => 'notification-id'),
+    getInitialNotification: jest.fn(async () => null),
+    onForegroundEvent: jest.fn(() => jest.fn()),
+    requestPermission: jest.fn(async () => ({ authorizationStatus: 1 })),
+  };
+
+  return {
+    __esModule: true,
+    default: notifee,
+    AndroidImportance: {
+      DEFAULT: 3,
+    },
+    AuthorizationStatus: {
+      NOT_DETERMINED: -1,
+      DENIED: 0,
+      AUTHORIZED: 1,
+      PROVISIONAL: 2,
+    },
+    EventType: {
+      PRESS: 1,
+    },
+  };
+});

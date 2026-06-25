@@ -22,6 +22,7 @@
     "@gluestack-ui/core": "^4.0.0-alpha.0",
     "@gluestack-ui/utils": "^4.0.0-alpha.0",
     "@legendapp/motion": "^2.5.3",
+    "@notifee/react-native": "^9.1.8",
     "@react-aria/dialog": "^3.6.1",
     "@react-aria/focus": "^3.22.1",
     "@react-aria/interactions": "^3.28.1",

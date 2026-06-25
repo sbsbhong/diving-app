@@ -1,5 +1,47 @@
 # Wiki 기록
 
+## 2026-06-26 - 구현 - pre-device priorities
+
+- 수정:
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/domains/dive-planning.md`
+  - `.wiki/wiki/domains/safety-rules.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - `packages/contracts/schemas/watch-session.schema.json`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/notifications/watch-sync-notification-service.ts`
+  - `apps/mobile/src/conditions/home-conditions.ts`
+  - `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+  - `docs/2026-06-26-pre-device-priorities/watchconnectivity-real-device-checklist.md`
+- 요약:
+  - `scuba`/`freedive` 두 모드 reset, Notifee 기반 local watch sync notification, Home 위치 조건 mock interface를 구현된 사실로 기록했다. WatchConnectivity paired-device/background delivery, 실제 underwater sensor behavior, Home real API/location policy는 아직 수동 검증 또는 후속 구현이 필요한 항목으로 남겼다.
+
+## 2026-06-26 - 설계 - pre-device readiness specs
+
+- 수정:
+  - `.wiki/wiki/overview.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/domains/dive-planning.md`
+  - `.wiki/wiki/domains/safety-rules.md`
+  - `.wiki/wiki/questions/open-questions.md`
+- 근거:
+  - 사용자 지시: 실기기 검증 전 Watch sync notification, two-mode dive UX, Home location conditions를 별도 spec으로 분리
+  - `docs/superpowers/specs/2026-06-26-watch-sync-notifications-design.md`
+  - `docs/superpowers/specs/2026-06-26-two-mode-dive-contract-and-ux-design.md`
+  - `docs/superpowers/specs/2026-06-26-home-location-conditions-design.md`
+- 요약:
+  - Notifee 기반 watch sync notification, `scuba`/`freedive` 두 모드 축소와 local storage reset, Home 위치/기온/해안 수온 provider-neutral interface를 승인된 다음 작업으로 기록했다. 오래된 in-memory 저장소 설명을 현재 AsyncStorage persistent repository 기준으로 바로잡았다.
+
 ## 2026-06-25 - 구조 - planned watch log completion
 
 - 수정:
@@ -257,7 +299,7 @@
   - `apps/mobile/src/screens/logbook/log-entry-detail.tsx`
   - `apps/mobile/src/types/dive-log-entry.ts`
 - 요약:
-  - 모바일 로그북이 기존 수동/watch 기반 항목을 수정할 수 있고, `diveMode`에 따라 scuba, freedive, snorkel, pool 전용 입력 section과 metadata를 다르게 저장하는 현재 구현 사실을 기록했다. Watch 기반 항목 수정은 raw watch capture와 `source: 'watch'`를 보존하고 manual overlay를 pending 상태로 둔다.
+  - 당시 모바일 로그북이 기존 수동/watch 기반 항목을 수정할 수 있고, mode별 입력 section과 metadata를 다르게 저장하던 구현 사실을 기록했다. 이후 active mode는 두 모드로 축소됐다. Watch 기반 항목 수정은 raw watch capture와 `source: 'watch'`를 보존하고 manual overlay를 pending 상태로 둔다.
 
 ## 2026-06-22 - 구조 - mobile local-first logbook Phase 2
 

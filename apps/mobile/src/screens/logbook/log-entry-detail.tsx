@@ -11,7 +11,6 @@ import {
   formatDate,
   formatDepth,
   formatDuration,
-  formatLength,
   formatRating,
   formatTemperature,
 } from '../../utils/dive-formatters';
@@ -184,27 +183,6 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
       { id: 'repetition-count', label: t('logbook.repetitionCount'), value: numberToText(measuredValues.repetitionCount) },
       { id: 'training-focus', label: t('logbook.trainingFocus'), value: measuredValues.trainingFocus },
       { id: 'perceived-exertion', label: t('logbook.perceivedExertion'), value: numberToText(measuredValues.perceivedExertion) },
-    ]);
-  }
-
-  if (measuredValues.diveMode === 'snorkel') {
-    return compactFacts([
-      entryStyleFact,
-      { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
-      { id: 'visibility-rating', label: t('logbook.visibilityRating'), value: numberToText(measuredValues.visibilityRating) },
-    ]);
-  }
-
-  if (measuredValues.diveMode === 'pool') {
-    return compactFacts([
-      entryStyleFact,
-      {
-        id: 'pool-length',
-        label: t('logbook.poolLengthMeters'),
-        value: measuredValues.poolLengthMeters === undefined ? undefined : formatLength(measuredValues.poolLengthMeters),
-      },
-      { id: 'lap-count', label: t('logbook.lapCount'), value: numberToText(measuredValues.lapCount) },
-      { id: 'training-focus', label: t('logbook.trainingFocus'), value: measuredValues.trainingFocus },
     ]);
   }
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pending Work"
+  short_description: "List remaining diving-app work"
+  default_prompt: "Use $pending-work to summarize the current remaining diving-app work."

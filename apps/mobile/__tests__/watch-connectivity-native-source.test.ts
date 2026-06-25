@@ -187,12 +187,31 @@ describe('WatchConnectivity native source contract', () => {
     expect(store).toContain('preferredDiveModeStorageKey');
     expect(store).toContain('func updatePreferredDiveMode(_ nextDiveMode: DiveMode)');
     expect(store).toContain('private static func loadPreferredDiveMode');
+    expect(store).toContain('DiveMode.defaultingRemovedDiveModeToScuba');
     expect(home).toContain('DiveAutoStartMonitor(sensorProvider: RealDepthSensorProvider())');
     expect(home).toContain('activationDepthMeters: Double = 3');
     expect(home).toContain('sample.depthMeters >= activationDepthMeters');
     expect(home).toContain('store.updatePreferredDiveMode(nextMode)');
     expect(home).toContain('.navigationDestination(item: $automaticDiveStartRequest)');
     expect(home).toContain('RecordingView(store: store, plan: request.plan)');
+  });
+
+  it('keeps active watch dive modes to scuba and freedive with mode-specific recording surfaces', () => {
+    const model = readRepoFile('apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift');
+    const recording = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/RecordingView.swift');
+    const diveModeBlock = model.slice(model.indexOf('enum DiveMode'), model.indexOf('enum WaterCondition'));
+
+    expect(diveModeBlock).toContain('enum DiveMode: String, Codable, CaseIterable, Identifiable');
+    expect(diveModeBlock).toContain('case scuba');
+    expect(diveModeBlock).toContain('case freedive');
+    expect(diveModeBlock).not.toContain('case snorkel');
+    expect(diveModeBlock).not.toContain('case pool');
+    expect(diveModeBlock).not.toContain('case unknown');
+    expect(model).toContain('defaultingRemovedDiveModeToScuba');
+    expect(recording).toContain('ScubaRecordingStatus');
+    expect(recording).toContain('FreediveRecordingStatus');
+    expect(recording).toContain('Air scuba reminder, not a dive computer.');
+    expect(recording).toContain('Freedive training reference only.');
   });
 
   it('uses app-store style stars for post-dive rating fields', () => {

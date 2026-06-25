@@ -23,7 +23,7 @@ Generated output은 다음과 같다.
 
 Session contract가 지원하는 값은 다음과 같다.
 
-- dive mode: `scuba`, `freedive`, `snorkel`, `pool`, `unknown`
+- dive mode: `scuba`, `freedive`
 - gas label, site id/name, buddy, gear, tag, note
 - source plan local id와 plan title
 - rating, perceived exertion, visibility rating, water condition
@@ -40,7 +40,7 @@ Mobile import 동작은 다음과 같다.
 - `src/utils/watch-sync-message-validation.ts`는 원시 JSON string이나 `unknown` value가 `WatchSyncMessage` contract를 만족하는지 실행 시점에 검증한다.
 - `src/utils/watch-fixtures.ts`는 `packages/contracts/fixtures/metadata-rich-watch-sync-message.json`을 import하고 validator를 통과한 message만 앱 fixture로 export한다.
 - `src/native/watch-connectivity.ts`는 iOS native `WatchConnectivityModule`에서 전달되는 raw JSON payload를 React Native event와 drain method로 받고, 무효 payload drop acknowledge와 import 완료 acknowledge를 구분한다. 또한 planned dive update와 linked watch status query를 노출한다.
-- `src/states/watch-connectivity-sync.tsx`는 pending native payload를 drain하고 새 event를 구독한 뒤, validator를 통과한 payload를 repository import로 넘긴다. 저장에 성공한 WatchConnectivity 수신 항목은 mobile top-level `syncStatus`를 `synced`로 보정하고, raw watch capture 안의 원본 `session.syncStatus`는 보존한다. 새 entry를 자동 import한 경우 root navigation으로 imported entry를 전달해 safe-area 안쪽 toast를 띄우고, 사용자는 toast의 로그 작성 action으로 해당 Logbook detail route를 열거나 닫을 수 있다.
+- `src/states/watch-connectivity-sync.tsx`는 pending native payload를 drain하고 새 event를 구독한 뒤, validator를 통과한 payload를 repository import로 넘긴다. 저장에 성공한 WatchConnectivity 수신 항목은 mobile top-level `syncStatus`를 `synced`로 보정하고, raw watch capture 안의 원본 `session.syncStatus`는 보존한다. 새 entry를 자동 import한 경우 root navigation으로 imported entry를 전달해 safe-area 안쪽 toast를 띄우고, 사용자는 toast의 로그 작성 action으로 해당 Logbook detail route를 열거나 닫을 수 있다. Settings opt-in이 켜져 있고 앱이 foreground가 아니면 Notifee local notification도 요청한다.
 - `watch-session-to-dive-log-entry.ts`는 `WatchSession`을 watch source `DiveLogEntry`로 변환한다.
 - 모바일 계획에서 시작한 watch session은 import 중 `sourcePlanLocalId`로 원본 `DivePlan`을 조회한다. 찾은 계획의 title, site, buddy, gear, tags, notes, dive mode, gas label, training metadata를 imported log의 manual overlay에 합치고, 원본 계획은 `status: completed`, `completedAt`, `convertedLogLocalId`를 저장한다. 계획 최대 수심과 계획 시간은 실제 측정값이 아니므로 watch capture의 실측 summary를 대체하지 않는다.
 - `DiveLogRepository.importWatchMessages`는 validator를 통과해 typed `WatchSyncMessage[]`가 된 payload를 import한다.
@@ -57,10 +57,19 @@ WatchConnectivity PoC 동작은 다음과 같다.
 - iOS app의 `WatchConnectivityInbox.updatePlannedDives`는 planned dive JSON을 `watchPlannedDives` application context로 갱신하고, watch가 reachable이면 같은 context를 `sendMessage`로도 보낸다. `WCSession` activation 전이나 일시 실패 시 최신 planned dive JSON을 보관했다가 activation 완료, reachability 변경, watch state 변경 뒤 다시 application context와 queued user info fallback으로 flush한다. Watch app의 `WatchSyncTransport`는 application context와 message 양쪽에서 planned dives를 decode해 `DiveSessionStore`로 넘기며, activation 완료 시 이미 저장된 `receivedApplicationContext`도 한 번 읽어 watch 앱 시작 시점을 놓치지 않게 한다.
 - 활성 iPhone/watch simulator 조합에서는 watch pending 세션의 mobile import, mobile durable inbox 비움, watch `syncStatus: "synced"` acknowledgement까지 확인됐다. 이 경로는 compile과 활성 simulator import behavior를 확인하기 위한 PoC이며, background delivery가 실제 기기에서 검증됐다는 뜻은 아니다.
 
+Watch sync notification 동작은 다음과 같다.
+
+- `src/notifications/watch-sync-notification-service.ts`는 Notifee permission request, local notification display, notification press data를 다룬다.
+- Settings의 watch sync notification opt-in은 사용자가 켤 때 permission을 요청하고, 거부되면 preference를 켜지 않는다.
+- Notification은 `WatchConnectivitySyncProvider`가 payload를 local repository에 저장하고 imported acknowledge까지 처리한 뒤 best-effort로 요청한다. Notification 실패는 repository import나 native inbox acknowledgement를 되돌리지 않는다.
+- Foreground 사용자는 local notification 대신 사용자가 닫기 전까지 유지되는 in-app toast를 본다.
+- Notification 문구는 local repository 저장 결과만 뜻하며 Supabase upload, cloud backup, certified dive computer data verification을 뜻하지 않는다.
+
 현재 비어 있는 부분은 다음과 같다.
 
 - WatchConnectivity entitlement, background delivery, 장시간 retry, 실기기 paired delivery 검증 없음. Companion embed 구조는 `apps/mobile/ios/DiveMobile.xcodeproj`에 포함되어 있고 활성 simulator 전송은 확인됐지만, 실제 설치/전송은 아직 지원 hardware에서 검증되지 않았다.
 - Durable native inbox, reachable live message, acknowledgement 기반 재처리 경로가 있고, Logbook import action은 pending native inbox를 수동 drain한다. Planned dive context는 mobile-to-watch로 전달되지만 사용자-facing retry status와 backoff policy는 아직 없다.
+- Watch sync notification code boundary와 Settings opt-in은 구현됐지만, background/killed 상태의 실제 OS delivery와 local notification 표시가 physical paired device에서 검증되지는 않았다.
 - Supabase upload 없음.
 - 인증된 사용자 연결 없음.
 - Generated Swift contract는 현재 watch target에 compile되지 않음.

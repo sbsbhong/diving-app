@@ -40,11 +40,9 @@ export type PlanEditorState = {
   perceivedDifficulty: string;
   trainingFocus: string;
   repetitionTarget: string;
-  poolLength: string;
-  lapTarget: string;
 };
 
-const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive', 'snorkel', 'pool'];
+const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive'];
 const entryStyles: DiveEntryStyle[] = ['shore', 'boat', 'pool'];
 
 export function PlanEditor(props: PlanEditorProps): React.JSX.Element {
@@ -254,8 +252,6 @@ function planToEditorState(plan: DivePlan): PlanEditorState {
     perceivedDifficulty: numberToText(plan.plannedValues.perceivedDifficulty),
     trainingFocus: plan.plannedValues.trainingFocus ?? '',
     repetitionTarget: numberToText(plan.plannedValues.repetitionTarget),
-    poolLength: numberToText(plan.plannedValues.poolLengthMeters),
-    lapTarget: numberToText(plan.plannedValues.lapTarget),
   };
 }
 
@@ -290,14 +286,6 @@ function getPlannedValues(draft: PlanEditorState, diveMode: WatchSession['diveMo
     plannedDurationMinutes: textToNonNegativeNumber(draft.plannedDuration),
     trainingFocus: emptyToUndefined(draft.trainingFocus),
   };
-
-  if (diveMode === 'pool') {
-    return {
-      ...commonValues,
-      poolLengthMeters: textToNonNegativeNumber(draft.poolLength),
-      lapTarget: textToNonNegativeInteger(draft.lapTarget),
-    };
-  }
 
   return {
     ...commonValues,

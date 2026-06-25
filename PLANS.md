@@ -62,6 +62,114 @@ Every phase must have a verification gate. If the same gate fails three times wi
 - Remaining risks:
 - Manual setup required:
 
+## Epic: Pre-device two-mode, notifications, and validation readiness
+
+### Phase 0 Investigation
+
+- Goal: Confirm current contract, mobile Logbook/Planning/Home/Settings, WatchConnectivity, watchOS source, and documentation state before implementation.
+- Files to inspect:
+  - `docs/superpowers/specs/2026-06-26-two-mode-dive-contract-and-ux-design.md`
+  - `docs/superpowers/specs/2026-06-26-watch-sync-notifications-design.md`
+  - `docs/superpowers/specs/2026-06-26-home-location-conditions-design.md`
+  - `packages/contracts/schemas/watch-session.schema.json`
+  - `apps/mobile/src/utils/watch-sync-message-validation.ts`
+  - `apps/mobile/src/screens/logbook/**`
+  - `apps/mobile/src/screens/planning/**`
+  - `apps/mobile/src/screens/home/screen.tsx`
+  - `apps/mobile/src/screens/settings/screen.tsx`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/ios/DiveWatchApp/**`
+  - `.wiki/wiki/architecture/*.md`
+  - `.wiki/wiki/domains/*.md`
+  - `.wiki/wiki/questions/open-questions.md`
+- Implementation notes:
+  - Preserve the safety boundary: no decompression, no certified dive-computer claims, no emergency instruction.
+  - Treat paired iPhone/Watch hardware checks as manual gates only; do not claim physical-device validation from simulator or local builds.
+  - Keep local sync notification wording tied to mobile local repository storage, not Supabase/cloud backup.
+- Verification gate: plan file exists at `docs/superpowers/plans/2026-06-26-pre-device-priorities.md` and contains task-level gates.
+- Risk: Existing wiki/spec changes are uncommitted in the starting workspace; preserve them and do not revert unrelated edits.
+
+### Phase 1 Contract
+
+- Goal: Reduce watch sync `diveMode` to `scuba | freedive` and reset local Logbook/Planbook storage namespace for the PoC reset.
+- Files to create or update:
+  - `packages/contracts/schemas/watch-session.schema.json`
+  - `packages/contracts/generated/typescript/index.ts`
+  - `packages/contracts/generated/swift/WatchContracts.swift`
+  - `packages/contracts/fixtures/*.json`
+  - `apps/mobile/src/utils/watch-sync-message-validation.ts`
+  - `apps/mobile/src/storage/storage-keys.ts`
+  - `apps/mobile/__tests__/watch-sync-message-validation.test.ts`
+  - `apps/mobile/__tests__/persistent-dive-log-repository.test.ts`
+  - `apps/mobile/__tests__/persistent-dive-plan-repository.test.ts`
+- Implementation notes:
+  - Write failing tests before changing validator/storage behavior.
+  - Regenerate generated contract output through `yarn check:quick`; do not hand-edit generated files except as generation output.
+- Verification gate: `yarn check:quick` and focused mobile tests for validator/storage.
+- Risk: Removed mode values in old local v1 data are intentionally not migrated; this must remain documented as a reset.
+
+### Phase 2 Core Implementation
+
+- Goal: Align mobile and watch UX around two dive modes, add watch sync notification preference/service, and add Home conditions mock interface.
+- Files to create or update:
+  - `apps/mobile/src/screens/logbook/**`
+  - `apps/mobile/src/screens/planning/**`
+  - `apps/mobile/src/screens/home/screen.tsx`
+  - `apps/mobile/src/screens/settings/screen.tsx`
+  - `apps/mobile/src/states/app-preferences.tsx`
+  - `apps/mobile/src/states/app-preferences-storage.ts`
+  - `apps/mobile/src/states/watch-connectivity-sync.tsx`
+  - `apps/mobile/src/notifications/watch-sync-notification-service.ts`
+  - `apps/mobile/src/conditions/home-conditions.ts`
+  - `apps/mobile/src/i18n/resources.ts`
+  - `apps/mobile/ios/DiveWatchApp/Models/DiveSession.swift`
+  - `apps/mobile/ios/DiveWatchApp/Views/HomeView.swift`
+  - `apps/mobile/ios/DiveWatchApp/Views/RecordingView.swift`
+  - `apps/mobile/package.json`
+  - `yarn.lock`
+- Implementation notes:
+  - Use TDD for behavior changes where Jest can cover them.
+  - Add Notifee as a mobile workspace dependency with Yarn 1.
+  - Keep Notifee usage behind an adapter/no-op fallback so tests and unsupported environments do not block local import.
+  - Use semantic UI tokens and existing Gluestack/NativeWind primitives.
+- Verification gate: focused Jest suites, `yarn mobile:typecheck`, `yarn workspace @repo/mobile watch:ui:check`, and `yarn watch:build`.
+- Risk: Adding a native notification dependency may require CocoaPods install for full iOS app builds; report if local pods are not refreshed.
+
+### Phase 3 Integration
+
+- Goal: Document manual real-device validation steps and update durable wiki facts after implementation.
+- Files to create or update:
+  - `docs/2026-06-26-pre-device-priorities/watchconnectivity-real-device-checklist.md`
+  - `docs/2026-06-26-pre-device-priorities/index.html`
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/architecture/mobile.md`
+  - `.wiki/wiki/architecture/watch-app.md`
+  - `.wiki/wiki/architecture/sync-flow.md`
+  - `.wiki/wiki/domains/dive-log.md`
+  - `.wiki/wiki/domains/dive-planning.md`
+  - `.wiki/wiki/domains/safety-rules.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `.wiki/wiki/log.md`
+- Implementation notes:
+  - Separate completed implementation facts from remaining physical-device validation.
+  - The HTML handoff should summarize commits, gates, manual checks, and residual risks.
+- Verification gate: documentation/source search for stale removed-mode and unsafe sync wording, then `yarn codex:check`.
+- Risk: Wiki must not overstate background delivery or real Apple Watch underwater sensor behavior.
+
+### Phase 4 Cleanup/Review
+
+- Goal: Verify all relevant gates, create logical commits, and preserve the branch for user review.
+- Files to review:
+  - `git status --short`
+  - `git diff --stat`
+  - `docs/superpowers/plans/2026-06-26-pre-device-priorities.md`
+  - touched source, tests, generated contracts, docs, wiki, `package.json`, `yarn.lock`
+- Implementation notes:
+  - Commit by requirement unit: two-mode contract/UX, notification service, Home conditions, handoff/wiki/checklist, pre-existing pending-work skill/specs if appropriate.
+  - Do not merge, push, or discard without explicit user choice after verification.
+- Verification gate: `yarn check:quick`, `yarn workspace @repo/mobile test --runInBand`, `yarn mobile:typecheck`, `yarn workspace @repo/mobile watch:ui:check`, `yarn watch:build`, `yarn codex:check`, `git diff --check`.
+- Risk: Physical paired-device verification remains a manual gate outside this environment.
+
 ## Epic: Pre-device-test mobile and watch readiness
 
 ### Phase 0 Investigation

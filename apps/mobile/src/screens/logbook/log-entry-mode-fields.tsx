@@ -22,8 +22,6 @@ export type LogEntryEditorState = {
   perceivedExertion: string;
   repetitionCount: string;
   trainingFocus: string;
-  poolLength: string;
-  lapCount: string;
   buddies: string;
   tags: string;
   observedMarineLife: string;
@@ -126,68 +124,6 @@ export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.El
                 onChangeText={value => props.setValue('perceivedExertion', value)}
                 keyboardType="numeric"
                 placeholder="3"
-              />
-            </Input>
-          </EditorField>
-        </HStack>
-        <EditorField label={t('logbook.trainingFocus')}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="log-entry-editor-training-focus"
-              value={props.draft.trainingFocus}
-              onChangeText={value => props.setValue('trainingFocus', value)}
-              placeholder={t('logbook.trainingFocusPlaceholder')}
-            />
-          </Input>
-        </EditorField>
-      </ModeSection>
-    );
-  }
-
-  if (props.diveMode === 'snorkel') {
-    return (
-      <ModeSection title={t('logbook.snorkelSection')}>
-        <WaterConditionPicker value={props.draft.waterCondition} onChange={value => props.setValue('waterCondition', value)} />
-        <HStack space="md">
-          <EditorField className="flex-1" label={t('logbook.visibilityRating')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="log-entry-editor-visibility-rating"
-                value={props.draft.visibilityRating}
-                onChangeText={value => props.setValue('visibilityRating', value)}
-                keyboardType="numeric"
-                placeholder="4"
-              />
-            </Input>
-          </EditorField>
-        </HStack>
-      </ModeSection>
-    );
-  }
-
-  if (props.diveMode === 'pool') {
-    return (
-      <ModeSection title={t('logbook.poolSection')}>
-        <HStack space="md">
-          <EditorField className="flex-1" label={t('logbook.poolLengthMeters')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="log-entry-editor-pool-length"
-                value={props.draft.poolLength}
-                onChangeText={value => props.setValue('poolLength', value)}
-                keyboardType="numeric"
-                placeholder="25"
-              />
-            </Input>
-          </EditorField>
-          <EditorField className="flex-1" label={t('logbook.lapCount')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="log-entry-editor-lap-count"
-                value={props.draft.lapCount}
-                onChangeText={value => props.setValue('lapCount', value)}
-                keyboardType="numeric"
-                placeholder="20"
               />
             </Input>
           </EditorField>

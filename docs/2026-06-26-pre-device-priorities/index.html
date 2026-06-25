@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Diving App Pre-Device Priorities Handoff</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f6f8fb;
+        color: #18212f;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 40px 24px 56px;
+      }
+      h1,
+      h2 {
+        line-height: 1.15;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 34px;
+      }
+      h2 {
+        margin-top: 32px;
+        font-size: 22px;
+      }
+      p {
+        margin: 0 0 14px;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      li {
+        margin: 8px 0;
+      }
+      code {
+        background: #e8edf5;
+        border-radius: 4px;
+        padding: 2px 5px;
+      }
+      .summary {
+        background: #ffffff;
+        border: 1px solid #d9e0ea;
+        border-radius: 8px;
+        padding: 18px 20px;
+      }
+      .status {
+        display: inline-block;
+        margin-bottom: 18px;
+        border-radius: 999px;
+        background: #dceeff;
+        color: #064f8f;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="status">Pre-device handoff</span>
+      <h1>Diving App Pre-Device Priorities</h1>
+      <p class="summary">
+        Implemented the pre-device priorities in code and docs: two-mode scuba/freedive contract and UX reset,
+        local watch sync notifications, Home conditions mock interface, and a manual real-device validation
+        checklist. Physical Apple Watch/iPhone validation has not been run.
+      </p>
+
+      <h2>Implemented</h2>
+      <ul>
+        <li>Watch sync contract and runtime validator now allow only <code>scuba</code> and <code>freedive</code>.</li>
+        <li>Mobile Logbook and Planbook storage keys moved to v2 reset namespaces.</li>
+        <li>Mobile Logbook/Planbook editors expose only scuba and freedive mode flows.</li>
+        <li>Watch app mode model and recording surfaces are aligned to scuba/freedive.</li>
+        <li>Notifee-backed local notification service is behind a Settings opt-in and fires only after local import success.</li>
+        <li>Foreground watch import toast stays visible until the user opens or closes it.</li>
+        <li>Home has a provider-neutral conditions interface with a static mock provider.</li>
+      </ul>
+
+      <h2>Manual Gate</h2>
+      <p>
+        Run <a href="./watchconnectivity-real-device-checklist.md">the real-device checklist</a> before claiming
+        paired-device foreground, background, killed-app, notification, or acknowledgement behavior.
+      </p>
+
+      <h2>Still Unverified</h2>
+      <ul>
+        <li>WatchConnectivity entitlement and paired physical-device delivery.</li>
+        <li>iOS background or killed-app local repository import and notification display.</li>
+        <li>Long-running retry and user-facing backoff behavior.</li>
+        <li>Actual Apple Watch underwater sensor behavior on supported hardware.</li>
+        <li>Future Home conditions API provider, location permission policy, Supabase/auth/cloud sync.</li>
+      </ul>
+    </main>
+  </body>
+</html>

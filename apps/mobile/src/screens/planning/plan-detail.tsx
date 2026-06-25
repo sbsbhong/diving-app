@@ -6,7 +6,7 @@ import { HStack } from '../../components/ui/hstack';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { DivePlan } from '../../types/dive-plan';
-import { formatDate, formatDepth, formatLength } from '../../utils/dive-formatters';
+import { formatDate, formatDepth } from '../../utils/dive-formatters';
 
 type PlanDetailProps = {
   plan: DivePlan;
@@ -36,7 +36,10 @@ export function PlanDetail(props: PlanDetailProps): React.JSX.Element {
           {formatDate(props.plan.plannedAt, locale, t('formatters.unknownDate', { defaultValue: 'Unknown date' }))}
         </Text>
         <HStack space="md">
-          <PlanFact label={t('logbook.diveMode', { defaultValue: 'Dive mode' })} value={props.plan.diveMode ?? t('diveModes.unknown')} />
+          <PlanFact
+            label={t('logbook.diveMode', { defaultValue: 'Dive mode' })}
+            value={props.plan.diveMode ? t(`diveModes.${props.plan.diveMode}`) : t('diveModes.notSet')}
+          />
           <PlanFact
             label={t('planning.entryStyle', { defaultValue: 'Entry style' })}
             value={props.plan.entryStyle ? t(`entryStyles.${props.plan.entryStyle}`, { defaultValue: props.plan.entryStyle }) : t('logbook.none')}
@@ -100,17 +103,11 @@ function ModeFacts(props: { plan: DivePlan }): React.JSX.Element {
   const { t } = useTranslation();
   const values = props.plan.plannedValues;
   const facts = [
-    props.plan.diveMode !== 'pool'
-      ? { id: 'planned-max', label: t('planning.plannedMax', { defaultValue: 'Planned max' }), value: formatDepth(values.plannedMaxDepthMeters) }
-      : undefined,
+    { id: 'planned-max', label: t('planning.plannedMax', { defaultValue: 'Planned max' }), value: formatDepth(values.plannedMaxDepthMeters) },
     values.plannedDurationMinutes !== undefined
       ? { id: 'duration', label: t('planning.plannedDurationMinutes', { defaultValue: 'Planned duration (min)' }), value: `${values.plannedDurationMinutes} min` }
       : undefined,
     values.gasLabel ? { id: 'gas', label: t('planning.gasLabel', { defaultValue: 'Gas label' }), value: values.gasLabel } : undefined,
-    values.poolLengthMeters !== undefined
-      ? { id: 'pool-length', label: t('planning.poolLengthMeters', { defaultValue: 'Pool length (m)' }), value: formatLength(values.poolLengthMeters) }
-      : undefined,
-    values.lapTarget !== undefined ? { id: 'lap-target', label: t('planning.lapTarget', { defaultValue: 'Lap target' }), value: `${values.lapTarget}` } : undefined,
     values.trainingFocus ? { id: 'training-focus', label: t('planning.trainingFocus', { defaultValue: 'Training focus' }), value: values.trainingFocus } : undefined,
   ].filter((fact): fact is { id: string; label: string; value: string } => Boolean(fact));
 

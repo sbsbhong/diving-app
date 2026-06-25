@@ -194,10 +194,7 @@ public extension WatchSession {
 
 public enum DiveMode: String, Codable {
     case freedive = "freedive"
-    case pool = "pool"
     case scuba = "scuba"
-    case snorkel = "snorkel"
-    case unknown = "unknown"
 }
 
 // MARK: - WatchLocation

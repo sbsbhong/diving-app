@@ -22,6 +22,12 @@ import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { DiveLogbookSection } from '../../types/dive-session';
 import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { DivePlan } from '../../types/dive-plan';
+import {
+  getInitialWatchSyncNotificationOpen,
+  notifyWatchSyncImport,
+  subscribeToWatchSyncNotificationOpens,
+} from '../../notifications/watch-sync-notification-service';
+import { useAppPreferences } from '../../states/app-preferences';
 import { useDiveLogbook } from '../../states/use-dive-logbook';
 import { useDivePlans } from '../../states/use-dive-plans';
 import { WatchConnectivitySyncProvider } from '../../states/watch-connectivity-sync';
@@ -97,26 +103,13 @@ export default function RootNavigation(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
   const planning = useDivePlans();
+  const { watchSyncNotificationsEnabled } = useAppPreferences();
 
   const refreshVisibleStackRoute = React.useCallback(() => {
     const rootState = rootStackNavigationRef.getRootState();
     const routeName = rootState?.routes[rootState.index]?.name;
     setVisibleStackRoute((routeName ?? 'tabs') as keyof RootStackParamList);
   }, []);
-
-  React.useEffect(() => {
-    if (!autoImportToast) {
-      return undefined;
-    }
-
-    const timeoutId = setTimeout(() => {
-      setAutoImportToast(undefined);
-    }, 6000);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [autoImportToast]);
 
   const returnToTabs = React.useCallback(() => {
     if (!rootStackNavigationRef.isReady()) {
@@ -238,6 +231,29 @@ export default function RootNavigation(): React.JSX.Element {
     [openStackScreen],
   );
 
+  React.useEffect(() => {
+    let isMounted = true;
+
+    getInitialWatchSyncNotificationOpen()
+      .then(open => {
+        if (isMounted && open) {
+          openStackScreen('logbookDetail', { localId: open.entryLocalId }, 'logbook');
+        }
+      })
+      .catch(error => {
+        console.warn('Failed to open initial watch sync notification', error);
+      });
+
+    const subscription = subscribeToWatchSyncNotificationOpens(open => {
+      openStackScreen('logbookDetail', { localId: open.entryLocalId }, 'logbook');
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.remove();
+    };
+  }, [openStackScreen]);
+
   const openImportedLogToast = React.useCallback(() => {
     if (!autoImportToast) {
       return;
@@ -255,6 +271,14 @@ export default function RootNavigation(): React.JSX.Element {
       });
     },
     [t],
+  );
+
+  const showImportedEntryNotification = React.useCallback(
+    (entry: DiveLogEntry) =>
+      notifyWatchSyncImport(entry, {
+        enabled: watchSyncNotificationsEnabled,
+      }),
+    [watchSyncNotificationsEnabled],
   );
 
   const openPlanDetail = React.useCallback(
@@ -291,7 +315,9 @@ export default function RootNavigation(): React.JSX.Element {
   );
 
   return (
-    <WatchConnectivitySyncProvider onImportedEntry={showImportedEntryToast}>
+    <WatchConnectivitySyncProvider
+      notifyImportedEntry={showImportedEntryNotification}
+      onImportedEntry={showImportedEntryToast}>
       <VStack
         className="flex-1 bg-background"
         style={{
@@ -425,12 +451,11 @@ export default function RootNavigation(): React.JSX.Element {
             ]}>
             <VStack space="sm">
               <Text className="text-sm font-semibold text-card-foreground">
-                {t('watchSync.autoImportedTitle', { defaultValue: 'Watch log synced' })}
+                {t('watchSync.autoImportedTitle', { defaultValue: 'Watch log saved' })}
               </Text>
               <Text className="text-sm leading-5 text-muted-foreground">
                 {t('watchSync.autoImportedBody', {
-                  defaultValue: 'Open {{siteName}}.',
-                  siteName: autoImportToast.siteName,
+                  defaultValue: 'A watch dive log was saved on this device.',
                 })}
               </Text>
               <HStack space="sm" className="pt-1">

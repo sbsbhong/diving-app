@@ -27,6 +27,7 @@ type WatchConnectivitySyncProviderProps = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
+  notifyImportedEntry?: (entry: DiveLogEntry) => Promise<void>;
   onImportedEntry?: (entry: DiveLogEntry) => void;
   subscribeToPayloads?: (handler: (payload: WatchConnectivityPayload) => void) => WatchConnectivitySubscription;
 };
@@ -39,6 +40,7 @@ type WatchConnectivityImportOptions = {
   drainPendingPayloads?: () => Promise<WatchConnectivityPayload[]>;
   acknowledgePayloads?: (payloadIds: readonly string[]) => Promise<void>;
   acknowledgeImportedPayloads?: (payloadIds: readonly string[]) => Promise<void>;
+  notifyImportedEntry?: (entry: DiveLogEntry) => Promise<void>;
 };
 
 export type WatchConnectivityImportSummary = {
@@ -56,6 +58,7 @@ type WatchConnectivityPayloadImportOptions = {
   queryScope?: string;
   acknowledgePayloads: WatchConnectivityAcknowledgement;
   acknowledgeImportedPayloads: WatchConnectivityAcknowledgement;
+  notifyImportedEntry?: (entry: DiveLogEntry) => Promise<void>;
 };
 
 export function WatchConnectivitySyncProvider({
@@ -65,6 +68,7 @@ export function WatchConnectivitySyncProvider({
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
   acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
   acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
+  notifyImportedEntry,
   onImportedEntry,
   subscribeToPayloads = subscribeToWatchConnectivityPayloads,
 }: WatchConnectivitySyncProviderProps): React.JSX.Element {
@@ -79,13 +83,22 @@ export function WatchConnectivitySyncProvider({
         queryClient,
         acknowledgePayloads,
         acknowledgeImportedPayloads,
+        notifyImportedEntry,
       });
 
       if (importedEntry) {
         onImportedEntry?.(importedEntry);
       }
     },
-    [acknowledgeImportedPayloads, acknowledgePayloads, onImportedEntry, planRepository, queryClient, repository],
+    [
+      acknowledgeImportedPayloads,
+      acknowledgePayloads,
+      notifyImportedEntry,
+      onImportedEntry,
+      planRepository,
+      queryClient,
+      repository,
+    ],
   );
 
   const importPayloadSafely = React.useCallback(
@@ -135,6 +148,7 @@ export async function importPendingWatchConnectivityPayloads({
   drainPendingPayloads = drainPendingWatchConnectivityPayloads,
   acknowledgePayloads = acknowledgeWatchConnectivityPayloads,
   acknowledgeImportedPayloads = acknowledgeImportedWatchConnectivityPayloads,
+  notifyImportedEntry,
 }: WatchConnectivityImportOptions): Promise<WatchConnectivityImportSummary> {
   const payloads = await drainPendingPayloads();
   let importedCount = 0;
@@ -148,6 +162,7 @@ export async function importPendingWatchConnectivityPayloads({
       queryScope,
       acknowledgePayloads,
       acknowledgeImportedPayloads,
+      notifyImportedEntry,
     });
 
     if (importedEntry) {
@@ -169,6 +184,7 @@ async function importWatchConnectivityPayload({
   queryScope,
   acknowledgePayloads,
   acknowledgeImportedPayloads,
+  notifyImportedEntry,
 }: WatchConnectivityPayloadImportOptions): Promise<DiveLogEntry | undefined> {
   const result = parseWatchSyncMessageJson(payload.payloadJson);
 
@@ -191,7 +207,23 @@ async function importWatchConnectivityPayload({
   queryClient.setQueryData(diveLogbookQueryKeys.list(repository, queryScope), syncedEntries);
   queryClient.invalidateQueries({ queryKey: diveLogbookQueryKeys.all(repository, queryScope) });
   await acknowledgePayload(payload, acknowledgeImportedPayloads);
+  await notifyImportedEntrySafely(importedEntry, notifyImportedEntry);
   return importedEntry;
+}
+
+async function notifyImportedEntrySafely(
+  importedEntry: DiveLogEntry | undefined,
+  notifyImportedEntry: ((entry: DiveLogEntry) => Promise<void>) | undefined,
+): Promise<void> {
+  if (!importedEntry || !notifyImportedEntry) {
+    return;
+  }
+
+  try {
+    await notifyImportedEntry(importedEntry);
+  } catch (error) {
+    console.warn('Failed to show watch sync notification', error);
+  }
 }
 
 async function acknowledgePayload(

@@ -22,7 +22,7 @@
 - Surface interval: 이전 logged dive 이후 elapsed time. Planning context로만 사용한다.
 - No-fly reminder: manual planning reminder. Medical 또는 certified aviation/diving recommendation이 아니다.
 - Sync status: 세션이 `pending`, `synced`, `failed` 중 어디에 있는지 나타내는 local state.
-- Dive mode: `scuba`, `freedive`, `snorkel`, `pool`, `unknown` 같은 session category.
+- Dive mode: 현재 active session category는 `scuba`와 `freedive`다.
 - Water condition: `calm`, `mild`, `choppy`, `surge`, `current`, `unknown` 같은 subjective post-dive condition.
 
 ## 관련 문서

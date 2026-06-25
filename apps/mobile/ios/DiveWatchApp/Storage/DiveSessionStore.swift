@@ -68,10 +68,6 @@ final class DiveSessionStore: ObservableObject {
     }
 
     func updatePreferredDiveMode(_ nextDiveMode: DiveMode) {
-        guard nextDiveMode != .unknown else {
-            return
-        }
-
         preferredDiveMode = nextDiveMode
         userDefaults.set(nextDiveMode.rawValue, forKey: Self.preferredDiveModeStorageKey)
     }
@@ -167,13 +163,7 @@ final class DiveSessionStore: ObservableObject {
     }
 
     private static func loadPreferredDiveMode(from userDefaults: UserDefaults) -> DiveMode {
-        guard let rawValue = userDefaults.string(forKey: preferredDiveModeStorageKey),
-              let diveMode = DiveMode(rawValue: rawValue),
-              diveMode != .unknown else {
-            return .scuba
-        }
-
-        return diveMode
+        DiveMode.defaultingRemovedDiveModeToScuba(userDefaults.string(forKey: preferredDiveModeStorageKey))
     }
 }
 

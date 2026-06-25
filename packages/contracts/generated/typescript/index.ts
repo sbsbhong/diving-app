@@ -7,7 +7,7 @@ export interface WatchSyncMessage {
 export interface WatchSession {
   localSessionId: string;
   schemaVersion?: number;
-  diveMode?: "scuba" | "freedive" | "snorkel" | "pool" | "unknown";
+  diveMode?: "scuba" | "freedive";
   gasLabel?: string;
   siteId?: string;
   siteName?: string;

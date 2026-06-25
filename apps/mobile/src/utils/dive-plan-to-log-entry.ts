@@ -32,7 +32,6 @@ export const divePlanToDiveLogEntryDraft = (
         diveMode: plan.diveMode,
         gasLabel: plan.plannedValues.gasLabel,
         trainingFocus: plan.plannedValues.trainingFocus,
-        poolLengthMeters: plan.diveMode === 'pool' ? plan.plannedValues.poolLengthMeters : undefined,
       },
     },
   };

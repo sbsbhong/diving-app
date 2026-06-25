@@ -29,9 +29,9 @@ export class PersistentDiveLogRepository implements DiveLogRepository {
     this.now = options.now ?? getCurrentTimestampSeconds;
     this.store = new PersistentJsonStore<DiveLogEntry[]>({
       key: mobileStorageKeys.logbook,
-      schemaVersion: 1,
+      schemaVersion: 2,
       defaultValue: () => initialEntries.map(cloneDiveLogEntry),
-      migrate: envelope => migrateVersionedValue<DiveLogEntry[]>(mobileStorageKeys.logbook, 1, envelope),
+      migrate: envelope => migrateVersionedValue<DiveLogEntry[]>(mobileStorageKeys.logbook, 2, envelope),
       storage: options.storage ?? createAsyncStorageKeyValueStore(),
       now: this.now,
       onReadError: options.onReadError,

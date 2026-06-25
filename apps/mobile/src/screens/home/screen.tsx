@@ -10,10 +10,15 @@ import { ScrollView } from '../../components/ui/scroll-view';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import { SessionProfile } from '../../components/ui/session-profile';
+import {
+  mockHomeConditionsProvider,
+  type HomeConditionsProvider,
+  type HomeConditionsSnapshot,
+} from '../../conditions/home-conditions';
 import { supportedLanguages, type SupportedLanguage } from '../../i18n';
 import { useAppPreferences } from '../../states/app-preferences';
 import type { MobileDiveSession } from '../../types/dive-session';
-import { formatDate, formatDepth, formatDuration } from '../../utils/dive-formatters';
+import { formatDate, formatDepth, formatDuration, formatTemperature } from '../../utils/dive-formatters';
 import { getSessionDurationSeconds, getSessionMaxDepthMeters } from '../../utils/session-summary';
 
 type HomeScreenProps = {
@@ -23,6 +28,7 @@ type HomeScreenProps = {
   onRefresh: () => void | Promise<void>;
   isRefreshing?: boolean;
   reselectToken?: number;
+  conditionsProvider?: HomeConditionsProvider;
 };
 
 export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
@@ -32,8 +38,36 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
   const recentDurationSeconds = recentSession ? getSessionDurationSeconds(recentSession) : undefined;
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const syncStatus = recentSession?.syncStatus ?? 'pending';
+  const conditionsProvider = props.conditionsProvider ?? mockHomeConditionsProvider;
+  const [conditionsSnapshot, setConditionsSnapshot] = React.useState<HomeConditionsSnapshot>({ status: 'loading' });
   const scrollViewRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
   const previousReselectToken = React.useRef(props.reselectToken ?? 0);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    setConditionsSnapshot({ status: 'loading' });
+    conditionsProvider
+      .getCurrentConditions({ locale })
+      .then(snapshot => {
+        if (isMounted) {
+          setConditionsSnapshot(snapshot);
+        }
+      })
+      .catch(error => {
+        if (isMounted) {
+          setConditionsSnapshot({
+            status: 'error',
+            source: 'mock',
+            errorMessage: error instanceof Error ? error.message : undefined,
+          });
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [conditionsProvider, locale]);
 
   React.useEffect(() => {
     const reselectToken = props.reselectToken ?? 0;
@@ -67,6 +101,8 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
             <Text className="text-sm font-semibold text-muted-foreground">{t('home.logsImported')}</Text>
           </HStack>
         </VStack>
+
+        <HomeConditionsBand snapshot={conditionsSnapshot} locale={locale} />
 
         <DiveSummaryCard>
           <DiveSummaryCard.Header
@@ -174,13 +210,101 @@ function getLanguageLabel(language: SupportedLanguage, t: ReturnType<typeof useT
   return language === 'ko' ? t('settings.language.korean') : t('settings.language.english');
 }
 
-function MetricTile(props: { label: string; value: string }): React.JSX.Element {
+function HomeConditionsBand(props: { snapshot: HomeConditionsSnapshot; locale: string }): React.JSX.Element {
+  const { t } = useTranslation();
+  const snapshot = props.snapshot;
+
+  if (snapshot.status === 'loading' || snapshot.status === 'idle') {
+    return (
+      <DiveSummaryCard>
+        <Text testID="home-conditions-loading" className="text-base font-semibold text-card-foreground">
+          {t('home.conditions.loading')}
+        </Text>
+      </DiveSummaryCard>
+    );
+  }
+
+  if (snapshot.status !== 'ready') {
+    return (
+      <DiveSummaryCard>
+        <VStack space="xs">
+          <Text testID="home-conditions-unavailable" className="text-base font-semibold text-card-foreground">
+            {t('home.conditions.unavailable')}
+          </Text>
+          <Text className="text-sm leading-5 text-muted-foreground">
+            {t('home.conditions.unavailableBody')}
+          </Text>
+        </VStack>
+      </DiveSummaryCard>
+    );
+  }
+
+  const showsWaterTemperature = snapshot.isCoastal !== false && snapshot.waterTemperatureCelsius !== undefined;
+
+  return (
+    <DiveSummaryCard>
+      <VStack space="md">
+        <HStack className="items-start justify-between" space="md">
+          <VStack space="xs" className="flex-1">
+            <Text testID="home-conditions-city" className="text-base font-semibold text-card-foreground">
+              {snapshot.cityName ?? t('home.conditions.currentLocation')}
+            </Text>
+            <Text testID="home-conditions-local-time" size="sm" className="text-muted-foreground">
+              {formatConditionsTime(snapshot.localTime, props.locale)}
+            </Text>
+          </VStack>
+          <StatusPill label={t(`home.conditions.sources.${snapshot.source ?? 'mock'}`)} tone="secondary" />
+        </HStack>
+
+        <HStack space="md">
+          <MetricTile
+            label={t('home.conditions.airTemperature')}
+            value={formatTemperature(snapshot.airTemperatureCelsius)}
+            valueTestID="home-conditions-air-temperature"
+          />
+          {showsWaterTemperature ? (
+            <MetricTile
+              label={t('home.conditions.waterTemperature')}
+              value={formatTemperature(snapshot.waterTemperatureCelsius)}
+              valueTestID="home-conditions-water-temperature"
+            />
+          ) : (
+            <VStack className="flex-1 justify-center rounded-2xl bg-muted px-4 py-4">
+              <Text testID="home-conditions-water-unavailable" className="text-sm leading-5 text-muted-foreground">
+                {t('home.conditions.waterUnavailable')}
+              </Text>
+            </VStack>
+          )}
+        </HStack>
+
+        <Text testID="home-conditions-updated" size="xs" className="text-muted-foreground">
+          {t('home.conditions.updatedAt', {
+            time: formatConditionsTime(snapshot.updatedAt, props.locale),
+          })}
+        </Text>
+      </VStack>
+    </DiveSummaryCard>
+  );
+}
+
+function MetricTile(props: { label: string; value: string; valueTestID?: string }): React.JSX.Element {
   return (
     <VStack space="xs" className="flex-1 rounded-2xl bg-muted px-4 py-4">
       <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-      <Text className="text-2xl font-semibold text-card-foreground">{props.value}</Text>
+      <Text testID={props.valueTestID} className="text-2xl font-semibold text-card-foreground">{props.value}</Text>
     </VStack>
   );
+}
+
+function formatConditionsTime(seconds: number | undefined, locale: string): string {
+  if (!seconds) {
+    return '--:--';
+  }
+
+  return new Intl.DateTimeFormat(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(seconds * 1000));
 }
 
 function formatOptionalDuration(seconds: number | undefined): string {

@@ -81,4 +81,20 @@ describe('PersistentDivePlanRepository', () => {
     expect((await repository.get('plan-1'))?.site.name).toBe('Original Reef');
     expect((await repository.get('plan-1'))?.checklistItems[0].completed).toBe(false);
   });
+
+  it('does not load pre-reset v1 planbook entries', async () => {
+    const storage = new InMemoryKeyValueStore();
+    await storage.setString(
+      'dive-app:planbook:v1',
+      JSON.stringify({
+        schemaVersion: 1,
+        updatedAt: 350,
+        value: [plan({ localId: 'legacy-v1-plan', site: { name: 'Legacy Reef' } })],
+      }),
+    );
+
+    const repository = new PersistentDivePlanRepository({ storage, now: () => 350 });
+
+    expect(await repository.list()).toEqual([]);
+  });
 });

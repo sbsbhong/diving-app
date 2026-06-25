@@ -41,8 +41,6 @@ export function enrichWatchLogWithSourcePlan(entry: DiveLogEntry, plan: DivePlan
         perceivedExertion: plan.plannedValues.perceivedDifficulty ?? entry.manual.measuredValues.perceivedExertion,
         trainingFocus: firstNonBlankText(plan.plannedValues.trainingFocus, entry.manual.measuredValues.trainingFocus),
         repetitionCount: plan.plannedValues.repetitionTarget ?? entry.manual.measuredValues.repetitionCount,
-        poolLengthMeters: plan.plannedValues.poolLengthMeters ?? entry.manual.measuredValues.poolLengthMeters,
-        lapCount: plan.plannedValues.lapTarget ?? entry.manual.measuredValues.lapCount,
       },
     },
   };

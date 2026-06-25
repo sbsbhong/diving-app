@@ -109,6 +109,41 @@ describe('WatchConnectivitySyncProvider', () => {
     expect(acknowledgeImportedPayloads).toHaveBeenCalledWith(['durable-payload-1']);
   });
 
+  it('notifies only after a valid watch payload is saved locally', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
+    const queryClient = createQueryClient();
+    const notifyImportedEntry = jest.fn().mockResolvedValue(undefined);
+
+    await ReactTestRenderer.act(async () => {
+      renderers.push(ReactTestRenderer.create(
+        <QueryClientProvider client={queryClient}>
+          <WatchConnectivitySyncProvider
+            repository={repository}
+            drainPendingPayloads={async () => [
+              {
+                payloadId: 'notify-payload-1',
+                payloadJson: JSON.stringify(metadataRichFixture),
+                localSessionId: 'fixture-rich-session',
+                receivedAt: 1781355000,
+              },
+            ]}
+            acknowledgePayloads={jest.fn()}
+            notifyImportedEntry={notifyImportedEntry}
+            subscribeToPayloads={() => ({ remove: jest.fn() })}
+          />
+        </QueryClientProvider>,
+      ));
+      await flushPromises();
+    });
+
+    const [entry] = await repository.list();
+    expect(entry.syncStatus).toBe('synced');
+    expect(notifyImportedEntry).toHaveBeenCalledWith(expect.objectContaining({
+      localId: entry.localId,
+      syncStatus: 'synced',
+    }));
+  });
+
   it('imports valid event payloads delivered after subscription', async () => {
     const repository = new LocalDiveLogRepository([], { now: () => 1781355000 });
     const queryClient = createQueryClient();
@@ -347,6 +382,7 @@ describe('WatchConnectivitySyncProvider', () => {
     ]);
     const queryClient = createQueryClient();
     const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
+    const notifyImportedEntry = jest.fn().mockResolvedValue(undefined);
     const planSaveSpy = jest.spyOn(planRepository, 'save');
     jest.spyOn(repository, 'save').mockRejectedValue(new Error('final log save failed'));
     jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -381,6 +417,7 @@ describe('WatchConnectivitySyncProvider', () => {
             ]}
             acknowledgePayloads={jest.fn()}
             acknowledgeImportedPayloads={acknowledgeImportedPayloads}
+            notifyImportedEntry={notifyImportedEntry}
             subscribeToPayloads={() => ({ remove: jest.fn() })}
           />
         </QueryClientProvider>,
@@ -390,6 +427,7 @@ describe('WatchConnectivitySyncProvider', () => {
 
     expect(planSaveSpy).not.toHaveBeenCalled();
     expect(acknowledgeImportedPayloads).not.toHaveBeenCalled();
+    expect(notifyImportedEntry).not.toHaveBeenCalled();
     const retryPlan = await planRepository.get('log-save-fails');
     expect(retryPlan?.status).toBe('planned');
     expect(retryPlan?.convertedLogLocalId).toBeUndefined();
@@ -401,6 +439,7 @@ describe('WatchConnectivitySyncProvider', () => {
     const queryClient = createQueryClient();
     const acknowledgePayloads = jest.fn().mockResolvedValue(undefined);
     const acknowledgeImportedPayloads = jest.fn().mockResolvedValue(undefined);
+    const notifyImportedEntry = jest.fn().mockResolvedValue(undefined);
     jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     await ReactTestRenderer.act(async () => {
@@ -418,6 +457,7 @@ describe('WatchConnectivitySyncProvider', () => {
             ]}
             acknowledgePayloads={acknowledgePayloads}
             acknowledgeImportedPayloads={acknowledgeImportedPayloads}
+            notifyImportedEntry={notifyImportedEntry}
             subscribeToPayloads={() => ({ remove: jest.fn() })}
           />
         </QueryClientProvider>,
@@ -433,6 +473,7 @@ describe('WatchConnectivitySyncProvider', () => {
     );
     expect(acknowledgePayloads).toHaveBeenCalledWith(['invalid-payload-1']);
     expect(acknowledgeImportedPayloads).not.toHaveBeenCalled();
+    expect(notifyImportedEntry).not.toHaveBeenCalled();
   });
 
   it('does not acknowledge durable payloads when repository import fails', async () => {

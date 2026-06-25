@@ -67,7 +67,20 @@
       }
     },
     "%lld/5" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/5"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/5"
+          }
+        }
+      }
     },
     "Active dive" : {
       "localizations" : {
@@ -100,6 +113,9 @@
           }
         }
       }
+    },
+    "Air scuba reminder, not a dive computer." : {
+
     },
     "Ascent" : {
       "localizations" : {
@@ -358,10 +374,36 @@
       }
     },
     "Dive Plan" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dive Plan"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 계획"
+          }
+        }
+      }
     },
     "DIVE PLAN" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIVE PLAN"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 계획"
+          }
+        }
+      }
     },
     "Dive Summary" : {
       "localizations" : {
@@ -380,7 +422,20 @@
       }
     },
     "DIVE TYPE" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DIVE TYPE"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다이브 유형"
+          }
+        }
+      }
     },
     "Dive Watch" : {
       "localizations" : {
@@ -494,6 +549,12 @@
           }
         }
       }
+    },
+    "Freedive session" : {
+
+    },
+    "Freedive training reference only." : {
+
     },
     "Gas" : {
       "localizations" : {
@@ -768,10 +829,36 @@
       }
     },
     "PLAN DETAILS" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PLAN DETAILS"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획 상세"
+          }
+        }
+      }
     },
     "Planned dive" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned dive"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획 다이브"
+          }
+        }
+      }
     },
     "PLANNED MAX" : {
       "localizations" : {
@@ -806,6 +893,7 @@
       }
     },
     "Pool" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1111,6 +1199,22 @@
       }
     },
     "Selected Plan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected Plan"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택된 계획"
+          }
+        }
+      }
+    },
+    "Session time" : {
 
     },
     "Sessions" : {
@@ -1130,7 +1234,20 @@
       }
     },
     "Set the plan, then start." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the plan, then start."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획을 설정한 뒤 시작하세요."
+          }
+        }
+      }
     },
     "Site" : {
       "localizations" : {
@@ -1149,6 +1266,7 @@
       }
     },
     "Snorkel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1308,8 +1426,24 @@
         }
       }
     },
-    "UNEXECUTED PLANS" : {
+    "Training" : {
 
+    },
+    "UNEXECUTED PLANS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UNEXECUTED PLANS"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "미실행 계획"
+          }
+        }
+      }
     },
     "Unknown" : {
       "localizations" : {
@@ -1328,7 +1462,20 @@
       }
     },
     "Use Plan" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Plan"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계획 사용"
+          }
+        }
+      }
     },
     "Vis" : {
       "extractionState" : "stale",

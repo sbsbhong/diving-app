@@ -7,13 +7,15 @@ import { CircleIcon, Icon, WatchIcon } from '../../components/ui/icon';
 import { Pressable } from '../../components/ui/pressable';
 import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '../../components/ui/radio';
 import { ScrollView } from '../../components/ui/scroll-view';
+import { Switch } from '../../components/ui/switch';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { SupportedLanguage } from '../../i18n';
 import { getLinkedWatchInfo, type LinkedWatchInfo } from '../../native/watch-connectivity';
+import { requestWatchSyncNotificationPermission as requestDefaultWatchSyncNotificationPermission } from '../../notifications/watch-sync-notification-service';
 import { useAppPreferences, type ThemePreference } from '../../states/app-preferences';
 
-export type SettingsRoute = 'index' | 'theme' | 'language' | 'devices';
+export type SettingsRoute = 'index' | 'theme' | 'language' | 'notifications' | 'devices';
 
 type SettingRowProps = {
   label: string;
@@ -37,6 +39,7 @@ type SettingsScreenProps = {
   route?: SettingsRoute;
   onBack?: () => void;
   onOpenRoute?: (route: Exclude<SettingsRoute, 'index'>) => void;
+  requestWatchSyncNotificationPermission?: () => Promise<boolean>;
 };
 
 const themeOptions: ThemePreference[] = ['system', 'light', 'dark'];
@@ -46,16 +49,27 @@ export default function SettingsScreen({
   loadLinkedWatchInfo = getLinkedWatchInfo,
   onBack,
   onOpenRoute,
+  requestWatchSyncNotificationPermission = requestDefaultWatchSyncNotificationPermission,
   route: controlledRoute,
 }: SettingsScreenProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { language, setLanguage, setThemePreference, themePreference } = useAppPreferences();
+  const {
+    language,
+    setLanguage,
+    setThemePreference,
+    setWatchSyncNotificationsEnabled,
+    themePreference,
+    watchSyncNotificationsEnabled,
+  } = useAppPreferences();
   const [localRoute, setLocalRoute] = React.useState<SettingsRoute>('index');
   const [linkedWatchInfo, setLinkedWatchInfo] = React.useState<LinkedWatchInfo | undefined>();
   const route = controlledRoute ?? localRoute;
 
   const themeLabel = getThemeLabel(themePreference, t);
   const languageLabel = getLanguageLabel(language, t);
+  const watchSyncNotificationLabel = watchSyncNotificationsEnabled
+    ? t('settings.notifications.on')
+    : t('settings.notifications.off');
   const openRoute = React.useCallback(
     (nextRoute: Exclude<SettingsRoute, 'index'>) => {
       if (onOpenRoute) {
@@ -164,6 +178,38 @@ export default function SettingsScreen({
     );
   }
 
+  if (route === 'notifications') {
+    return (
+      <SettingsScaffold>
+        <DetailHeader title={t('settings.notifications.title')} onBack={closeRoute} />
+        <Text size="sm" className="leading-5 text-muted-foreground">
+          {t('settings.notifications.subtitle')}
+        </Text>
+
+        <VStack className="overflow-hidden rounded-2xl bg-card">
+          <ToggleRow
+            rowTestID="settings-option-watch-sync-notifications"
+            label={t('settings.notifications.watchSyncTitle')}
+            description={t('settings.notifications.watchSyncDescription')}
+            selected={watchSyncNotificationsEnabled}
+            onPress={async () => {
+              if (watchSyncNotificationsEnabled) {
+                await setWatchSyncNotificationsEnabled(false);
+                return;
+              }
+
+              const permitted = await requestWatchSyncNotificationPermission();
+
+              if (permitted) {
+                await setWatchSyncNotificationsEnabled(true);
+              }
+            }}
+          />
+        </VStack>
+      </SettingsScaffold>
+    );
+  }
+
   return (
     <SettingsScaffold>
       <VStack space="xs">
@@ -194,6 +240,21 @@ export default function SettingsScreen({
             value={languageLabel}
             valueTestID="settings-current-language"
             onPress={() => openRoute('language')}
+          />
+        </VStack>
+      </VStack>
+
+      <VStack space="sm">
+        <Text size="xs" className="font-semibold uppercase text-muted-foreground">
+          {t('settings.notifications.title')}
+        </Text>
+        <VStack className="overflow-hidden rounded-2xl bg-card">
+          <SettingRow
+            rowTestID="settings-row-notifications"
+            label={t('settings.notifications.watchSyncTitle')}
+            value={watchSyncNotificationLabel}
+            valueTestID="settings-current-watch-sync-notifications"
+            onPress={() => openRoute('notifications')}
           />
         </VStack>
       </VStack>
@@ -307,6 +368,41 @@ function OptionRow(props: OptionRowProps): React.JSX.Element {
         </RadioIndicator>
       </HStack>
     </Radio>
+  );
+}
+
+function ToggleRow(props: {
+  description: string;
+  label: string;
+  rowTestID: string;
+  selected: boolean;
+  onPress: () => void | Promise<void>;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      testID={props.rowTestID}
+      accessibilityState={{ selected: props.selected }}
+      onPress={props.onPress}
+      className={props.selected ? 'bg-primary/10 px-4 py-4' : 'bg-card px-4 py-4'}
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+      <HStack space="md" className="min-h-11 flex-1 items-center justify-between">
+        <VStack space="xs" className="flex-1 pr-3">
+          <Text className={props.selected ? 'font-semibold text-primary' : 'font-semibold text-card-foreground'}>
+            {props.label}
+          </Text>
+          <Text size="sm" className="leading-5 text-muted-foreground">
+            {props.description}
+          </Text>
+        </VStack>
+        <Switch
+          testID={`${props.rowTestID}-switch`}
+          value={props.selected}
+          onValueChange={() => {
+            void props.onPress();
+          }}
+        />
+      </HStack>
+    </Pressable>
   );
 }
 

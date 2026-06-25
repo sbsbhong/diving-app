@@ -14,7 +14,7 @@ export type WatchSyncMessagesParseResult =
   | { ok: false; error: WatchSyncMessageValidationError };
 
 const messageTypes = ['sessionCreated', 'sessionUpdated', 'sessionEnded'] as const;
-const diveModes = ['scuba', 'freedive', 'snorkel', 'pool', 'unknown'] as const;
+const diveModes = ['scuba', 'freedive'] as const;
 const syncStatuses = ['pending', 'synced', 'failed'] as const;
 const waterConditions = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'] as const;
 

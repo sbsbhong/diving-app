@@ -16,15 +16,15 @@
 
 현재 코드에는 Supabase layer, 인증 흐름, cloud backup, paired-device WatchConnectivity delivery 검증이 구현되어 있지 않다.
 
-모바일 로그북은 `DiveLogEntry`와 `DiveLogRepository` 경계를 사용한다. 현재는 로그인 없이 수동 로그를 만들고 watch fixture를 같은 목록에서 볼 수 있지만, 저장소 구현은 아직 앱 실행 중 메모리 저장소이며 앱 재시작 뒤 유지되는 production 저장소는 없다.
+모바일 로그북은 `DiveLogEntry`와 `DiveLogRepository` 경계를 사용한다. 현재는 로그인 없이 수동 로그를 만들고 watch fixture와 WatchConnectivity 수신 로그를 같은 목록에서 볼 수 있으며, 앱 기본 저장소는 AsyncStorage 기반 persistent repository다.
 
 ## 상세
 
 watch 앱의 기록 흐름은 현재 `MockDepthSensorProvider`를 사용한다. `RealDepthSensorProvider`는 향후 `CMWaterSubmersionManager` 연동을 위한 자리 표시자이며, 공개 배포 전 지원되는 Apple Watch hardware에서 수동 검증이 필요하다.
 
-모바일 앱은 generated TypeScript watch contract type과 로컬 watch fixture message를 import한다. 가져온 watch session은 raw `WatchSession`을 보존한 `DiveLogEntry`가 되며, 현재는 `LocalDiveLogRepository`의 in-memory map에만 보관된다. Device database나 server 저장은 아직 없다.
+모바일 앱은 generated TypeScript watch contract type과 로컬 watch fixture message를 import한다. 가져온 watch session은 raw `WatchSession`을 보존한 `DiveLogEntry`가 되며, 기본 구현에서는 AsyncStorage 기반 `PersistentDiveLogRepository`에 저장된다. Server 저장은 아직 없다.
 
-모바일 설정은 현재 테마 선호와 언어 선호를 실행 중인 React state에만 보관한다. 테마는 `system`, `light`, `dark` 선호를 지원하고, 언어는 `ko`, `en`을 지원한다. Production persistence는 아직 없다.
+모바일 설정은 테마 선호와 언어 선호를 AsyncStorage 기반 versioned JSON store에 저장한다. 테마는 `system`, `light`, `dark` 선호를 지원하고, 언어는 `ko`, `en`을 지원한다.
 
 동기화 계약은 의도적으로 `userId`를 포함하지 않는다. 사용자 연결은 이후 모바일 또는 server 쪽에 인증이 생긴 뒤 붙이는 책임이다.
 

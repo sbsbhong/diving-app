@@ -41,10 +41,7 @@
       "type": "string",
       "enum": [
         "scuba",
-        "freedive",
-        "snorkel",
-        "pool",
-        "unknown"
+        "freedive"
       ]
     },
     "gasLabel": {

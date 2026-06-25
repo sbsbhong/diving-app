@@ -421,7 +421,9 @@ private struct PreDivePlanFields: View {
                 .labelsHidden()
                 .frame(height: 58)
 
-                DiveTextField(title: String(localized: "Gas label"), text: $plan.gasLabel)
+                if plan.diveMode == .scuba {
+                    DiveTextField(title: String(localized: "Gas label"), text: $plan.gasLabel)
+                }
                 DiveTextField(title: String(localized: "Site"), text: $plan.siteName)
                 DiveTextField(title: String(localized: "Buddy"), text: $plan.buddyName)
                 DiveTextField(title: String(localized: "Quick note"), text: $plan.quickNote)
