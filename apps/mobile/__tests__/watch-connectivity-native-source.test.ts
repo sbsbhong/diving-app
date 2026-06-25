@@ -143,11 +143,15 @@ describe('WatchConnectivity native source contract', () => {
     expect(store).toContain('markPlanExecuted');
     expect(transport).toContain('didReceiveApplicationContext applicationContext');
     expect(transport).toContain('onPlannedDivesChanged');
-    expect(home).toContain('PlannedDivesSection');
-    expect(home).toContain('Start Planned Dive');
-    expect(home).toContain('RecordingView(store: store, plan: plannedDive.preDivePlan)');
+    expect(home).toContain('DivePlanSetupView(store: store, plan: $plan)');
+    expect(home).toContain('PlannedDivesSection(');
+    expect(home).toContain('selectedPlanLocalId: plan.sourcePlanLocalId');
+    expect(home).toContain('plan = plannedDive.preDivePlan');
+    expect(home).toContain('Use Plan');
+    expect(home).toContain('RecordingView(store: store, plan: plan)');
     expect(home).toContain('ForEach(plannedDives)');
     expect(home).not.toContain('plannedDives.prefix(3)');
+    expect(home).not.toContain('RecordingView(store: store, plan: plannedDive.preDivePlan)');
     expect(recorder).toContain('sourcePlanLocalId');
   });
 
@@ -163,16 +167,16 @@ describe('WatchConnectivity native source contract', () => {
     expect(transport).toContain('handleReceivedApplicationContext(from: connectivitySession)');
   });
 
-  it('keeps the watch pre-dive plan editor collapsed until the user expands it', () => {
+  it('keeps the watch home focused on dive type and moves plan fields behind Dive Plan', () => {
     const home = readRepoFile('apps/mobile/ios/DiveWatchApp/Views/HomeView.swift');
 
-    expect(home).toContain('@State private var isPreDivePlanExpanded = false');
-    expect(home).toContain('PreDivePlanForm(');
-    expect(home).toContain('isExpanded: $isPreDivePlanExpanded');
-    expect(home).toContain('@Binding var isExpanded: Bool');
-    expect(home).toContain('withAnimation(.easeInOut(duration: 0.18))');
-    expect(home).toContain('if isExpanded');
-    expect(home).toContain('Image(systemName: isExpanded ? "chevron.up" : "chevron.down")');
+    expect(home).toContain('DiveModeSelector(');
+    expect(home).toContain('Label("Dive Plan", systemImage: "list.clipboard")');
+    expect(home).toContain('private struct DivePlanSetupView');
+    expect(home).toContain('private struct PreDivePlanFields');
+    expect(home).not.toContain('@State private var isPreDivePlanExpanded');
+    expect(home).not.toContain('PreDivePlanForm(');
+    expect(home).not.toContain('isExpanded');
   });
 
   it('persists the preferred watch dive mode and auto-starts recording below the depth threshold', () => {
