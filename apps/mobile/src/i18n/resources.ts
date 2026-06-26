@@ -122,6 +122,7 @@ const resources = {
       watchSync: {
         autoImportedTitle: '워치 기록 저장됨',
         autoImportedBody: '워치 다이브 기록이 이 기기에 저장되었습니다.',
+        notificationChannelName: '워치 기록 저장',
         openImportedLog: '로그 작성',
         dismiss: '닫기',
       },
@@ -463,6 +464,7 @@ const resources = {
       watchSync: {
         autoImportedTitle: 'Watch log saved',
         autoImportedBody: 'A watch dive log was saved on this device.',
+        notificationChannelName: 'Watch sync imports',
         openImportedLog: 'Write log',
         dismiss: 'Close',
       },

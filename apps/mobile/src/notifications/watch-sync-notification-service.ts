@@ -7,6 +7,7 @@ import notifee, {
   type Notification,
 } from '@notifee/react-native';
 import { AppState, Platform, type AppStateStatus } from 'react-native';
+import i18n, { resolveSupportedLanguage, type SupportedLanguage } from '../i18n';
 import type { DiveLogEntry } from '../types/dive-log-entry';
 
 export type WatchSyncNotificationOpen = {
@@ -16,12 +17,18 @@ export type WatchSyncNotificationOpen = {
 type WatchSyncImportNotificationOptions = {
   enabled: boolean;
   appState?: AppStateStatus;
+  language?: SupportedLanguage;
 };
 
 export const WATCH_SYNC_IMPORT_NOTIFICATION_CHANNEL_ID = 'watch-sync-imports';
 const WATCH_SYNC_IMPORT_NOTIFICATION_SOURCE = 'watch-sync-import';
-const WATCH_SYNC_IMPORT_TITLE = 'Watch log saved';
-const WATCH_SYNC_IMPORT_BODY = 'A watch dive log was saved on this device.';
+
+type WatchSyncImportNotificationContent = {
+  body: string;
+  channelName: string;
+  locale: SupportedLanguage;
+  title: string;
+};
 
 export async function requestWatchSyncNotificationPermission(): Promise<boolean> {
   try {
@@ -46,10 +53,11 @@ export async function notifyWatchSyncImport(
   }
 
   try {
+    const content = resolveWatchSyncImportNotificationContent(options.language);
     const android =
       Platform.OS === 'android'
         ? {
-            channelId: await ensureWatchSyncImportChannel(),
+            channelId: await ensureWatchSyncImportChannel(content.channelName),
             pressAction: {
               id: 'default',
             },
@@ -57,10 +65,11 @@ export async function notifyWatchSyncImport(
         : undefined;
 
     await notifee.displayNotification({
-      title: WATCH_SYNC_IMPORT_TITLE,
-      body: WATCH_SYNC_IMPORT_BODY,
+      title: content.title,
+      body: content.body,
       data: {
         entryLocalId: entry.localId,
+        locale: content.locale,
         source: WATCH_SYNC_IMPORT_NOTIFICATION_SOURCE,
       },
       android,
@@ -75,6 +84,28 @@ export async function notifyWatchSyncImport(
   } catch (error) {
     console.warn('Failed to display watch sync notification', error);
   }
+}
+
+export function resolveWatchSyncImportNotificationContent(
+  language?: SupportedLanguage,
+): WatchSyncImportNotificationContent {
+  const locale = resolveSupportedLanguage(language ?? i18n.resolvedLanguage ?? i18n.language);
+
+  return {
+    body: i18n.t('watchSync.autoImportedBody', {
+      defaultValue: 'A watch dive log was saved on this device.',
+      lng: locale,
+    }),
+    channelName: i18n.t('watchSync.notificationChannelName', {
+      defaultValue: 'Watch sync imports',
+      lng: locale,
+    }),
+    locale,
+    title: i18n.t('watchSync.autoImportedTitle', {
+      defaultValue: 'Watch log saved',
+      lng: locale,
+    }),
+  };
 }
 
 export async function getInitialWatchSyncNotificationOpen(): Promise<WatchSyncNotificationOpen | undefined> {
@@ -107,10 +138,10 @@ export function subscribeToWatchSyncNotificationOpens(
   };
 }
 
-async function ensureWatchSyncImportChannel(): Promise<string> {
+async function ensureWatchSyncImportChannel(channelName: string): Promise<string> {
   return notifee.createChannel({
     id: WATCH_SYNC_IMPORT_NOTIFICATION_CHANNEL_ID,
-    name: 'Watch sync imports',
+    name: channelName,
     importance: AndroidImportance.DEFAULT,
   });
 }

@@ -87,6 +87,8 @@ type AppTabScreenProps = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppTabs = createNavigatorFactory(AppTabNavigator)();
 const rootStackNavigationRef = createNavigationContainerRef<RootStackParamList>();
+const AUTO_IMPORT_TOAST_EDGE_GAP = 16;
+const AUTO_IMPORT_TOAST_TAB_OFFSET = 68;
 
 export default function RootNavigation(): React.JSX.Element {
   const { t } = useTranslation();
@@ -103,7 +105,7 @@ export default function RootNavigation(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const logbook = useDiveLogbook();
   const planning = useDivePlans();
-  const { watchSyncNotificationsEnabled } = useAppPreferences();
+  const { language, watchSyncNotificationsEnabled } = useAppPreferences();
 
   const refreshVisibleStackRoute = React.useCallback(() => {
     const rootState = rootStackNavigationRef.getRootState();
@@ -277,8 +279,9 @@ export default function RootNavigation(): React.JSX.Element {
     (entry: DiveLogEntry) =>
       notifyWatchSyncImport(entry, {
         enabled: watchSyncNotificationsEnabled,
+        language,
       }),
-    [watchSyncNotificationsEnabled],
+    [language, watchSyncNotificationsEnabled],
   );
 
   const openPlanDetail = React.useCallback(
@@ -439,42 +442,55 @@ export default function RootNavigation(): React.JSX.Element {
           </Stack.Navigator>
         </NavigationContainer>
         {autoImportToast ? (
-          <Pressable
-            testID="watch-auto-import-toast"
-            onPress={openImportedLogToast}
-            className="absolute left-4 right-4 z-10 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm"
-            style={({ pressed }) => [
-              {
-                bottom: Math.max(insets.bottom + 16, 24) + (visibleStackRoute === 'tabs' ? 68 : 0),
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-              },
-            ]}>
-            <VStack space="sm">
-              <Text className="text-sm font-semibold text-card-foreground">
-                {t('watchSync.autoImportedTitle', { defaultValue: 'Watch log saved' })}
-              </Text>
-              <Text className="text-sm leading-5 text-muted-foreground">
-                {t('watchSync.autoImportedBody', {
-                  defaultValue: 'A watch dive log was saved on this device.',
-                })}
-              </Text>
-              <HStack space="sm" className="pt-1">
-                <InstrumentButton
-                  testID="watch-auto-import-open-log"
-                  label={t('watchSync.openImportedLog', { defaultValue: 'Write log' })}
-                  variant="primary"
-                  onPress={openImportedLogToast}
-                  className="min-h-10 flex-1 px-4 py-2"
-                />
-                <InstrumentButton
-                  testID="watch-auto-import-dismiss"
-                  label={t('watchSync.dismiss', { defaultValue: 'Close' })}
-                  onPress={() => setAutoImportToast(undefined)}
-                  className="min-h-10 flex-1 px-4 py-2"
-                />
-              </HStack>
-            </VStack>
-          </Pressable>
+          <Box
+            testID="watch-auto-import-toast-safe-area"
+            pointerEvents="box-none"
+            className="absolute z-10 overflow-hidden"
+            style={{
+              bottom: insets.bottom,
+              left: insets.left,
+              right: insets.right,
+              top: insets.top,
+            }}>
+            <Pressable
+              testID="watch-auto-import-toast"
+              onPress={openImportedLogToast}
+              className="absolute left-4 right-4 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm"
+              style={({ pressed }) => [
+                {
+                  bottom:
+                    AUTO_IMPORT_TOAST_EDGE_GAP +
+                    (visibleStackRoute === 'tabs' ? AUTO_IMPORT_TOAST_TAB_OFFSET : 0),
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                },
+              ]}>
+              <VStack space="sm">
+                <Text className="text-sm font-semibold text-card-foreground">
+                  {t('watchSync.autoImportedTitle', { defaultValue: 'Watch log saved' })}
+                </Text>
+                <Text className="text-sm leading-5 text-muted-foreground">
+                  {t('watchSync.autoImportedBody', {
+                    defaultValue: 'A watch dive log was saved on this device.',
+                  })}
+                </Text>
+                <HStack space="sm" className="pt-1">
+                  <InstrumentButton
+                    testID="watch-auto-import-open-log"
+                    label={t('watchSync.openImportedLog', { defaultValue: 'Write log' })}
+                    variant="primary"
+                    onPress={openImportedLogToast}
+                    className="min-h-10 flex-1 px-4 py-2"
+                  />
+                  <InstrumentButton
+                    testID="watch-auto-import-dismiss"
+                    label={t('watchSync.dismiss', { defaultValue: 'Close' })}
+                    onPress={() => setAutoImportToast(undefined)}
+                    className="min-h-10 flex-1 px-4 py-2"
+                  />
+                </HStack>
+              </VStack>
+            </Pressable>
+          </Box>
         ) : null}
       </VStack>
     </WatchConnectivitySyncProvider>

@@ -91,7 +91,7 @@ describe('watch sync notification service', () => {
   });
 
   it('displays the local-device watch import notification when enabled outside the foreground', async () => {
-    await notifyWatchSyncImport(makeEntry(), { enabled: true });
+    await notifyWatchSyncImport(makeEntry(), { enabled: true, language: 'en' });
 
     expect(notifee.createChannel).toHaveBeenCalledWith({
       id: 'watch-sync-imports',
@@ -103,6 +103,26 @@ describe('watch sync notification service', () => {
       body: 'A watch dive log was saved on this device.',
       data: {
         entryLocalId: 'log-watch-1',
+        locale: 'en',
+        source: 'watch-sync-import',
+      },
+    }));
+  });
+
+  it('uses the app language preference for local notification copy and future push locale data', async () => {
+    await notifyWatchSyncImport(makeEntry(), { enabled: true, language: 'ko' });
+
+    expect(notifee.createChannel).toHaveBeenCalledWith({
+      id: 'watch-sync-imports',
+      name: '워치 기록 저장',
+      importance: 3,
+    });
+    expect(notifee.displayNotification).toHaveBeenCalledWith(expect.objectContaining({
+      title: '워치 기록 저장됨',
+      body: '워치 다이브 기록이 이 기기에 저장되었습니다.',
+      data: {
+        entryLocalId: 'log-watch-1',
+        locale: 'ko',
         source: 'watch-sync-import',
       },
     }));

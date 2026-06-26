@@ -52,6 +52,10 @@ const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 let mockWatchConnectivityHandler:
   | ((payload: { payloadId?: string; payloadJson: string; localSessionId?: string; receivedAt?: number }) => void)
   | undefined;
+let mockSafeAreaMetrics = {
+  frame: { width: 320, height: 640, x: 0, y: 0 },
+  insets: { left: 0, right: 0, bottom: 0, top: 0 },
+};
 
 jest.mock('../src/native/watch-connectivity', () => ({
   acknowledgeImportedWatchConnectivityPayloads: (payloadIds: readonly string[]) =>
@@ -102,16 +106,12 @@ jest.mock('react-native-reanimated', () => {
 jest.mock('react-native-safe-area-context', () => {
   const ReactModule = require('react') as typeof import('react');
   const actual = jest.requireActual('react-native-safe-area-context');
-  const metrics = {
-    frame: { width: 320, height: 640, x: 0, y: 0 },
-    insets: { left: 0, right: 0, bottom: 0, top: 0 },
-  };
 
   return {
     ...actual,
-    initialWindowMetrics: metrics,
-    useSafeAreaFrame: jest.fn(() => metrics.frame),
-    useSafeAreaInsets: jest.fn(() => metrics.insets),
+    initialWindowMetrics: mockSafeAreaMetrics,
+    useSafeAreaFrame: jest.fn(() => mockSafeAreaMetrics.frame),
+    useSafeAreaInsets: jest.fn(() => mockSafeAreaMetrics.insets),
     SafeAreaProvider: ({ children }: { children?: React.ReactNode }) =>
       ReactModule.createElement(ReactModule.Fragment, null, children),
   };
@@ -140,6 +140,10 @@ describe('App navigation', () => {
     mockAcknowledgeWatchConnectivityPayloads.mockResolvedValue(undefined);
     mockAcknowledgeImportedWatchConnectivityPayloads.mockResolvedValue(undefined);
     mockWatchConnectivityHandler = undefined;
+    mockSafeAreaMetrics = {
+      frame: { width: 320, height: 640, x: 0, y: 0 },
+      insets: { left: 0, right: 0, bottom: 0, top: 0 },
+    };
 
     await ReactTestRenderer.act(async () => {
       await i18n.changeLanguage('ko');
@@ -324,6 +328,57 @@ describe('App navigation', () => {
       'Easy recreational checkout dive. Not for decompression planning.',
     );
     expect(root.findByProps({ testID: 'log-entry-detail-depth-profile' })).toBeTruthy();
+  });
+
+  test('keeps automatic watch import toasts inside the safe-area overlay', async () => {
+    mockSafeAreaMetrics = {
+      frame: { width: 393, height: 852, x: 0, y: 0 },
+      insets: { left: 0, right: 0, bottom: 34, top: 59 },
+    };
+    const fixture = {
+      ...metadataRichFixture,
+      session: {
+        ...metadataRichFixture.session,
+        localSessionId: 'app-safe-area-toast-session',
+        endedAt: 1781357600,
+        samples: metadataRichFixture.session.samples.map(sample => ({
+          ...sample,
+          localSessionId: 'app-safe-area-toast-session',
+        })),
+      },
+    };
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(<App />);
+      renderers.push(renderer);
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+    });
+
+    const root = renderer!.root;
+    await waitForWatchConnectivitySubscription();
+
+    await ReactTestRenderer.act(async () => {
+      mockWatchConnectivityHandler?.({
+        payloadId: 'app-safe-area-toast-payload',
+        payloadJson: JSON.stringify(fixture),
+        localSessionId: 'app-safe-area-toast-session',
+        receivedAt: 1781357600,
+      });
+    });
+    await waitForTestID(root, 'watch-auto-import-toast');
+
+    expect(root.findByProps({ testID: 'watch-auto-import-toast-safe-area' }).props.style).toEqual(
+      expect.objectContaining({
+        bottom: 34,
+        left: 0,
+        right: 0,
+        top: 59,
+      }),
+    );
+
+    const toastStyle = root.findByProps({ testID: 'watch-auto-import-toast' }).props.style({ pressed: false })[0];
+    expect(toastStyle).toEqual(expect.objectContaining({ bottom: 84 }));
   });
 
   test('does not auto-dismiss automatic watch import toasts on a timer', () => {
