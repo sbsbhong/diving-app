@@ -2,6 +2,7 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import i18n from '../src/i18n';
 import { HStack } from '../src/components/ui/hstack';
+import { Icon } from '../src/components/ui/icon';
 import { AppPreferencesProvider } from '../src/states/app-preferences';
 import SettingsScreen, { type SettingsRoute } from '../src/screens/settings/screen';
 import type { LinkedWatchInfo } from '../src/native/watch-connectivity';
@@ -61,6 +62,15 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-current-theme' }).props.children).toBe('시스템 기본값');
     expect(root.findByProps({ testID: 'settings-current-language' }).props.children).toBe('한국어');
     expect(root.findByProps({ testID: 'settings-current-watch-sync-notifications' }).props.children).toBe('꺼짐');
+    expect(root.findByProps({ testID: 'settings-row-theme-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'settings-row-language-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'settings-row-notifications-icon' })).toBeTruthy();
+    const rowIconClassName = root.findByProps({ testID: 'settings-row-theme-icon' }).props.className;
+    const linkedWatchIcon = root.findByProps({ testID: 'settings-linked-watch-icon' });
+    expect(linkedWatchIcon.props.className).toBe(rowIconClassName);
+    expect(linkedWatchIcon.findByType(Icon).props.size).toBe('sm');
+    expect(root.findByProps({ testID: 'settings-row-theme-disclosure' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'settings-row-devices-disclosure' })).toBeTruthy();
   });
 
   test('shows linked watch in device management with icon and status', async () => {
@@ -118,6 +128,14 @@ describe('SettingsScreen', () => {
     });
 
     expect(root.findByProps({ testID: 'settings-current-watch-sync-notifications' }).props.children).toBe('켜짐');
+  });
+
+  test('renders detail back navigation as an accessible icon control', async () => {
+    const renderer = await renderSettings({ route: 'theme' });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-back' }).props.accessibilityLabel).toBe('설정');
+    expect(root.findByProps({ testID: 'settings-back-icon' })).toBeTruthy();
   });
 
   test('keeps watch sync notifications disabled when permission is denied', async () => {

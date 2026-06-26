@@ -1,7 +1,8 @@
 import React from 'react';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
-import { Button, ButtonText } from './button';
+import { Box } from './box';
+import { Button, ButtonIcon, ButtonText } from './button';
 import { Text } from './text';
 import type { InstrumentTone } from './theme';
 
@@ -44,6 +45,8 @@ export function StatusPill(props: StatusPillProps): React.JSX.Element {
 
 type InstrumentButtonProps = Omit<React.ComponentProps<typeof Button>, 'children' | 'className' | 'style' | 'variant'> & {
   label: string;
+  icon?: React.ElementType;
+  iconPlacement?: 'leading' | 'trailing';
   variant?: 'primary' | 'secondary' | 'danger';
   className?: string;
   style?: StyleProp<ViewStyle>;
@@ -77,6 +80,20 @@ const buttonTextStyles = tva({
   },
 });
 
+const buttonIconStyles = tva({
+  base: 'shrink-0',
+  variants: {
+    variant: {
+      primary: 'text-primary-foreground',
+      secondary: 'text-primary',
+      danger: 'text-destructive',
+    },
+  },
+  defaultVariants: {
+    variant: 'secondary',
+  },
+});
+
 const instrumentButtonVariant = {
   primary: 'default',
   secondary: 'secondary',
@@ -85,18 +102,30 @@ const instrumentButtonVariant = {
 
 export function InstrumentButton({
   label,
+  icon: ButtonGlyph,
+  iconPlacement = 'leading',
   variant = 'secondary',
   className,
   style,
   ...pressableProps
 }: InstrumentButtonProps): React.JSX.Element {
+  const icon = ButtonGlyph ? (
+    <Box
+      testID={typeof pressableProps.testID === 'string' ? `${pressableProps.testID}-icon` : undefined}
+      className="items-center justify-center">
+      <ButtonIcon as={ButtonGlyph} className={buttonIconStyles({ variant })} />
+    </Box>
+  ) : null;
+
   return (
     <Button
       {...pressableProps}
       variant={instrumentButtonVariant[variant]}
       className={buttonStyles({ variant, class: className })}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }, style]}>
+      {iconPlacement === 'leading' ? icon : null}
       <ButtonText className={buttonTextStyles({ variant })}>{label}</ButtonText>
+      {iconPlacement === 'trailing' ? icon : null}
     </Button>
   );
 }

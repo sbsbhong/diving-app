@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import { cssInterop } from 'nativewind';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-import { UIIcon } from '@gluestack-ui/core/icon/creator';
+import { UIIcon } from '../icon';
 
 const SCOPE = 'ALERT';
 
@@ -106,13 +106,14 @@ const AlertText = React.forwardRef<
 type IAlertIconProps = React.ComponentPropsWithoutRef<typeof UIAlert.Icon> &
   VariantProps<typeof alertIconStyle> & {
     height?: number;
+    size?: number;
     width?: number;
   };
 
 const AlertIcon = React.forwardRef<
   React.ComponentRef<typeof UIAlert.Icon>,
   IAlertIconProps
->(function AlertIcon({ className, size = 'sm', ...props }, ref) {
+>(function AlertIcon({ className, size, ...props }, ref) {
   const { variant: parentVariant } = useStyleContext(SCOPE);
 
   if (typeof size === 'number') {
@@ -120,7 +121,12 @@ const AlertIcon = React.forwardRef<
       <UIAlert.Icon
         ref={ref}
         {...props}
-        className={alertIconStyle({ class: className })}
+        className={alertIconStyle({
+          parentVariants: {
+            variant: parentVariant,
+          },
+          class: className,
+        })}
         size={size}
       />
     );
@@ -142,7 +148,6 @@ const AlertIcon = React.forwardRef<
         parentVariants: {
           variant: parentVariant,
         },
-        size,
         class: className,
       })}
       {...props}

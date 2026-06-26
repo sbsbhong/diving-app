@@ -1,10 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import { Box } from '../../components/ui/box';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
-import { Input, InputField } from '../../components/ui/input';
+import { EditIcon, Icon, SearchIcon, WatchIcon } from '../../components/ui/icon';
+import { Input, InputField, InputIcon, InputSlot } from '../../components/ui/input';
 import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
 import { RefreshControl } from '../../components/ui/refresh-control';
@@ -197,6 +198,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
               <InstrumentButton
                 testID="logbook-create-action"
                 label={t('logbook.createManual')}
+                icon={EditIcon}
                 variant="primary"
                 onPress={openCreate}
                 className="min-h-10 px-4 py-2"
@@ -219,6 +221,9 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
           ) : null}
           <VStack space="md" className="rounded-2xl bg-card px-4 py-4">
             <Input className="h-11 rounded-full border-0 bg-muted px-5 shadow-none">
+              <InputSlot testID="logbook-search-icon">
+                <InputIcon as={SearchIcon} className="text-muted-foreground" />
+              </InputSlot>
               <InputField
                 testID="logbook-search-input"
                 placeholder={t('logbook.searchPlaceholder')}
@@ -321,9 +326,11 @@ function SessionListItem(props: {
       <VStack space="sm">
         <HStack className="items-center justify-between">
           <HStack space="md" className="flex-1 items-center pr-2.5">
-            <Text testID={`logbook-list-source-${siteName}`} className={sourceBadgeStyles({ source: props.entry.source })}>
-              {t(`logbook.sources.${props.entry.source}`)}
-            </Text>
+            <Box
+              testID={`logbook-list-source-icon-${siteName}`}
+              className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <Icon as={props.entry.source === 'watch' ? WatchIcon : EditIcon} size="md" className="text-primary" />
+            </Box>
             <VStack space="xs" className="flex-1">
               <Text className="text-lg font-semibold text-card-foreground">{title}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
@@ -342,7 +349,7 @@ function SessionListItem(props: {
             </Text>
           </VStack>
         </HStack>
-        <Text className="pl-5 text-sm leading-5 text-muted-foreground">
+        <Text className="pl-14 text-sm leading-5 text-muted-foreground">
           {session.diveMode ? t(`diveModes.${session.diveMode}`) : t('diveModes.notSet')} ·{' '}
           <Text testID={`logbook-list-duration-${siteName}-${toTestIdValue(durationLabel)}`}>{durationLabel}</Text> · {tags}
         </Text>
@@ -396,13 +403,3 @@ const toVisibleSyncStatus = (syncStatus: DiveLogEntry['syncStatus']): VisibleSyn
 
   return 'pending';
 };
-
-const sourceBadgeStyles = tva({
-  base: 'min-w-14 rounded-full px-2.5 py-1 text-center text-xs font-semibold uppercase',
-  variants: {
-    source: {
-      watch: 'bg-primary/10 text-primary',
-      manual: 'bg-muted text-muted-foreground',
-    },
-  },
-});

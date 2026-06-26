@@ -85,8 +85,13 @@ describe('Home conditions interface', () => {
 
     expect(provider.getCurrentConditions).toHaveBeenCalledWith(expect.objectContaining({ locale: 'ko' }));
     expect(root.findByProps({ testID: 'home-conditions-city' }).props.children).toBe('Jeju City');
+    expect(root.findByProps({ testID: 'home-conditions-location-icon' }).props.className).toEqual(expect.stringContaining('bg-primary/10'));
     expect(root.findByProps({ testID: 'home-conditions-local-time' }).props.children).toMatch(/\d{1,2}:\d{2}/);
+    expect(root.findByProps({ testID: 'home-conditions-air-tile' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'home-conditions-air-tile-icon' })).toBeTruthy();
     expect(root.findByProps({ testID: 'home-conditions-air-temperature' }).props.children).toBe('24.20 °C');
+    expect(root.findByProps({ testID: 'home-conditions-water-tile' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'home-conditions-water-tile-icon' })).toBeTruthy();
     expect(root.findByProps({ testID: 'home-conditions-water-temperature' }).props.children).toBe('22.80 °C');
   });
 
@@ -138,6 +143,13 @@ describe('Home conditions interface', () => {
     const root = renderer!.root;
 
     expect(root.findByProps({ testID: 'home-conditions-unavailable' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'home-reminder-alert' })).toBeTruthy();
+    const reminderIcon = root.findByProps({ testID: 'home-reminder-alert-icon' });
+    expect(reminderIcon.props.className).toEqual(expect.stringContaining('rounded-full'));
+    expect(reminderIcon.props.className).toEqual(expect.stringContaining('bg-primary/10'));
+    expect(root.findAll(node => node.props.children === '알림')).toHaveLength(0);
+    expect(root.findByProps({ testID: 'home-open-logbook-action-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'home-open-planning-action-icon' })).toBeTruthy();
 
     await ReactTestRenderer.act(async () => {
       root.findByProps({ testID: 'home-open-logbook-action' }).props.onPress();

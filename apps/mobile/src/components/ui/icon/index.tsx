@@ -856,6 +856,30 @@ const GlobeIcon = createIcon({
 GlobeIcon.displayName = 'GlobeIcon';
 export { GlobeIcon };
 
+const MapPinIcon = createIcon({
+  Root: Svg,
+  viewBox: '0 0 24 24',
+  path: (
+    <>
+      <Path
+        d="M21 10C21 16 12 22 12 22C12 22 3 16 3 10C3 5.03 7.03 1 12 1C16.97 1 21 5.03 21 10Z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+});
+
+MapPinIcon.displayName = 'MapPinIcon';
+export { MapPinIcon };
+
 const GripVerticalIcon = createIcon({
   Root: Svg,
   viewBox: '0 0 24 24',
@@ -1532,6 +1556,36 @@ const SunIcon = createIcon({
 
 SunIcon.displayName = 'SunIcon';
 export { SunIcon };
+
+const WavesIcon = createIcon({
+  Root: Svg,
+  viewBox: '0 0 24 24',
+  path: (
+    <>
+      <Path
+        d="M2 12C4 10 6 10 8 12C10 14 12 14 14 12C16 10 18 10 22 12"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M2 16C4 14 6 14 8 16C10 18 12 18 14 16C16 14 18 14 22 16"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M2 20C4 18 6 18 8 20C10 22 12 22 14 20C16 18 18 18 22 20"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+});
+
+WavesIcon.displayName = 'WavesIcon';
+export { WavesIcon };
 
 const ThreeDotsIcon = createIcon({
   Root: Svg,

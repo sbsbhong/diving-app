@@ -1,9 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, ButtonText } from '../../components/ui/button';
+import { Alert, AlertIcon, AlertText } from '../../components/ui/alert';
+import { Box } from '../../components/ui/box';
+import { Button, ButtonIcon, ButtonText } from '../../components/ui/button';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
+import { BellIcon, CalendarDaysIcon, ChevronRightIcon, GlobeIcon, Icon, MapPinIcon, SunIcon, WavesIcon } from '../../components/ui/icon';
 import { Menu, MenuItem, MenuItemLabel } from '../../components/ui/menu';
 import { RefreshControl } from '../../components/ui/refresh-control';
 import { ScrollView } from '../../components/ui/scroll-view';
@@ -123,26 +126,36 @@ export default function HomeScreen(props: HomeScreenProps): React.JSX.Element {
           </DiveSummaryCard.Body>
         </DiveSummaryCard>
 
-        <DiveSummaryCard>
-          <HStack space="md" className="items-center">
-            <AssistantMark label={t('home.reminderMark')} />
-            <VStack space="xs" className="flex-1">
-              <Text className="text-base font-semibold text-card-foreground">{t('home.watchReminderStatus')}</Text>
-              <Text className="text-sm leading-5 text-muted-foreground">{t('home.reminderReview')}</Text>
-            </VStack>
-          </HStack>
-          <DiveSummaryCard.Metric label={t('home.ascent')} value={t('home.reviewOnly')} />
-          <DiveSummaryCard.Metric label={t('home.safetyStop')} value={t('home.planningReminder')} />
-        </DiveSummaryCard>
+        <Alert testID="home-reminder-alert" className="rounded-2xl border-border bg-card px-4 py-4">
+          <Box testID="home-reminder-alert-icon" className="mt-0.5 h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <AlertIcon as={BellIcon} className="text-primary" />
+          </Box>
+          <AlertText className="leading-5 text-card-foreground">
+            <Text className="text-base font-semibold text-card-foreground">{t('home.watchReminderStatus')}</Text>
+            {'\n'}
+            <Text className="text-sm leading-5 text-muted-foreground">{t('home.reminderReview')}</Text>
+            {'\n'}
+            <Text className="text-xs font-semibold uppercase leading-5 text-muted-foreground">
+              {t('home.ascent')}: {t('home.reviewOnly')} · {t('home.safetyStop')}: {t('home.planningReminder')}
+            </Text>
+          </AlertText>
+        </Alert>
 
         <VStack space="md">
           <InstrumentButton
             testID="home-open-logbook-action"
             label={t('home.openLogbook')}
+            icon={ChevronRightIcon}
+            iconPlacement="trailing"
             variant="primary"
             onPress={props.onOpenLogbook}
           />
-          <InstrumentButton testID="home-open-planning-action" label={t('home.planNextDive')} onPress={props.onOpenPlanning} />
+          <InstrumentButton
+            testID="home-open-planning-action"
+            label={t('home.planNextDive')}
+            icon={CalendarDaysIcon}
+            onPress={props.onOpenPlanning}
+          />
         </VStack>
 
         <SafetyText>{t('home.safetyText')}</SafetyText>
@@ -180,6 +193,7 @@ function LanguageMenu(): React.JSX.Element {
           variant="secondary"
           size="sm"
           className="rounded-full">
+          <ButtonIcon as={GlobeIcon} className="text-primary" />
           <ButtonText className="text-sm font-semibold text-primary">{activeLabel}</ButtonText>
         </Button>
       )}>
@@ -245,28 +259,39 @@ function HomeConditionsBand(props: { snapshot: HomeConditionsSnapshot; locale: s
     <DiveSummaryCard>
       <VStack space="md">
         <HStack className="items-start justify-between" space="md">
-          <VStack space="xs" className="flex-1">
-            <Text testID="home-conditions-city" className="text-base font-semibold text-card-foreground">
-              {snapshot.cityName ?? t('home.conditions.currentLocation')}
-            </Text>
-            <Text testID="home-conditions-local-time" size="sm" className="text-muted-foreground">
-              {formatConditionsTime(snapshot.localTime, props.locale)}
-            </Text>
-          </VStack>
+          <HStack space="sm" className="flex-1 items-start">
+            <Box testID="home-conditions-location-icon" className="mt-0.5 h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Icon as={MapPinIcon} size="sm" className="text-primary" />
+            </Box>
+            <VStack space="xs" className="flex-1">
+              <Text testID="home-conditions-city" className="text-xl font-semibold leading-7 text-card-foreground">
+                {snapshot.cityName ?? t('home.conditions.currentLocation')}
+              </Text>
+              <Text testID="home-conditions-local-time" size="sm" className="text-muted-foreground">
+                {formatConditionsTime(snapshot.localTime, props.locale)}
+              </Text>
+            </VStack>
+          </HStack>
           <StatusPill label={t(`home.conditions.sources.${snapshot.source ?? 'mock'}`)} tone="secondary" />
         </HStack>
 
         <HStack space="md">
-          <MetricTile
+          <ConditionMetricTile
+            testID="home-conditions-air-tile"
             label={t('home.conditions.airTemperature')}
             value={formatTemperature(snapshot.airTemperatureCelsius)}
             valueTestID="home-conditions-air-temperature"
+            icon={SunIcon}
+            tone="muted"
           />
           {showsWaterTemperature ? (
-            <MetricTile
+            <ConditionMetricTile
+              testID="home-conditions-water-tile"
               label={t('home.conditions.waterTemperature')}
               value={formatTemperature(snapshot.waterTemperatureCelsius)}
               valueTestID="home-conditions-water-temperature"
+              icon={WavesIcon}
+              tone="primary"
             />
           ) : (
             <VStack className="flex-1 justify-center rounded-2xl bg-muted px-4 py-4">
@@ -284,6 +309,41 @@ function HomeConditionsBand(props: { snapshot: HomeConditionsSnapshot; locale: s
         </Text>
       </VStack>
     </DiveSummaryCard>
+  );
+}
+
+function ConditionMetricTile(props: {
+  label: string;
+  value: string;
+  valueTestID?: string;
+  icon: React.ElementType;
+  tone: 'muted' | 'primary';
+  testID?: string;
+}): React.JSX.Element {
+  const tileClassName =
+    props.tone === 'primary'
+      ? 'flex-1 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-4'
+      : 'flex-1 rounded-2xl bg-muted px-4 py-4';
+  const iconClassName = props.tone === 'primary' ? 'text-primary' : 'text-muted-foreground';
+  const labelClassName =
+    props.tone === 'primary'
+      ? 'text-xs font-semibold uppercase text-primary'
+      : 'text-xs font-semibold uppercase text-muted-foreground';
+
+  return (
+    <Box testID={props.testID} className={tileClassName}>
+      <VStack space="sm">
+        <HStack className="items-center justify-between">
+          <Text className={labelClassName}>{props.label}</Text>
+          <Box testID={props.testID ? `${props.testID}-icon` : undefined} className="h-7 w-7 items-center justify-center rounded-full bg-card">
+            <Icon as={props.icon} size="xs" className={iconClassName} />
+          </Box>
+        </HStack>
+        <Text testID={props.valueTestID} className="text-2xl font-semibold text-card-foreground">
+          {props.value}
+        </Text>
+      </VStack>
+    </Box>
   );
 }
 
@@ -309,12 +369,4 @@ function formatConditionsTime(seconds: number | undefined, locale: string): stri
 
 function formatOptionalDuration(seconds: number | undefined): string {
   return seconds === undefined ? '--:--' : formatDuration(seconds);
-}
-
-function AssistantMark(props: { label: string }): React.JSX.Element {
-  return (
-    <VStack className="h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-      <Text className="text-sm font-semibold text-primary">{props.label}</Text>
-    </VStack>
-  );
 }

@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { KeyboardAvoidingView, RefreshControl, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
+import { ButtonIcon } from '../src/components/ui/button';
 import i18n from '../src/i18n';
+import { AddIcon, CalendarDaysIcon } from '../src/components/ui/icon';
 import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
 import PlanningScreen from '../src/screens/planning/screen';
 import { useDivePlans } from '../src/states/use-dive-plans';
@@ -261,6 +263,14 @@ describe('Planning screen planbook flow', () => {
     const renderer = await renderPlanning(repository, { onCreatePlan, onOpenPlan });
     const root = renderer.root;
 
+    expect(root.findAllByProps({ testID: 'planning-title-icon' })).toHaveLength(0);
+    const createActionIcon = root.findByProps({ testID: 'planning-create-action-icon' });
+    expect(createActionIcon.findByType(ButtonIcon).props.as).toBe(CalendarDaysIcon);
+    expect(createActionIcon.findByType(ButtonIcon).props.as).not.toBe(AddIcon);
+    expect(root.findByProps({ testID: 'planning-active-open-action-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-plan-row-Route Reef-icon' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-open-logbook-action-icon' })).toBeTruthy();
+
     await press(root, 'planning-create-action');
     expect(onCreatePlan).toHaveBeenCalledTimes(1);
     expect(root.findAllByProps({ testID: 'planning-editor-title' })).toHaveLength(0);
@@ -268,6 +278,16 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-plan-row-Route Reef');
     expect(onOpenPlan).toHaveBeenCalledWith(expect.objectContaining({ localId: 'plan-1' }));
     expect(root.findAllByProps({ testID: 'planning-detail-edit' })).toHaveLength(0);
+  });
+
+  it('keeps one new-plan button on the empty planning screen', async () => {
+    const renderer = await renderPlanning(new LocalDivePlanRepository([]));
+    const root = renderer.root;
+
+    expect(root.findAll(node => node.props.label === 'New plan')).toHaveLength(1);
+    expect(root.findByProps({ testID: 'planning-create-action' })).toBeTruthy();
+    expect(root.findAllByProps({ testID: 'planning-active-create-action' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-empty-create-action' })).toHaveLength(0);
   });
 
   it('completes a plan and lets the user choose Later', async () => {

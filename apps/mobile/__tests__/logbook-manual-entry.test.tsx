@@ -3,6 +3,8 @@ import React from 'react';
 import { KeyboardAvoidingView, RefreshControl, ScrollView } from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import metadataRichFixture from '../../../packages/contracts/fixtures/metadata-rich-watch-sync-message.json';
+import { ButtonIcon } from '../src/components/ui/button';
+import { EditIcon } from '../src/components/ui/icon';
 import i18n from '../src/i18n';
 import { LocalDiveLogRepository } from '../src/repositories/local-dive-log-repository';
 import LogbookScreen from '../src/screens/logbook/screen';
@@ -286,6 +288,10 @@ describe('Logbook manual entry flow', () => {
 
     expect(root.findByProps({ testID: 'logbook-create-action' }).props.label).toBe('Write');
     expect(root.findByProps({ testID: 'logbook-import-action' }).props.label).toBe('Sync Watch');
+    const createActionIcon = root.findByProps({ testID: 'logbook-create-action-icon' });
+    expect(createActionIcon.findByType(ButtonIcon).props.as).toBe(EditIcon);
+    expect(root.findAllByProps({ testID: 'logbook-import-action-icon' })).toHaveLength(0);
+    expect(root.findByProps({ testID: 'logbook-search-icon' })).toBeTruthy();
   });
 
   test('keeps logbook inputs in a keyboard-aware scroll container', async () => {
@@ -471,13 +477,15 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'logbook-list-duration-No Metrics Reef---:--' })).toBeTruthy();
   });
 
-  test('labels logbook rows by source instead of using an ambiguous selected dot', async () => {
+  test('uses one source affordance in logbook rows instead of duplicating icon and badge', async () => {
     const repository = new LocalDiveLogRepository([watchEntry, manualEntry]);
     const renderer = await renderLogbook(repository);
     const root = renderer.root;
 
-    expect(root.findByProps({ testID: 'logbook-list-source-Watch Reef' }).props.children).toBe('Watch');
-    expect(root.findByProps({ testID: 'logbook-list-source-Manual Reef' }).props.children).toBe('Manual');
+    expect(root.findByProps({ testID: 'logbook-list-source-icon-Watch Reef' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'logbook-list-source-icon-Manual Reef' })).toBeTruthy();
+    expect(root.findAllByProps({ testID: 'logbook-list-source-Watch Reef' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'logbook-list-source-Manual Reef' })).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'logbook-list-selected-dot' })).toHaveLength(0);
   });
 

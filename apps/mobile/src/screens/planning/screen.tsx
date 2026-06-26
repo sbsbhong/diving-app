@@ -4,6 +4,7 @@ import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, SafetyText, SelectorPill, StatusPill } from '../../components/ui/instrument';
 import { Box } from '../../components/ui/box';
 import { HStack } from '../../components/ui/hstack';
+import { ArrowRightIcon, CalendarDaysIcon, ChevronRightIcon, Icon } from '../../components/ui/icon';
 import { KeyboardAwareScrollView } from '../../components/ui/keyboard-aware-scroll-view';
 import { Pressable } from '../../components/ui/pressable';
 import { RefreshControl } from '../../components/ui/refresh-control';
@@ -214,13 +215,14 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
 
         {route === 'list' ? (
           <VStack space="lg">
-            <ActivePlanPanel plan={activePlan} locale={locale} onCreate={openCreate} onOpenPlan={openDetail} />
+            <ActivePlanPanel plan={activePlan} locale={locale} onOpenPlan={openDetail} />
             <VStack space="md">
               <HStack className="items-center justify-between">
                 <Text className="text-xl font-semibold text-foreground">{t('planning.planbook', { defaultValue: 'Planbook' })}</Text>
                 <InstrumentButton
                   testID="planning-create-action"
                   label={t('planning.newPlan', { defaultValue: 'New plan' })}
+                  icon={CalendarDaysIcon}
                   variant="primary"
                   onPress={openCreate}
                   className="min-h-10 px-4 py-2"
@@ -244,13 +246,19 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
                   ))}
                 </VStack>
               ) : (
-                <EmptyPlanbook onCreate={openCreate} />
+                <EmptyPlanbook />
               )}
             </VStack>
           </VStack>
         ) : null}
 
-        <InstrumentButton testID="planning-open-logbook-action" label={t('planning.openLogbook')} onPress={props.onOpenLogbook} />
+        <InstrumentButton
+          testID="planning-open-logbook-action"
+          label={t('planning.openLogbook')}
+          icon={ArrowRightIcon}
+          iconPlacement="trailing"
+          onPress={props.onOpenLogbook}
+        />
         <SafetyText>{t('planning.safetyText')}</SafetyText>
       </VStack>
     </KeyboardAwareScrollView>
@@ -260,7 +268,6 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
 function ActivePlanPanel(props: {
   plan: DivePlan | undefined;
   locale: string;
-  onCreate: () => void;
   onOpenPlan: (plan: DivePlan) => void;
 }): React.JSX.Element {
   const { t } = useTranslation();
@@ -269,9 +276,6 @@ function ActivePlanPanel(props: {
     return (
       <DiveSummaryCard accent="secondary">
         <DiveSummaryCard.Header eyebrow={t('planning.activePlan', { defaultValue: 'Active plan' })} title={t('planning.noActivePlan', { defaultValue: 'No active plan' })} />
-        <DiveSummaryCard.Footer>
-          <InstrumentButton testID="planning-active-create-action" label={t('planning.newPlan', { defaultValue: 'New plan' })} variant="primary" onPress={props.onCreate} />
-        </DiveSummaryCard.Footer>
       </DiveSummaryCard>
     );
   }
@@ -298,7 +302,14 @@ function ActivePlanPanel(props: {
         />
       </DiveSummaryCard.Body>
       <DiveSummaryCard.Footer>
-        <InstrumentButton testID="planning-active-open-action" label={t('planning.openPlan', { defaultValue: 'Open plan' })} variant="primary" onPress={() => props.onOpenPlan(props.plan!)} />
+        <InstrumentButton
+          testID="planning-active-open-action"
+          label={t('planning.openPlan', { defaultValue: 'Open plan' })}
+          icon={ChevronRightIcon}
+          iconPlacement="trailing"
+          variant="primary"
+          onPress={() => props.onOpenPlan(props.plan!)}
+        />
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
   );
@@ -318,7 +329,11 @@ function PlanRow(props: { plan: DivePlan; locale: string; onPress: () => void })
       <VStack space="sm">
         <HStack className="items-center justify-between">
           <HStack space="md" className="flex-1 items-center pr-2.5">
-            <Box className="h-2 w-2 rounded-full bg-primary" />
+            <Box
+              testID={`planning-plan-row-${siteName}-icon`}
+              className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <Icon as={CalendarDaysIcon} size="md" className="text-primary" />
+            </Box>
             <VStack space="xs" className="flex-1">
               <Text className="text-lg font-semibold text-card-foreground">{title}</Text>
               <Text className="text-sm leading-5 text-muted-foreground">
@@ -367,16 +382,13 @@ function CompletionPrompt(props: { plan: DivePlan; onLater: () => void; onCreate
   );
 }
 
-function EmptyPlanbook(props: { onCreate: () => void }): React.JSX.Element {
+function EmptyPlanbook(): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
     <DiveSummaryCard>
       <VStack testID="planning-empty-state" space="lg">
         <DiveSummaryCard.Header eyebrow={t('planning.emptyEyebrow', { defaultValue: 'Empty' })} title={t('planning.noPlans', { defaultValue: 'No plans yet' })} />
-        <DiveSummaryCard.Footer>
-          <InstrumentButton label={t('planning.newPlan', { defaultValue: 'New plan' })} variant="primary" onPress={props.onCreate} />
-        </DiveSummaryCard.Footer>
       </VStack>
     </DiveSummaryCard>
   );

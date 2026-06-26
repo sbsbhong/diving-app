@@ -1,9 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box } from '../../components/ui/box';
-import { Button, ButtonText } from '../../components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '../../components/ui/button';
 import { HStack } from '../../components/ui/hstack';
-import { CircleIcon, Icon, WatchIcon } from '../../components/ui/icon';
+import {
+  BellIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CircleIcon,
+  GlobeIcon,
+  Icon,
+  SunIcon,
+  WatchIcon,
+} from '../../components/ui/icon';
 import { Pressable } from '../../components/ui/pressable';
 import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from '../../components/ui/radio';
 import { ScrollView } from '../../components/ui/scroll-view';
@@ -18,6 +27,7 @@ import { useAppPreferences, type ThemePreference } from '../../states/app-prefer
 export type SettingsRoute = 'index' | 'theme' | 'language' | 'notifications' | 'devices';
 
 type SettingRowProps = {
+  icon: React.ElementType;
   label: string;
   rowTestID: string;
   valueTestID: string;
@@ -228,6 +238,7 @@ export default function SettingsScreen({
         <VStack className="overflow-hidden rounded-2xl bg-card">
           <SettingRow
             rowTestID="settings-row-theme"
+            icon={SunIcon}
             label={t('settings.theme.title')}
             value={themeLabel}
             valueTestID="settings-current-theme"
@@ -236,6 +247,7 @@ export default function SettingsScreen({
           <Box className="h-px bg-border" />
           <SettingRow
             rowTestID="settings-row-language"
+            icon={GlobeIcon}
             label={t('settings.language.title')}
             value={languageLabel}
             valueTestID="settings-current-language"
@@ -251,6 +263,7 @@ export default function SettingsScreen({
         <VStack className="overflow-hidden rounded-2xl bg-card">
           <SettingRow
             rowTestID="settings-row-notifications"
+            icon={BellIcon}
             label={t('settings.notifications.watchSyncTitle')}
             value={watchSyncNotificationLabel}
             valueTestID="settings-current-watch-sync-notifications"
@@ -292,14 +305,15 @@ function DetailHeader(props: { title: string; onBack: () => void }): React.JSX.E
     <VStack space="md">
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
         testID="settings-back"
+        accessibilityLabel={t('settings.title')}
         onPress={props.onBack}
-        className="self-start rounded-full bg-primary/10 px-3 py-2"
+        className="h-10 w-10 self-start rounded-full bg-primary/10"
         style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-        <ButtonText className="text-sm font-semibold text-primary">
-          {`‹ ${t('settings.title')}`}
-        </ButtonText>
+        <Box testID="settings-back-icon" className="items-center justify-center">
+          <ButtonIcon as={ChevronLeftIcon} className="text-primary" />
+        </Box>
       </Button>
       <Text testID="settings-detail-title" size="3xl" className="font-semibold text-foreground">
         {props.title}
@@ -325,6 +339,9 @@ function SettingRow(props: SettingRowProps): React.JSX.Element {
       className="h-auto w-full rounded-none bg-card px-4 py-4"
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
       <HStack space="md" className="min-h-10 flex-1 items-center justify-between">
+        <Box testID={`${props.rowTestID}-icon`} className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+          <ButtonIcon as={props.icon} className="text-primary" />
+        </Box>
         <ButtonText className="flex-1 text-base font-semibold text-card-foreground">
           {props.label}
         </ButtonText>
@@ -332,9 +349,9 @@ function SettingRow(props: SettingRowProps): React.JSX.Element {
           <ButtonText testID={props.valueTestID} className="text-sm text-muted-foreground">
             {props.value}
           </ButtonText>
-          <ButtonText className="text-xl text-muted-foreground">
-            ›
-          </ButtonText>
+          <Box testID={`${props.rowTestID}-disclosure`} className="items-center justify-center">
+            <ButtonIcon as={ChevronRightIcon} className="text-muted-foreground" />
+          </Box>
         </HStack>
       </HStack>
     </Button>
@@ -412,8 +429,8 @@ function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo; showsDisclo
 
   return (
     <HStack className="items-center rounded-2xl bg-card px-4 py-4" space="md">
-      <Box testID="settings-linked-watch-icon" className="h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-        <Icon as={WatchIcon} size="lg" className="text-primary" />
+      <Box testID="settings-linked-watch-icon" className="h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+        <Icon as={WatchIcon} size="sm" className="text-primary" />
       </Box>
       <VStack space="xs" className="flex-1">
         <Text testID="settings-linked-watch-name" className="text-base font-semibold text-card-foreground">
@@ -424,9 +441,9 @@ function LinkedWatchCard(props: { linkedWatchInfo?: LinkedWatchInfo; showsDisclo
         </Text>
       </VStack>
       {props.showsDisclosure ? (
-        <Text className="text-xl text-muted-foreground">
-          ›
-        </Text>
+        <Box testID="settings-row-devices-disclosure" className="items-center justify-center">
+          <Icon as={ChevronRightIcon} size="md" className="text-muted-foreground" />
+        </Box>
       ) : null}
     </HStack>
   );
