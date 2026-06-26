@@ -1,5 +1,17 @@
 # Wiki 기록
 
+## 2026-06-27 - 기록 - WatchConnectivity 재연결 crash blocker
+
+- 수정:
+  - `.wiki/wiki/architecture/implementation-priorities.md`
+  - `.wiki/wiki/questions/open-questions.md`
+  - `docs/2026-06-26-pre-device-priorities/watchconnectivity-real-device-checklist.md`
+  - `.wiki/wiki/log.md`
+- 근거:
+  - 사용자 보고: 모바일과 watch 연결이 끊긴 상태에서 watch로 다이빙 기록을 만든 뒤 재연결 후 앱에서 동기화를 시도하면 crash 발생
+- 요약:
+  - 실기기 검증 전에 해결해야 하는 WatchConnectivity blocker로 기록했다. 기본 자동 동기화와 Logbook `워치 동기화` 버튼 기반 수동 재시도가 모두 pending watch 기록을 crash 없이 import해야 한다.
+
 ## 2026-06-26 - 구현 - pre-device priorities
 
 - 수정:

@@ -29,10 +29,13 @@ This checklist is a manual gate before claiming paired-device WatchConnectivity 
 
 ## Manual Drain And Retry
 
+- Treat this section as a pre-device-test blocker: if the phone and watch are disconnected while the watch saves a dive session, reconnecting and attempting sync from the mobile app must not crash.
+- Confirm watch sync runs automatically after reconnection when the OS delivers the pending WatchConnectivity payload.
 - Save a watch session while the iPhone app is not actively showing the Logbook.
 - Open Logbook and tap the watch sync action.
-- Confirm pending native inbox payloads drain into the persistent Logbook repository.
+- Confirm pending native inbox payloads drain into the persistent Logbook repository when the automatic path did not already import them.
 - If a transfer fails, confirm the payload is not acknowledged as imported and can be retried on app restart.
+- If automatic sync fails for any reason, tap the Logbook watch sync action and confirm the same watch session imports without duplicate loss or app crash.
 - Observe whether repeated failures have user-visible status; current implementation does not include a finished retry/backoff policy UI.
 
 ## Background And Killed-App Delivery

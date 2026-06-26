@@ -61,6 +61,7 @@
 4. WatchConnectivity 실기기 검증과 sync 상태 확정
    - watch 로컬 세션이 실제 paired iPhone으로 전달되는지 지원 hardware에서 검증해야 한다.
    - Durable native inbox, reachable live message, JS acknowledge, 모바일 수신 성공 시 `synced` 표시, watch acknowledgement status 갱신은 구현됐지만, 사용자-facing retry/backoff policy와 manual retry UI는 아직 없다.
+   - 모바일과 watch 연결이 끊긴 상태에서 watch로 다이빙 기록을 만든 뒤 다시 연결하고 앱에서 동기화를 시도하면 crash가 발생하는 사례가 보고됐다. 실기기 검증 전에 자동 watch 동기화가 기본으로 동작해야 하고, 자동 동기화가 실패하더라도 Logbook의 `워치 동기화` 버튼으로 같은 기록이 정상 import되어야 한다.
    - entitlement, background delivery, 장시간 retry behavior, 실기기 pairing은 simulator만으로 검증됐다고 쓰면 안 된다.
    - 관련 문서: [[architecture/watch-app]], [[architecture/sync-flow]]
 
