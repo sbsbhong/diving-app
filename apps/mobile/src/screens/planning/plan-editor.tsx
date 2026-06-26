@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
-import { InstrumentButton, SelectorPill } from '../../components/ui/instrument';
+import { InstrumentButton, ScreenBackButton, SelectorPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
@@ -71,6 +71,11 @@ export function PlanEditor(props: PlanEditorProps): React.JSX.Element {
 
   return (
     <DiveSummaryCard accent="primary">
+      <ScreenBackButton
+        testID="planning-editor-back"
+        accessibilityLabel={t('common.back', { defaultValue: 'Back' })}
+        onPress={props.onCancel}
+      />
       <DiveSummaryCard.Header
         eyebrow={t('planning.editorEyebrow', { defaultValue: 'Planbook entry' })}
         title={t(mode === 'edit' ? 'planning.editorEditTitle' : 'planning.editorTitle', {

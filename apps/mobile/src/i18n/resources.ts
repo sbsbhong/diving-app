@@ -8,6 +8,9 @@ const resources = {
         memory: '메모리',
         settings: '설정',
       },
+      common: {
+        back: '뒤로',
+      },
       settings: {
         title: '설정',
         subtitle: '앱 표시 방식과 로컬 선호를 관리합니다.',
@@ -349,6 +352,9 @@ const resources = {
         planning: 'Plan',
         memory: 'Memory',
         settings: 'Settings',
+      },
+      common: {
+        back: 'Back',
       },
       settings: {
         title: 'Settings',

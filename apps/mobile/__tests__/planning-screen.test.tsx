@@ -153,6 +153,19 @@ describe('Planning screen planbook flow', () => {
     expect(root.findByProps({ testID: 'planning-plan-row-Blue Wall' })).toBeTruthy();
   });
 
+  it('shows a back icon on the local plan editor', async () => {
+    const renderer = await renderPlanning(new LocalDivePlanRepository([]));
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+
+    expect(root.findByProps({ testID: 'planning-editor-back-icon' })).toBeTruthy();
+    await press(root, 'planning-editor-back');
+
+    expect(root.findAllByProps({ testID: 'planning-editor-title' })).toHaveLength(0);
+    expect(root.findByProps({ testID: 'planning-create-action' })).toBeTruthy();
+  });
+
   it('plan editor exposes only scuba and freedive modes', async () => {
     const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
     const renderer = await renderPlanning(repository);
@@ -247,6 +260,27 @@ describe('Planning screen planbook flow', () => {
       objective: 'Line practice',
     });
     expect(root.findByProps({ testID: 'planning-plan-row-Edited Reef' })).toBeTruthy();
+  });
+
+  it('shows a back icon on the local plan detail', async () => {
+    const repository = new LocalDivePlanRepository([
+      plan({
+        localId: 'plan-1',
+        status: 'planned',
+        title: 'Route plan',
+        site: { name: 'Route Reef' },
+      }),
+    ]);
+    const renderer = await renderPlanning(repository);
+    const root = renderer.root;
+
+    await press(root, 'planning-plan-row-Route Reef');
+
+    expect(root.findByProps({ testID: 'planning-detail-back-icon' })).toBeTruthy();
+    await press(root, 'planning-detail-back');
+
+    expect(root.findAllByProps({ testID: 'planning-detail-edit' })).toHaveLength(0);
+    expect(root.findByProps({ testID: 'planning-plan-row-Route Reef' })).toBeTruthy();
   });
 
   it('delegates plan detail and creation to the app route when provided', async () => {

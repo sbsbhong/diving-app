@@ -268,6 +268,19 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'log-entry-editor-save' })).toBeTruthy();
   });
 
+  test('manual editor shows a back icon for local navigation', async () => {
+    const renderer = await renderLogbook(new LocalDiveLogRepository([]));
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+
+    expect(root.findByProps({ testID: 'log-entry-editor-back-icon' })).toBeTruthy();
+    await press(root, 'log-entry-editor-back');
+
+    expect(root.findAllByProps({ testID: 'log-entry-editor-title' })).toHaveLength(0);
+    expect(root.findByProps({ testID: 'logbook-create-action' })).toBeTruthy();
+  });
+
   test('manual editor exposes only scuba and freedive modes', async () => {
     const renderer = await renderLogbook(new LocalDiveLogRepository([]));
     const root = renderer.root;
@@ -528,6 +541,7 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-list-item-Manual Reef');
     expect(root.findByProps({ testID: 'log-entry-detail-provenance-max-depth-manual' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-back-icon' })).toBeTruthy();
 
     await press(root, 'log-entry-detail-back');
     await press(root, 'logbook-list-item-Watch Reef');

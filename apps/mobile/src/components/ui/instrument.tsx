@@ -3,6 +3,7 @@ import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { Box } from './box';
 import { Button, ButtonIcon, ButtonText } from './button';
+import { ChevronLeftIcon } from './icon';
 import { Text } from './text';
 import type { InstrumentTone } from './theme';
 
@@ -99,6 +100,37 @@ const instrumentButtonVariant = {
   secondary: 'secondary',
   danger: 'ghost',
 } as const;
+
+type ScreenBackButtonProps = Omit<React.ComponentProps<typeof Button>, 'children' | 'className' | 'style' | 'variant' | 'size'> & {
+  accessibilityLabel: string;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
+};
+
+const screenBackButtonStyles = tva({
+  base: 'h-10 w-10 self-start rounded-full bg-primary/10',
+});
+
+export function ScreenBackButton({
+  className,
+  style,
+  testID,
+  ...pressableProps
+}: ScreenBackButtonProps): React.JSX.Element {
+  return (
+    <Button
+      {...pressableProps}
+      testID={testID}
+      variant="ghost"
+      size="icon"
+      className={screenBackButtonStyles({ class: className })}
+      style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
+      <Box testID={typeof testID === 'string' ? `${testID}-icon` : undefined} className="items-center justify-center">
+        <ButtonIcon as={ChevronLeftIcon} className="text-primary" />
+      </Box>
+    </Button>
+  );
+}
 
 export function InstrumentButton({
   label,

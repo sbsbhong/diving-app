@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
-import { InstrumentButton, StatusPill } from '../../components/ui/instrument';
+import { InstrumentButton, ScreenBackButton, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
@@ -26,6 +26,11 @@ export function PlanDetail(props: PlanDetailProps): React.JSX.Element {
 
   return (
     <DiveSummaryCard accent="primary">
+      <ScreenBackButton
+        testID="planning-detail-back"
+        accessibilityLabel={t('common.back', { defaultValue: 'Back' })}
+        onPress={props.onBack}
+      />
       <DiveSummaryCard.Header
         eyebrow={t('planning.detailEyebrow', { defaultValue: 'Plan detail' })}
         title={title}
@@ -92,7 +97,6 @@ export function PlanDetail(props: PlanDetailProps): React.JSX.Element {
               onPress={() => props.onDelete?.(props.plan.localId)}
             />
           ) : null}
-          <InstrumentButton testID="planning-detail-back" label={t('logbook.backToList', { defaultValue: 'Back to list' })} onPress={props.onBack} />
         </VStack>
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>

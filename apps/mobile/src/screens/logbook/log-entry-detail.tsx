@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
-import { InstrumentButton, StatusPill } from '../../components/ui/instrument';
+import { InstrumentButton, ScreenBackButton, StatusPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
@@ -39,6 +39,13 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
 
   return (
     <DiveSummaryCard accent="primary">
+      {props.onBack ? (
+        <ScreenBackButton
+          testID="log-entry-detail-back"
+          accessibilityLabel={t('common.back', { defaultValue: 'Back' })}
+          onPress={props.onBack}
+        />
+      ) : null}
       <DiveSummaryCard.Header
         eyebrow={sourceLabel}
         title={props.entry.manual.title ?? props.entry.manual.site.name ?? t('logbook.detailTitle')}
@@ -111,7 +118,6 @@ export function LogEntryDetail(props: LogEntryDetailProps): React.JSX.Element {
           {props.onEdit ? (
             <InstrumentButton testID="log-entry-detail-edit" label={t('logbook.editLog')} variant="primary" onPress={() => props.onEdit?.(props.entry)} />
           ) : null}
-          {props.onBack ? <InstrumentButton testID="log-entry-detail-back" label={t('logbook.backToList')} onPress={props.onBack} /> : null}
           {props.onDelete ? (
             <InstrumentButton
               label={t('logbook.deleteLog')}
