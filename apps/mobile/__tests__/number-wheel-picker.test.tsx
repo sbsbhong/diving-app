@@ -8,6 +8,7 @@ import {
   getWheelLayout,
 } from '../src/components/ui/number-wheel-picker';
 import { MultiColumnNumberWheelPicker } from '../src/components/ui/multi-column-number-wheel-picker';
+import { DepthWheelField, DurationWheelField } from '../src/screens/common/form/compound-number-wheel-fields';
 import { NumericSliderField } from '../src/screens/common/form/numeric-slider-field';
 
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
@@ -173,6 +174,205 @@ describe('NumberWheelPicker', () => {
     expect(renderer!.root.findByProps({ testID: 'depth-picker-tenths-value' }).props.children).toBe('.6');
     expect(renderer!.root.findByProps({ testID: 'depth-picker-unit-fixed' }).props.children).toBe('m');
     expect(renderer!.root.findAllByProps({ testID: 'depth-picker-column-unit-wheel-list' })).toHaveLength(0);
+  });
+
+  it('renders duration seconds as minute and second columns without emitting on mount', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DurationWheelField
+          label="Duration"
+          valueSeconds={602}
+          maxSeconds={240 * 60}
+          onChange={onChange}
+          testID="duration-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-minutes-value' }).props.children).toBe('10');
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-seconds-value' }).props.children).toBe('02');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('emits composed seconds when the duration seconds column changes', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DurationWheelField
+          label="Duration"
+          valueSeconds={600}
+          maxSeconds={240 * 60}
+          onChange={onChange}
+          testID="duration-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const secondsList = renderer!.root.findByProps({ testID: 'duration-picker-column-seconds-wheel-list' });
+    await ReactTestRenderer.act(async () => {
+      secondsList.props.onScroll({ nativeEvent: { contentOffset: { y: ITEM_HEIGHT * 3 } } });
+    });
+
+    expect(onChange).toHaveBeenCalledWith(603);
+  });
+
+  it('commits duration direct input in colon, unit, and seconds forms', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DurationWheelField
+          label="Duration"
+          valueSeconds={0}
+          maxSeconds={240 * 60}
+          onChange={onChange}
+          testID="duration-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const root = renderer!.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'duration-picker-input-trigger' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onChangeText === 'function')!.props.onChangeText('10:03');
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function')!.props.onSubmitEditing();
+    });
+    expect(onChange).toHaveBeenLastCalledWith(603);
+
+    await ReactTestRenderer.act(async () => {
+      renderer!.update(
+        <DurationWheelField
+          label="Duration"
+          valueSeconds={0}
+          maxSeconds={240 * 60}
+          onChange={onChange}
+          testID="duration-picker"
+        />,
+      );
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'duration-picker-input-trigger' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onChangeText === 'function')!.props.onChangeText('10m03s');
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function')!.props.onSubmitEditing();
+    });
+    expect(onChange).toHaveBeenLastCalledWith(603);
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'duration-picker-input-trigger' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onChangeText === 'function')!.props.onChangeText('603');
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'duration-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function')!.props.onSubmitEditing();
+    });
+    expect(onChange).toHaveBeenLastCalledWith(603);
+  });
+
+  it('renders depth meters as integer, decimal, and fixed meter columns', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DepthWheelField
+          label="Max depth"
+          valueMeters={18.6}
+          maxMeters={60}
+          onChange={onChange}
+          testID="depth-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-meters-value' }).props.children).toBe('18');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-tenths-value' }).props.children).toBe('.6');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-unit-fixed' }).props.children).toBe('m');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('commits depth direct input and clamps to max tenth precision', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DepthWheelField
+          label="Max depth"
+          valueMeters={0}
+          maxMeters={60}
+          onChange={onChange}
+          testID="depth-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const root = renderer!.root;
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'depth-picker-input-trigger' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onChangeText === 'function')!.props.onChangeText('19.6');
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function')!.props.onSubmitEditing();
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(19.6);
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'depth-picker-input-trigger' }).props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onChangeText === 'function')!.props.onChangeText('99.9');
+    });
+    await ReactTestRenderer.act(async () => {
+      root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function')!.props.onSubmitEditing();
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(60);
+  });
+
+  it('keeps undefined compound values visual only until the user changes them', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <DepthWheelField
+          label="Max depth"
+          valueMeters={undefined}
+          maxMeters={60}
+          onChange={onChange}
+          testID="depth-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-meters-value' }).props.children).toBe('0');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-tenths-value' }).props.children).toBe('.0');
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('renders a plain scroll-backed snapping wheel from min to max using step', async () => {
