@@ -47,6 +47,8 @@ export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
               min={0}
               max={60}
               step={0.1}
+              unitLabel="m"
+              valueType="float"
               required
               error={props.errors.plannedMaxDepthMeters?.message}
               testID="planning-editor-planned-max-depth"
@@ -66,6 +68,8 @@ export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
               min={0}
               max={240}
               step={1}
+              unitLabel="min"
+              valueType="int"
               required
               error={props.errors.plannedDurationMinutes?.message}
               testID="planning-editor-planned-duration"
@@ -114,6 +118,7 @@ export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
               min={0}
               max={200}
               step={1}
+              valueType="int"
               error={props.errors.repetitionTarget?.message}
               testID="planning-editor-repetition-target"
               placeholder="8"
@@ -177,7 +182,6 @@ function ModeSection(props: { title: string; children: React.ReactNode }): React
     <VStack space="sm" className="rounded-2xl border border-border bg-card px-4 py-4">
       <HStack className="items-center justify-between">
         <Text className="text-xs font-semibold uppercase text-primary">{props.title}</Text>
-        <Text className="rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">OPTIONAL</Text>
       </HStack>
       {props.children}
     </VStack>

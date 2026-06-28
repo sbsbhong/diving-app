@@ -178,6 +178,8 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
                 min={0}
                 max={240}
                 step={1}
+                unitLabel="min"
+                valueType="int"
                 required
                 error={errors.durationMinutes?.message}
                 testID="log-entry-editor-duration"
@@ -197,6 +199,8 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
                 min={0}
                 max={60}
                 step={0.1}
+                unitLabel="m"
+                valueType="float"
                 required
                 error={errors.maxDepthMeters?.message}
                 testID="log-entry-editor-max-depth"

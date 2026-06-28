@@ -1,9 +1,12 @@
 'use client';
 import React from 'react';
-import { FlatList as RNFlatList, Platform, FlatListProps } from 'react-native';
+import { FlatList as RNFlatList, Platform, type FlatListProps } from 'react-native';
 
 // Performance-optimized FlatList with Android defaults
-export function FlatList<ItemT = any>(props: FlatListProps<ItemT>) {
+function FlatListInner<ItemT = any>(
+  props: FlatListProps<ItemT>,
+  ref: React.ForwardedRef<RNFlatList<ItemT>>,
+): React.JSX.Element {
   // Apply Android-specific performance defaults if not explicitly overridden
   const optimizedProps = Platform.OS === 'android' ? {
     removeClippedSubviews: true,
@@ -14,8 +17,12 @@ export function FlatList<ItemT = any>(props: FlatListProps<ItemT>) {
     ...props,
   } : props;
 
-  return <RNFlatList {...optimizedProps} />;
+  return <RNFlatList ref={ref} {...optimizedProps} />;
 }
+
+export const FlatList = React.forwardRef(FlatListInner) as <ItemT = any>(
+  props: FlatListProps<ItemT> & React.RefAttributes<RNFlatList<ItemT>>,
+) => React.JSX.Element;
 
 // Also export the original for advanced use cases
 export { FlatList as RNFlatList } from 'react-native';

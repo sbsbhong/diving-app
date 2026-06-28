@@ -245,16 +245,19 @@ const changeDateTime = async (root: ReactTestRenderer.ReactTestInstance, testID:
 
 const changeNumber = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: number) => {
   await ReactTestRenderer.act(async () => {
-    const trigger = root.findAllByProps({ testID }).find(match => typeof match.props.onPress === 'function');
-    trigger?.props.onPress();
+    root.findByProps({ testID: `${testID}-input-trigger` }).props.onPress();
   });
 
   await ReactTestRenderer.act(async () => {
-    root.findByProps({ testID: `${testID}-option-${numberOptionToken(value)}` }).props.onPress();
+    const input = root.findAllByProps({ testID: `${testID}-input` }).find(match => typeof match.props.onChangeText === 'function');
+    input!.props.onChangeText(`${value}`);
+  });
+
+  await ReactTestRenderer.act(async () => {
+    const input = root.findAllByProps({ testID: `${testID}-input` }).find(match => typeof match.props.onSubmitEditing === 'function');
+    input!.props.onSubmitEditing();
   });
 };
-
-const numberOptionToken = (value: number) => `${value}`.replace('.', '_');
 
 const numericTestIDs = new Set([
   'log-entry-editor-duration',
@@ -574,9 +577,14 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'log-entry-editor-started-at-date' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-started-at-time' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-duration-wheel' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-editor-duration-wheel-list' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-max-depth-wheel' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-editor-max-depth-wheel-list' })).toBeTruthy();
     expect(root.findAllByProps({ testID: 'log-entry-editor-started-at' }).filter(match => typeof match.props.onChangeText === 'function')).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'log-entry-editor-duration-slider' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-duration-decrement' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'log-entry-editor-duration-increment' })).toHaveLength(0);
+    expect(root.findAllByProps({ children: 'OPTIONAL' })).toHaveLength(0);
   });
 
   test('uses the date time picker value when saving a manual log', async () => {

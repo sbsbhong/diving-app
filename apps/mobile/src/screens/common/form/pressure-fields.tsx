@@ -61,6 +61,8 @@ export function PressureFields(props: PressureFieldsProps): React.JSX.Element {
           min={range.min}
           max={range.max}
           step={range.step}
+          unitLabel={unit}
+          valueType="int"
           error={props.errors?.start}
           testID={`${props.testIDPrefix}-start`}
         />
@@ -72,6 +74,8 @@ export function PressureFields(props: PressureFieldsProps): React.JSX.Element {
           min={range.min}
           max={range.max}
           step={range.step}
+          unitLabel={unit}
+          valueType="int"
           error={props.errors?.end}
           testID={`${props.testIDPrefix}-end`}
         />

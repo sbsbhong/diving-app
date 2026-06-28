@@ -120,6 +120,7 @@ export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.El
                 min={0}
                 max={200}
                 step={1}
+                valueType="int"
                 error={props.errors.repetitionCount?.message}
                 testID="log-entry-editor-repetition-count"
                 placeholder="8"
@@ -168,7 +169,6 @@ function ModeSection(props: { title: string; children: React.ReactNode }): React
     <VStack space="sm" className="rounded-2xl border border-border bg-card px-4 py-4">
       <HStack className="items-center justify-between">
         <Text className="text-xs font-semibold uppercase text-primary">{props.title}</Text>
-        <Text className="rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">OPTIONAL</Text>
       </HStack>
       {props.children}
     </VStack>

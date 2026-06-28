@@ -142,16 +142,19 @@ const changeDateTime = async (root: ReactTestRenderer.ReactTestInstance, testID:
 
 const changeNumber = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: number) => {
   await ReactTestRenderer.act(async () => {
-    const trigger = root.findAllByProps({ testID }).find(match => typeof match.props.onPress === 'function');
-    trigger?.props.onPress();
+    root.findByProps({ testID: `${testID}-input-trigger` }).props.onPress();
   });
 
   await ReactTestRenderer.act(async () => {
-    root.findByProps({ testID: `${testID}-option-${numberOptionToken(value)}` }).props.onPress();
+    const input = root.findAllByProps({ testID: `${testID}-input` }).find(match => typeof match.props.onChangeText === 'function');
+    input!.props.onChangeText(`${value}`);
+  });
+
+  await ReactTestRenderer.act(async () => {
+    const input = root.findAllByProps({ testID: `${testID}-input` }).find(match => typeof match.props.onSubmitEditing === 'function');
+    input!.props.onSubmitEditing();
   });
 };
-
-const numberOptionToken = (value: number) => `${value}`.replace('.', '_');
 
 const findInputLike = (root: ReactTestRenderer.ReactTestInstance, testID: string): ReactTestRenderer.ReactTestInstance => {
   const matches = root.findAllByProps({ testID });
@@ -265,9 +268,14 @@ describe('Planning screen planbook flow', () => {
     expect(root.findByProps({ testID: 'planning-editor-planned-at-date' })).toBeTruthy();
     expect(root.findByProps({ testID: 'planning-editor-planned-at-time' })).toBeTruthy();
     expect(root.findByProps({ testID: 'planning-editor-planned-duration-wheel' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-duration-wheel-list' })).toBeTruthy();
     expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-wheel' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-wheel-list' })).toBeTruthy();
     expect(root.findAllByProps({ testID: 'planning-editor-planned-at' }).filter(match => typeof match.props.onChangeText === 'function')).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-slider' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-decrement' })).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-increment' })).toHaveLength(0);
+    expect(root.findAllByProps({ children: 'OPTIONAL' })).toHaveLength(0);
   });
 
   it('commits plan lists as badges and removes them before saving', async () => {
