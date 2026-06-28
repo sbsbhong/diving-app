@@ -8,7 +8,7 @@ export type LogEntryFormValues = {
   diveMode: NonNullable<WatchSession['diveMode']>;
   entryStyle?: DiveEntryStyle;
   siteName: string;
-  durationMinutes: number | undefined;
+  durationSeconds: number | undefined;
   maxDepthMeters: number | undefined;
   gasLabel?: 'Air';
   gearIds: string[];
@@ -83,7 +83,7 @@ export const logEntryFormSchema = z.object({
   diveMode: z.enum(['scuba', 'freedive']),
   entryStyle: z.enum(['shore', 'boat', 'pool']).optional(),
   siteName: z.string().trim().min(1, '사이트 이름을 입력해주세요.'),
-  durationMinutes: requiredNumber(makeNumberMessages('시간(분)', '선택'), 240),
+  durationSeconds: requiredNumber(makeNumberMessages('시간', '선택'), 240 * 60),
   maxDepthMeters: requiredNumber(makeNumberMessages('최대 수심(m)', '선택'), 60),
   gasLabel: z.literal('Air').optional(),
   gearIds: z.array(z.string()),
@@ -109,7 +109,7 @@ export function entryToLogEntryFormValues(entry: DiveLogEntry): LogEntryFormValu
     diveMode,
     entryStyle: entry.manual.entryStyle,
     siteName: entry.manual.site.name ?? '',
-    durationMinutes: secondsToMinutesNumber(getEditorNumber(entry, 'durationSeconds')),
+    durationSeconds: getEditorNumber(entry, 'durationSeconds'),
     maxDepthMeters: getEditorNumber(entry, 'maxDepthMeters'),
     gasLabel: diveMode === 'scuba' ? 'Air' : undefined,
     gearIds: [...entry.manual.gearIds],
@@ -154,8 +154,8 @@ export function logEntryFormValuesToEntry(
   applyStartedAtValue(entry, measuredValues, provenance, values, dirtyFields);
   applyEditableNumberValue(entry, measuredValues, provenance, {
     field: 'durationSeconds',
-    draftKey: 'durationMinutes',
-    value: minutesToSeconds(values.durationMinutes),
+    draftKey: 'durationSeconds',
+    value: values.durationSeconds,
     dirtyFields,
     visible: true,
   });
@@ -455,14 +455,6 @@ function pressureToFormValue(value: DivePressureValues | undefined): DivePressur
 function emptyToUndefined(value: string): string | undefined {
   const trimmedValue = value.trim();
   return trimmedValue.length ? trimmedValue : undefined;
-}
-
-function minutesToSeconds(value: number | undefined): number | undefined {
-  return value === undefined ? undefined : Math.round(value * 60);
-}
-
-function secondsToMinutesNumber(value: number | undefined): number | undefined {
-  return value === undefined ? undefined : Math.round(value / 60);
 }
 
 function isDirty(dirtyFields: LogEntryDirtyFields, key: keyof LogEntryFormValues): boolean {

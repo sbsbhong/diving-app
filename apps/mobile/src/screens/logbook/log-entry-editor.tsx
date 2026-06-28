@@ -12,9 +12,9 @@ import type { DiveEntryStyle } from '../../types/dive-plan';
 import type { DiveLogEntry } from '../../types/dive-log-entry';
 import type { WatchSession } from '../../types/dive-session';
 import { BadgeListField } from '../common/form/badge-list-field';
+import { DepthWheelField, DurationWheelField } from '../common/form/compound-number-wheel-fields';
 import { DateTimeField } from '../common/form/date-time-field';
 import { EditorField } from '../common/form/editor-field';
-import { NumericSliderField } from '../common/form/numeric-slider-field';
 import { StarRatingField } from '../common/form/star-rating-field';
 import {
   entryToLogEntryFormValues,
@@ -168,22 +168,17 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
         <HStack space="md">
           <Controller
             control={form.control}
-            name="durationMinutes"
+            name="durationSeconds"
             render={({ field }) => (
-              <NumericSliderField
+              <DurationWheelField
                 className="flex-1"
-                label={t('logbook.durationMinutes')}
-                value={field.value}
+                label={t('logbook.durationSeconds', { defaultValue: 'Duration' })}
+                valueSeconds={field.value}
                 onChange={field.onChange}
-                min={0}
-                max={240}
-                step={1}
-                unitLabel="min"
-                valueType="int"
+                maxSeconds={240 * 60}
                 required
-                error={errors.durationMinutes?.message}
+                error={errors.durationSeconds?.message}
                 testID="log-entry-editor-duration"
-                placeholder="47"
               />
             )}
           />
@@ -191,20 +186,15 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
             control={form.control}
             name="maxDepthMeters"
             render={({ field }) => (
-              <NumericSliderField
+              <DepthWheelField
                 className="flex-1"
                 label={t('logbook.maxDepthMeters')}
-                value={field.value}
+                valueMeters={field.value}
                 onChange={field.onChange}
-                min={0}
-                max={60}
-                step={0.1}
-                unitLabel="m"
-                valueType="float"
+                maxMeters={60}
                 required
                 error={errors.maxDepthMeters?.message}
                 testID="log-entry-editor-max-depth"
-                placeholder="18.6"
               />
             )}
           />
@@ -304,7 +294,7 @@ function getFirstLogEntryErrorField(errors: FieldErrors<LogEntryFormValues>): st
     'startedAt',
     'diveMode',
     'siteName',
-    'durationMinutes',
+    'durationSeconds',
     'maxDepthMeters',
     'gearIds',
     'waterCondition',
