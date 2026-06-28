@@ -12,11 +12,40 @@ import { Pressable } from './pressable';
 import { ScrollView } from './scroll-view';
 import { Text } from './text';
 
-export const ITEM_HEIGHT = 44;
+export const ITEM_HEIGHT = 36;
+export const DEFAULT_WHEEL_HEIGHT = 176;
 
-const VISIBLE_ITEM_COUNT = 5;
-const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEM_COUNT;
-const CENTER_PADDING = ITEM_HEIGHT * Math.floor(VISIBLE_ITEM_COUNT / 2);
+const MIN_VISIBLE_ITEM_COUNT = 3;
+const MIN_WHEEL_HEIGHT = ITEM_HEIGHT * MIN_VISIBLE_ITEM_COUNT;
+
+export type NumberWheelLayout = {
+  wheelHeight: number;
+  visibleItemCount: number;
+  centerPadding: number;
+};
+
+export function getWheelLayout(height = DEFAULT_WHEEL_HEIGHT): NumberWheelLayout {
+  const requestedHeight = Number.isFinite(height) ? height : DEFAULT_WHEEL_HEIGHT;
+  const wheelHeight = Math.max(MIN_WHEEL_HEIGHT, Math.round(requestedHeight));
+  const approximateCount = Math.max(MIN_VISIBLE_ITEM_COUNT, wheelHeight / ITEM_HEIGHT);
+  const visibleItemCount = toOddVisibleItemCount(approximateCount);
+
+  return {
+    wheelHeight,
+    visibleItemCount,
+    centerPadding: (wheelHeight - ITEM_HEIGHT) / 2,
+  };
+}
+
+function toOddVisibleItemCount(value: number): number {
+  const count = Math.max(MIN_VISIBLE_ITEM_COUNT, value);
+  const floor = Math.floor(count);
+  const ceiling = Math.ceil(count);
+  const lowerOdd = Math.max(MIN_VISIBLE_ITEM_COUNT, floor % 2 === 1 ? floor : floor - 1);
+  const upperOdd = Math.max(MIN_VISIBLE_ITEM_COUNT, ceiling % 2 === 1 ? ceiling : ceiling + 1);
+
+  return count - lowerOdd <= upperOdd - count ? lowerOdd : upperOdd;
+}
 
 export type NumberWheelPickerProps = {
   value: number;
@@ -28,6 +57,7 @@ export type NumberWheelPickerProps = {
   disabled?: boolean;
   valueType?: 'int' | 'float';
   onBlur?: () => void;
+  height?: number;
   testID?: string;
 };
 
@@ -41,6 +71,7 @@ export function NumberWheelPicker({
   disabled = false,
   valueType,
   onBlur,
+  height = DEFAULT_WHEEL_HEIGHT,
   testID = 'number-wheel-picker',
 }: NumberWheelPickerProps): React.JSX.Element {
   const scrollViewRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
@@ -49,6 +80,7 @@ export function NumberWheelPicker({
   const selectedIndex = React.useMemo(() => getClosestOptionIndex(options, value), [options, value]);
   const selectedValue = options[selectedIndex] ?? clamp(roundToStep(value, step), min, max);
   const inputValueType = valueType ?? (getStepPrecision(step) > 0 ? 'float' : 'int');
+  const layout = React.useMemo(() => getWheelLayout(height), [height]);
   const [displayIndex, setDisplayIndex] = React.useState(selectedIndex);
   const [isEditing, setIsEditing] = React.useState(false);
   const [draftValue, setDraftValue] = React.useState(() => formatNumber(selectedValue, step));
@@ -220,7 +252,7 @@ export function NumberWheelPicker({
         text: unitLabel ? `${formatNumber(displayValue, step)} ${unitLabel}` : formatNumber(displayValue, step),
       }}
     >
-      <Box testID={`${testID}-wheel`} className={wheelClassName} style={styles.wheel}>
+      <Box testID={`${testID}-wheel`} className={wheelClassName} style={[styles.wheel, { height: layout.wheelHeight }]}>
         <ScrollView
           ref={scrollViewRef}
           testID={`${testID}-wheel-list`}
@@ -238,22 +270,22 @@ export function NumberWheelPicker({
           nestedScrollEnabled
           bounces={false}
           scrollEventThrottle={16}
-          style={styles.scroller}
-          contentContainerStyle={styles.contentContainer}
+          style={[styles.scroller, { height: layout.wheelHeight }]}
+          contentContainerStyle={[styles.contentContainer, { paddingVertical: layout.centerPadding }]}
         >
           {optionRows}
         </ScrollView>
-        <Box pointerEvents="none" style={styles.topShade} className={shadeClassName} />
-        <Box pointerEvents="none" style={styles.bottomShade} className={shadeClassName} />
-        <Box pointerEvents="none" style={styles.selectionFrame} className="border-y border-primary/30 bg-primary/10" />
-        <Box pointerEvents="none" style={styles.selectionRail} className="bg-primary" />
+        <Box pointerEvents="none" style={[styles.topShade, { height: layout.centerPadding }]} className={shadeClassName} />
+        <Box pointerEvents="none" style={[styles.bottomShade, { height: layout.centerPadding }]} className={shadeClassName} />
+        <Box pointerEvents="none" style={[styles.selectionFrame, { top: layout.centerPadding }]} className="border-y border-primary/30 bg-primary/10" />
+        <Box pointerEvents="none" style={[styles.selectionRail, { top: layout.centerPadding + 8 }]} className="bg-primary" />
         <Pressable
           testID={`${testID}-input-trigger`}
           accessibilityRole="button"
           accessibilityLabel="Enter number"
           disabled={disabled}
           onPress={handleInputPress}
-          style={styles.selectionFrame}
+          style={[styles.selectionFrame, { top: layout.centerPadding }]}
           className="items-center justify-center px-4 data-[active=true]:bg-primary/10"
         >
           {isEditing ? (
@@ -301,45 +333,35 @@ export function NumberWheelPicker({
 const styles = StyleSheet.create({
   bottomShade: {
     bottom: 0,
-    height: CENTER_PADDING,
     left: 0,
     position: 'absolute',
     right: 0,
   },
-  contentContainer: {
-    paddingVertical: CENTER_PADDING,
-  },
+  contentContainer: {},
   item: {
     height: ITEM_HEIGHT,
   },
-  scroller: {
-    height: WHEEL_HEIGHT,
-  },
+  scroller: {},
   selectionFrame: {
     height: ITEM_HEIGHT,
     left: 0,
     position: 'absolute',
     right: 0,
-    top: CENTER_PADDING,
   },
   selectionRail: {
     borderRadius: 2,
     height: 28,
     left: 12,
     position: 'absolute',
-    top: CENTER_PADDING + 8,
     width: 4,
   },
   topShade: {
-    height: CENTER_PADDING,
     left: 0,
     position: 'absolute',
     right: 0,
     top: 0,
   },
-  wheel: {
-    height: WHEEL_HEIGHT,
-  },
+  wheel: {},
 });
 
 function makeNumberOptions(min: number, max: number, step: number): number[] {

@@ -1,6 +1,11 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { ITEM_HEIGHT, NumberWheelPicker } from '../src/components/ui/number-wheel-picker';
+import {
+  DEFAULT_WHEEL_HEIGHT,
+  ITEM_HEIGHT,
+  NumberWheelPicker,
+  getWheelLayout,
+} from '../src/components/ui/number-wheel-picker';
 
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
@@ -14,6 +19,34 @@ afterEach(async () => {
 });
 
 describe('NumberWheelPicker', () => {
+  it('uses a 176px default wheel height with five visible candidates', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={10} min={0} max={20} step={5} unitLabel="m" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const wheel = renderer!.root.findByProps({ testID: 'depth-picker-wheel' });
+    const list = renderer!.root.findByProps({ testID: 'depth-picker-wheel-list' });
+
+    expect(ITEM_HEIGHT).toBe(36);
+    expect(DEFAULT_WHEEL_HEIGHT).toBe(176);
+    expect(wheel.props.style).toEqual(expect.arrayContaining([expect.objectContaining({ height: 176 })]));
+    expect(list.props.snapToInterval).toBe(36);
+    expect(list.props.contentContainerStyle).toEqual(expect.arrayContaining([expect.objectContaining({ paddingVertical: 70 })]));
+  });
+
+  it('derives visible candidate counts from custom picker heights', () => {
+    expect(getWheelLayout(132)).toEqual({ wheelHeight: 132, visibleItemCount: 3, centerPadding: 48 });
+    expect(getWheelLayout(176)).toEqual({ wheelHeight: 176, visibleItemCount: 5, centerPadding: 70 });
+    expect(getWheelLayout(220)).toEqual({ wheelHeight: 220, visibleItemCount: 7, centerPadding: 92 });
+    expect(getWheelLayout(80)).toEqual({ wheelHeight: 108, visibleItemCount: 3, centerPadding: 36 });
+  });
+
   it('renders a vertical snapping wheel from min to max using step', async () => {
     const onChange = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
