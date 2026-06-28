@@ -6,7 +6,7 @@ import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { withStyleContext } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-import { UIIcon } from '@gluestack-ui/core/icon/creator';
+import { UIIcon } from '../icon';
 
 const SCOPE = 'FORM_CONTROL';
 
@@ -177,7 +177,7 @@ cssInterop(UIIcon, {
       height: true,
       width: true,
       fill: true,
-      color: true,
+      color: 'classNameColor',
       stroke: true,
     },
   },

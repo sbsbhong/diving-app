@@ -6,6 +6,7 @@ import { ButtonIcon } from '../src/components/ui/button';
 import i18n from '../src/i18n';
 import { AddIcon, CalendarDaysIcon } from '../src/components/ui/icon';
 import { LocalDivePlanRepository } from '../src/repositories/local-dive-plan-repository';
+import { PlanEditor } from '../src/screens/planning/plan-editor';
 import PlanningScreen from '../src/screens/planning/screen';
 import { useDivePlans } from '../src/states/use-dive-plans';
 import type { DivePlan } from '../src/types/dive-plan';
@@ -116,11 +117,41 @@ const changeText = async (root: ReactTestRenderer.ReactTestInstance, testID: str
 };
 
 const changeDateTime = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: Date) => {
+  const trigger = root.findAllByProps({ testID: `${testID}-trigger` })[0];
+  if (trigger) {
+    await ReactTestRenderer.act(async () => {
+      trigger.props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      const picker = root.findByProps({ testID: `${testID}-picker` });
+      if (typeof picker.props.onValueChange === 'function') {
+        picker.props.onValueChange({ nativeEvent: { timestamp: value.getTime(), utcOffset: 0 } }, value);
+        return;
+      }
+
+      picker.props.onChange({ type: 'set' }, value);
+    });
+    return;
+  }
+
   await ReactTestRenderer.act(async () => {
     const field = findInputLike(root, testID);
     field.props.onChange(value);
   });
 };
+
+const changeNumber = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: number) => {
+  await ReactTestRenderer.act(async () => {
+    const trigger = root.findAllByProps({ testID }).find(match => typeof match.props.onPress === 'function');
+    trigger?.props.onPress();
+  });
+
+  await ReactTestRenderer.act(async () => {
+    root.findByProps({ testID: `${testID}-option-${numberOptionToken(value)}` }).props.onPress();
+  });
+};
+
+const numberOptionToken = (value: number) => `${value}`.replace('.', '_');
 
 const findInputLike = (root: ReactTestRenderer.ReactTestInstance, testID: string): ReactTestRenderer.ReactTestInstance => {
   const matches = root.findAllByProps({ testID });
@@ -158,12 +189,12 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-editor-mode-scuba');
     await press(root, 'planning-editor-entry-style-boat');
     expect(root.findByProps({ testID: 'planning-editor-gas-label-air' })).toBeTruthy();
-    await changeText(root, 'planning-editor-planned-max-depth', '24');
-    await changeText(root, 'planning-editor-planned-duration', '45');
+    await changeNumber(root, 'planning-editor-planned-max-depth', 24);
+    await changeNumber(root, 'planning-editor-planned-duration', 45);
     await changeText(root, 'planning-editor-gear-input', 'bcd-1, computer-1,');
     await press(root, 'planning-editor-pressure-unit-psi');
-    await changeText(root, 'planning-editor-pressure-start', '3000');
-    await changeText(root, 'planning-editor-pressure-end', '900');
+    await changeNumber(root, 'planning-editor-pressure-start', 3000);
+    await changeNumber(root, 'planning-editor-pressure-end', 900);
     await press(root, 'planning-editor-save-planned');
 
     const [savedPlan] = await repository.list();
@@ -196,11 +227,47 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-create-action');
     await press(root, 'planning-editor-save-planned');
 
-    expect(root.findByProps({ testID: 'planning-editor-planned-at-error' }).props.children).toBe('Required');
-    expect(root.findByProps({ testID: 'planning-editor-site-name-error' }).props.children).toBe('Required');
-    expect(root.findByProps({ testID: 'planning-editor-planned-duration-error' }).props.children).toBe('Required');
-    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'planning-editor-planned-at-error' }).props.children).toBe('계획 날짜와 시간을 선택해주세요.');
+    expect(root.findByProps({ testID: 'planning-editor-site-name-error' }).props.children).toBe('사이트 이름을 입력해주세요.');
+    expect(root.findByProps({ testID: 'planning-editor-planned-duration-error' }).props.children).toBe('계획 시간(분)을 선택해주세요.');
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-error' }).props.children).toBe('계획 최대 수심(m)을 선택해주세요.');
     expect(await repository.list()).toEqual([]);
+  });
+
+  it('plan editor reports the first invalid field so the screen can scroll to it', async () => {
+    const onInvalidSubmit = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      await i18n.changeLanguage('en');
+      renderer = ReactTestRenderer.create(
+        <PlanEditor
+          onCancel={jest.fn()}
+          onSave={jest.fn()}
+          onInvalidSubmit={onInvalidSubmit}
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    await press(renderer!.root, 'planning-editor-save-planned');
+
+    expect(onInvalidSubmit).toHaveBeenCalledWith('plannedAt');
+  });
+
+  it('renders date time as a row trigger and numeric values as wheel pickers', async () => {
+    const renderer = await renderPlanning(new LocalDivePlanRepository([]));
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+
+    expect(root.findByProps({ testID: 'planning-editor-planned-at-trigger' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-at-date' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-at-time' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-duration-wheel' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-wheel' })).toBeTruthy();
+    expect(root.findAllByProps({ testID: 'planning-editor-planned-at' }).filter(match => typeof match.props.onChangeText === 'function')).toHaveLength(0);
+    expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-slider' })).toHaveLength(0);
   });
 
   it('commits plan lists as badges and removes them before saving', async () => {
@@ -211,10 +278,13 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-create-action');
     await changeDateTime(root, 'planning-editor-planned-at', new Date('2026-06-20T09:30:00'));
     await changeText(root, 'planning-editor-site-name', 'Badge Reef');
-    await changeText(root, 'planning-editor-planned-max-depth', '24');
-    await changeText(root, 'planning-editor-planned-duration', '45');
+    await changeNumber(root, 'planning-editor-planned-max-depth', 24);
+    await changeNumber(root, 'planning-editor-planned-duration', 45);
     await changeText(root, 'planning-editor-buddies-input', 'Mina, Alex,');
     await changeText(root, 'planning-editor-tags-input', 'reef, training,');
+    expect(root.findByProps({ testID: 'planning-editor-tags-badge-reef' }).props.className).toEqual(
+      expect.stringContaining('bg-primary/10'),
+    );
     await press(root, 'planning-editor-buddies-remove-Mina');
     await press(root, 'planning-editor-save-planned');
 
@@ -231,8 +301,8 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-create-action');
     await changeDateTime(root, 'planning-editor-planned-at', new Date('2026-06-20T09:30:00'));
     await changeText(root, 'planning-editor-site-name', 'Star Reef');
-    await changeText(root, 'planning-editor-planned-max-depth', '18');
-    await changeText(root, 'planning-editor-planned-duration', '40');
+    await changeNumber(root, 'planning-editor-planned-max-depth', 18);
+    await changeNumber(root, 'planning-editor-planned-duration', 40);
     await press(root, 'planning-editor-visibility-expectation-star-4');
     await press(root, 'planning-editor-perceived-difficulty-star-3');
     await press(root, 'planning-editor-save-planned');

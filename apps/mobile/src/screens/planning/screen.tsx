@@ -151,6 +151,10 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
     [props],
   );
 
+  const scrollToEditorError = React.useCallback((fieldName: string) => {
+    scrollViewRef.current?.scrollTo({ y: getPlanEditorFieldOffset(fieldName), animated: true });
+  }, []);
+
   return (
     <KeyboardAwareScrollView
       ref={scrollViewRef}
@@ -199,6 +203,7 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
             saveError={props.saveError}
             onCancel={() => setRoute(route === 'edit' ? 'detail' : 'list')}
             onSave={savePlan}
+            onInvalidSubmit={scrollToEditorError}
           />
         ) : null}
 
@@ -263,6 +268,30 @@ export default function PlanningScreen(props: PlanningScreenProps): React.JSX.El
       </VStack>
     </KeyboardAwareScrollView>
   );
+}
+
+function getPlanEditorFieldOffset(fieldName: string): number {
+  const offsets: Record<string, number> = {
+    title: 180,
+    plannedAt: 260,
+    diveMode: 360,
+    siteName: 500,
+    buddies: 600,
+    gearIds: 600,
+    tags: 700,
+    objective: 780,
+    plannedMaxDepthMeters: 900,
+    plannedDurationMinutes: 900,
+    plannedPressure: 1080,
+    waterCondition: 1200,
+    visibilityExpectation: 1280,
+    perceivedDifficulty: 1360,
+    trainingFocus: 1440,
+    repetitionTarget: 1080,
+    notes: 1520,
+  };
+
+  return offsets[fieldName] ?? 260;
 }
 
 function ActivePlanPanel(props: {

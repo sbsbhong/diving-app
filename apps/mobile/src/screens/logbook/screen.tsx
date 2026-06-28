@@ -159,6 +159,10 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
     [props],
   );
 
+  const scrollToEditorError = React.useCallback((fieldName: string) => {
+    scrollViewRef.current?.scrollTo({ y: getLogEntryEditorFieldOffset(fieldName), animated: true });
+  }, []);
+
   const syncWatch = React.useCallback(async () => {
     setIsSyncingWatch(true);
     setSyncToastMessage(undefined);
@@ -258,6 +262,7 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
             saveError={props.saveError}
             onCancel={() => setRoute(route === 'edit' ? 'detail' : 'list')}
             onSave={saveDraft}
+            onInvalidSubmit={scrollToEditorError}
           />
         ) : null}
 
@@ -285,6 +290,30 @@ export default function LogbookScreen(props: LogbookScreenProps): React.JSX.Elem
       </VStack>
     </KeyboardAwareScrollView>
   );
+}
+
+function getLogEntryEditorFieldOffset(fieldName: string): number {
+  const offsets: Record<string, number> = {
+    startedAt: 220,
+    diveMode: 300,
+    siteName: 430,
+    durationMinutes: 520,
+    maxDepthMeters: 520,
+    gearIds: 680,
+    waterCondition: 760,
+    visibilityRating: 840,
+    perceivedExertion: 920,
+    pressure: 1000,
+    repetitionCount: 700,
+    trainingFocus: 780,
+    buddies: 1120,
+    tags: 1200,
+    observedMarineLife: 1280,
+    notes: 1360,
+    rating: 1460,
+  };
+
+  return offsets[fieldName] ?? 220;
 }
 
 function EmptyLogbook(): React.JSX.Element {

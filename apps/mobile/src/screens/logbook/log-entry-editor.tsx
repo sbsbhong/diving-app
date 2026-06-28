@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
-import { Controller, useForm, type Resolver } from 'react-hook-form';
+import { Controller, useForm, type FieldErrors, type Resolver } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, ScreenBackButton, SelectorPill } from '../../components/ui/instrument';
@@ -32,6 +32,7 @@ type LogEntryEditorProps = {
   saveError?: Error | null;
   onCancel: () => void;
   onSave: (entry: DiveLogEntry) => Promise<DiveLogEntry>;
+  onInvalidSubmit?: (fieldName: string) => void;
 };
 
 const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive'];
@@ -49,6 +50,16 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
   const mode = props.mode ?? 'create';
   const errors = form.formState.errors;
 
+  const handleInvalidSubmit = React.useCallback(
+    (fieldErrors: FieldErrors<LogEntryFormValues>) => {
+      const firstInvalidField = getFirstLogEntryErrorField(fieldErrors);
+      if (firstInvalidField) {
+        props.onInvalidSubmit?.(firstInvalidField);
+      }
+    },
+    [props],
+  );
+
   const save = form.handleSubmit(async values => {
     setLocalSaveFailed(false);
     try {
@@ -57,7 +68,7 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
       setLocalSaveFailed(true);
       // Keep the draft in place while React Query exposes the mutation error state.
     }
-  });
+  }, handleInvalidSubmit);
 
   return (
     <DiveSummaryCard accent="primary">
@@ -185,7 +196,7 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
                 onChange={field.onChange}
                 min={0}
                 max={60}
-                step={0.5}
+                step={0.1}
                 required
                 error={errors.maxDepthMeters?.message}
                 testID="log-entry-editor-max-depth"
@@ -282,4 +293,28 @@ export function LogEntryEditor(props: LogEntryEditorProps): React.JSX.Element {
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
   );
+}
+
+function getFirstLogEntryErrorField(errors: FieldErrors<LogEntryFormValues>): string | undefined {
+  const fieldOrder: Array<keyof LogEntryFormValues> = [
+    'startedAt',
+    'diveMode',
+    'siteName',
+    'durationMinutes',
+    'maxDepthMeters',
+    'gearIds',
+    'waterCondition',
+    'visibilityRating',
+    'perceivedExertion',
+    'pressure',
+    'repetitionCount',
+    'trainingFocus',
+    'buddies',
+    'tags',
+    'observedMarineLife',
+    'notes',
+    'rating',
+  ];
+
+  return fieldOrder.find(fieldName => Boolean(errors[fieldName]));
 }

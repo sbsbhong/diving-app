@@ -165,8 +165,11 @@ export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.El
 
 function ModeSection(props: { title: string; children: React.ReactNode }): React.JSX.Element {
   return (
-    <VStack space="sm" className="rounded-2xl bg-muted px-4 py-4">
-      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.title}</Text>
+    <VStack space="sm" className="rounded-2xl border border-border bg-card px-4 py-4">
+      <HStack className="items-center justify-between">
+        <Text className="text-xs font-semibold uppercase text-primary">{props.title}</Text>
+        <Text className="rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">OPTIONAL</Text>
+      </HStack>
       {props.children}
     </VStack>
   );

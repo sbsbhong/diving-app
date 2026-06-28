@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, ButtonText } from '../../../components/ui/button';
+import { Button, ButtonIcon } from '../../../components/ui/button';
 import { HStack } from '../../../components/ui/hstack';
+import { CloseIcon } from '../../../components/ui/icon';
 import { Input, InputField } from '../../../components/ui/input';
 import { Text } from '../../../components/ui/text';
 import { VStack } from '../../../components/ui/vstack';
@@ -74,25 +75,30 @@ export function BadgeListField(props: BadgeListFieldProps): React.JSX.Element {
       <VStack space="sm">
         {props.values.length ? (
           <HStack space="xs" className="flex-wrap">
-            {props.values.map(value => (
+            {props.values.map((value, index) => {
+              const badgeTone = getBadgeTone(index);
+
+              return (
               <HStack
                 key={value}
                 testID={`${props.badgeTestIDPrefix}-badge-${value}`}
                 space="xs"
-                className="mr-1 items-center rounded-full border border-border bg-background px-2 py-1"
+                className={`mr-1 items-center rounded-full border px-2 py-1 ${badgeTone.container}`}
               >
-                <Text className="text-xs font-semibold text-card-foreground">{value}</Text>
+                <Text className={`text-xs font-semibold ${badgeTone.text}`}>{value}</Text>
                 <Button
                   testID={`${props.badgeTestIDPrefix}-remove-${value}`}
                   size="icon"
                   variant="ghost"
+                  accessibilityLabel={`${value} 삭제`}
                   className="ml-1 min-h-4 min-w-4 p-0"
                   onPress={() => removeValue(value)}
                 >
-                  <ButtonText className="text-xs text-muted-foreground">x</ButtonText>
+                  <ButtonIcon as={CloseIcon} className={badgeTone.text} />
                 </Button>
               </HStack>
-            ))}
+              );
+            })}
           </HStack>
         ) : null}
         <Input className="h-11 rounded-xl bg-background">
@@ -107,4 +113,15 @@ export function BadgeListField(props: BadgeListFieldProps): React.JSX.Element {
       </VStack>
     </EditorField>
   );
+}
+
+function getBadgeTone(index: number): { container: string; text: string } {
+  const tones = [
+    { container: 'border-primary/20 bg-primary/10', text: 'text-primary' },
+    { container: 'border-secondary bg-secondary', text: 'text-secondary-foreground' },
+    { container: 'border-accent bg-accent', text: 'text-accent-foreground' },
+    { container: 'border-border bg-muted', text: 'text-foreground' },
+  ];
+
+  return tones[index % tones.length];
 }

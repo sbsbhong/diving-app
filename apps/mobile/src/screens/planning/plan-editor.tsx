@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
-import { Controller, useForm, type Resolver } from 'react-hook-form';
+import { Controller, useForm, type FieldErrors, type Resolver } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { DiveSummaryCard } from '../../components/ui/dive-summary-card';
 import { InstrumentButton, ScreenBackButton, SelectorPill } from '../../components/ui/instrument';
@@ -25,6 +25,7 @@ type PlanEditorProps = {
   saveError?: Error | null;
   onCancel: () => void;
   onSave: (plan: DivePlan) => Promise<DivePlan>;
+  onInvalidSubmit?: (fieldName: string) => void;
 };
 
 const diveModes: NonNullable<WatchSession['diveMode']>[] = ['scuba', 'freedive'];
@@ -43,6 +44,16 @@ export function PlanEditor(props: PlanEditorProps): React.JSX.Element {
   const mode = props.mode ?? 'create';
   const errors = form.formState.errors;
 
+  const handleInvalidSubmit = React.useCallback(
+    (fieldErrors: FieldErrors<PlanFormValues>) => {
+      const firstInvalidField = getFirstPlanErrorField(fieldErrors);
+      if (firstInvalidField) {
+        props.onInvalidSubmit?.(firstInvalidField);
+      }
+    },
+    [props],
+  );
+
   const save = React.useCallback(
     (status: DivePlanStatus) =>
       form.handleSubmit(async values => {
@@ -52,8 +63,8 @@ export function PlanEditor(props: PlanEditorProps): React.JSX.Element {
         } catch {
           setLocalSaveFailed(true);
         }
-      })(),
-    [basePlan, form, props],
+      }, handleInvalidSubmit)(),
+    [basePlan, form, handleInvalidSubmit, props],
   );
 
   return (
@@ -272,4 +283,28 @@ export function PlanEditor(props: PlanEditorProps): React.JSX.Element {
       </DiveSummaryCard.Footer>
     </DiveSummaryCard>
   );
+}
+
+function getFirstPlanErrorField(errors: FieldErrors<PlanFormValues>): string | undefined {
+  const fieldOrder: Array<keyof PlanFormValues> = [
+    'title',
+    'plannedAt',
+    'diveMode',
+    'siteName',
+    'plannedMaxDepthMeters',
+    'plannedDurationMinutes',
+    'buddies',
+    'gearIds',
+    'tags',
+    'objective',
+    'plannedPressure',
+    'waterCondition',
+    'visibilityExpectation',
+    'perceivedDifficulty',
+    'trainingFocus',
+    'repetitionTarget',
+    'notes',
+  ];
+
+  return fieldOrder.find(fieldName => Boolean(errors[fieldName]));
 }

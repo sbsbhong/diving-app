@@ -1,5 +1,14 @@
 import React from 'react';
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from '../../../components/ui/form-control';
 import { HStack } from '../../../components/ui/hstack';
+import { AlertCircleIcon } from '../../../components/ui/icon';
 import { Text } from '../../../components/ui/text';
 import { VStack } from '../../../components/ui/vstack';
 
@@ -14,19 +23,28 @@ type EditorFieldProps = {
 
 export function EditorField(props: EditorFieldProps): React.JSX.Element {
   return (
-    <VStack space="xs" className={props.className}>
-      <HStack space="xs" className="items-center">
-        <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-        {props.required ? (
-          <Text className="text-xs font-semibold text-destructive">*</Text>
+    <FormControl isInvalid={Boolean(props.error)} className={props.className}>
+      <VStack space="xs">
+        <FormControlLabel>
+          <HStack space="xs" className="items-center">
+            <FormControlLabelText className="text-xs font-semibold uppercase text-muted-foreground">
+              {props.label}
+            </FormControlLabelText>
+            {props.required ? (
+              <Text className="text-xs font-semibold text-destructive">*</Text>
+            ) : null}
+          </HStack>
+        </FormControlLabel>
+        {props.children}
+        {props.error ? (
+          <FormControlError className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2">
+            <FormControlErrorIcon as={AlertCircleIcon} />
+            <FormControlErrorText testID={props.errorTestID} className="flex-1 font-semibold leading-4">
+              {props.error}
+            </FormControlErrorText>
+          </FormControlError>
         ) : null}
-      </HStack>
-      {props.children}
-      {props.error ? (
-        <Text testID={props.errorTestID} className="text-xs font-semibold text-destructive">
-          {props.error}
-        </Text>
-      ) : null}
-    </VStack>
+      </VStack>
+    </FormControl>
   );
 }
