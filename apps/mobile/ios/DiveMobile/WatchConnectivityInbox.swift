@@ -16,6 +16,7 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
   private var isActivated = false
   private var pendingPayloads: [PendingWatchConnectivityPayload] = []
   private var pendingPlannedDivesJson: String?
+  private var lastPlannedDivesContextError: NSError?
 
   private override init() {
     connectivitySession = WCSession.isSupported() ? WCSession.default : nil
@@ -232,16 +233,30 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
       WatchConnectivityEnvelopeKey.updatedAt: Date().timeIntervalSince1970
     ]
 
+    guard PropertyListSerialization.propertyList(context, isValidFor: .binary) else {
+      lastPlannedDivesContextError = Self.makePlannedDivesContextError(
+        code: PlannedDivesContextUpdateErrorCode.unsupportedPropertyList.rawValue,
+        description: "Planned dives context contains values that WatchConnectivity cannot serialize."
+      )
+      return
+    }
+
     if connectivitySession.isReachable {
       connectivitySession.sendMessage(context, replyHandler: nil) { _ in }
     }
 
-    do {
-      try connectivitySession.updateApplicationContext(context)
-    } catch {
+    if connectivitySession.applicationContext[WatchConnectivityEnvelopeKey.plannedDivesJson] as? String == plannedDivesJson {
+      lastPlannedDivesContextError = nil
+      return
+    }
+
+    if let error = Self.updateApplicationContextWithoutThrow(context, on: connectivitySession) {
+      lastPlannedDivesContextError = error
       // The latest payload stays persisted and will be retried on the next watch state change.
       return
     }
+
+    lastPlannedDivesContextError = nil
   }
 
   private func linkedWatchInfoOnMainQueue() -> [String: Any] {
@@ -277,7 +292,50 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     status["payloadCount"] = payloadCount
     status["queuedCount"] = pendingPlannedDivesJson == nil ? 0 : 1
     status["updatedAt"] = Date().timeIntervalSince1970
+
+    if let lastPlannedDivesContextError {
+      status["lastContextErrorDomain"] = lastPlannedDivesContextError.domain
+      status["lastContextErrorCode"] = lastPlannedDivesContextError.code
+      status["lastContextErrorDescription"] = lastPlannedDivesContextError.localizedDescription
+    }
+
     return status
+  }
+
+  private static func updateApplicationContextWithoutThrow(
+    _ context: [String: Any],
+    on connectivitySession: WCSession
+  ) -> NSError? {
+    let selector = NSSelectorFromString("updateApplicationContext:error:")
+
+    guard connectivitySession.responds(to: selector),
+          let implementation = connectivitySession.method(for: selector) else {
+      return makePlannedDivesContextError(
+        code: PlannedDivesContextUpdateErrorCode.missingSelector.rawValue,
+        description: "WCSession does not expose updateApplicationContext:error:."
+      )
+    }
+
+    let updateApplicationContext = unsafeBitCast(implementation, to: UpdateApplicationContextIMP.self)
+    var contextError: NSError?
+    let didUpdate = updateApplicationContext(connectivitySession, selector, context as NSDictionary, &contextError)
+
+    if didUpdate {
+      return nil
+    }
+
+    return contextError ?? makePlannedDivesContextError(
+      code: PlannedDivesContextUpdateErrorCode.unknownFailure.rawValue,
+      description: "WCSession rejected the planned dives application context without an NSError."
+    )
+  }
+
+  private static func makePlannedDivesContextError(code: Int, description: String) -> NSError {
+    NSError(
+      domain: PlannedDivesContextUpdateErrorDomain,
+      code: code,
+      userInfo: [NSLocalizedDescriptionKey: description]
+    )
   }
 
   private func activationStateName(for activationState: WCSessionActivationState?) -> String {
@@ -346,6 +404,21 @@ private struct PendingWatchConnectivityPayload: Codable {
 
     return payload
   }
+}
+
+private typealias UpdateApplicationContextIMP = @convention(c) (
+  AnyObject,
+  Selector,
+  NSDictionary,
+  AutoreleasingUnsafeMutablePointer<NSError?>
+) -> Bool
+
+private let PlannedDivesContextUpdateErrorDomain = "DiveMobileWatchConnectivity.PlannedDivesContext"
+
+private enum PlannedDivesContextUpdateErrorCode: Int {
+  case unsupportedPropertyList = 1
+  case missingSelector = 2
+  case unknownFailure = 3
 }
 
 private enum WatchConnectivityEnvelopeKey {

@@ -106,9 +106,12 @@ describe('WatchConnectivity native source contract', () => {
     expect(inbox).toContain('plannedDivesContextStorageKey');
     expect(inbox).toContain('userDefaults.string(forKey: Self.plannedDivesContextStorageKey)');
     expect(inbox).toContain('userDefaults.set(plannedDivesJson, forKey: Self.plannedDivesContextStorageKey)');
-    expect(inbox).toContain('try connectivitySession.updateApplicationContext(context)');
+    expect(inbox).toContain('NSSelectorFromString("updateApplicationContext:error:")');
+    expect(inbox).toContain('AutoreleasingUnsafeMutablePointer<NSError?>');
+    expect(inbox).toContain('lastPlannedDivesContextError');
+    expect(inbox).toContain('connectivitySession.applicationContext[WatchConnectivityEnvelopeKey.plannedDivesJson] as? String == plannedDivesJson');
+    expect(inbox).not.toContain('try connectivitySession.updateApplicationContext(context)');
     expect(inbox).not.toContain('connectivitySession.transferUserInfo(context)');
-    expect(inbox).not.toContain('pendingPlannedDivesJson = nil');
     expect(inbox).toContain('func sessionWatchStateDidChange(_ session: WCSession)');
     expect(transport).toContain('didReceiveUserInfo userInfo');
     expect(transport).toContain('handlePlannedDives(userInfo: userInfo)');

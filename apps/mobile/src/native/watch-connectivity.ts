@@ -28,6 +28,9 @@ export type PlannedWatchDivesUpdateStatus = LinkedWatchInfo & {
   activationState: 'notActivated' | 'inactive' | 'activated' | 'unknown' | 'unsupported';
   payloadCount: number;
   queuedCount: number;
+  lastContextErrorCode?: number;
+  lastContextErrorDescription?: string;
+  lastContextErrorDomain?: string;
   updatedAt?: number;
 };
 

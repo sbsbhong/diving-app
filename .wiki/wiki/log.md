@@ -586,3 +586,5 @@
 - Updated: 열린 질문
 
 ## [2026-06-28] ingest | 동기화 흐름 구조
+- Updated: planned dive application context delivery
+- Updated: planned dive context breakpoint hardening

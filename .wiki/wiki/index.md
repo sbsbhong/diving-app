@@ -33,7 +33,7 @@
 | [모바일 구조](architecture/mobile.md) | `apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server와 database 없이 React Navigation, React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다. | 2026-06-28 |
 | [Monorepo 구조](architecture/monorepo.md) | 이 저장소는 Turborepo로 관리되는 Yarn 1 workspace monorepo다. 앱 workspace는 `apps/` 아래에 있고, 공유 package는 `packages/` 아래에 있다. | 2026-06-28 |
 | [Supabase 구조](architecture/supabase.md) | 현재 저장소에는 구현된 Supabase 영역이 없다. | 2026-06-28 |
-| [동기화 흐름 구조](architecture/sync-flow.md) | 현재 동기화 모델은 계약을 먼저 정의하는 방식이다. Watch-to-mobile session과 acknowledgement는 event-style delivery에 맞게 WatchConnectivity queued envelope와 live message를 함께 쓰고, mobile-to-watch planned dive 목록은 최신 상태이므로 `updateApplicationContext`와 reachable `sendMessage`로 전달하며 stale snapshot을 `transferUserInfo(context)`로 enqueue하지 않는다. | 2026-06-28 |
+| [동기화 흐름 구조](architecture/sync-flow.md) | 현재 동기화 모델은 계약을 먼저 정의하는 방식이다. Watch-to-mobile session과 acknowledgement는 event-style delivery에 맞게 WatchConnectivity queued envelope와 live message를 함께 쓰고, mobile-to-watch planned dive 목록은 최신 상태이므로 application context와 reachable `sendMessage`로 전달하되 Swift throwing `updateApplicationContext` 호출과 stale snapshot queueing은 피한다. | 2026-06-28 |
 | [Watch 앱 구조](architecture/watch-app.md) | `apps/mobile/ios/DiveWatchApp`는 현재 동작하는 SwiftUI watchOS companion 앱 source를 담는다. Xcode project는 `apps/mobile/ios/DiveMobile.xcodeproj`이고, watch target과 scheme은 `DiveWatchApp`이다. | 2026-06-28 |
 
 ## domains
