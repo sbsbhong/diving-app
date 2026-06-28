@@ -17,6 +17,7 @@ type NumericSliderFieldProps = {
   unitLabel?: string;
   valueType?: 'int' | 'float';
   disabled?: boolean;
+  pickerHeight?: number;
 };
 
 export function NumericSliderField(props: NumericSliderFieldProps): React.JSX.Element {
@@ -39,6 +40,7 @@ export function NumericSliderField(props: NumericSliderFieldProps): React.JSX.El
         unitLabel={props.unitLabel}
         valueType={valueType}
         disabled={props.disabled}
+        height={props.pickerHeight}
         onChange={props.onChange}
         testID={props.testID}
       />

@@ -262,7 +262,7 @@ function NumberWheelPickerRoot({
     setDraftValue(formatNumber(displayValue, safeStep));
     setIsEditing(true);
     setTimeout(() => {
-      inputRef.current?.focus?.();
+      (inputRef.current as unknown as { focus?: () => void } | null)?.focus?.();
     }, 0);
   }, [disabled, displayValue, safeStep]);
 

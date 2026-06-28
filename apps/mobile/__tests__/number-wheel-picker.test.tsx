@@ -6,6 +6,7 @@ import {
   NumberWheelPicker,
   getWheelLayout,
 } from '../src/components/ui/number-wheel-picker';
+import { NumericSliderField } from '../src/screens/common/form/numeric-slider-field';
 
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
 
@@ -273,5 +274,33 @@ describe('NumberWheelPicker', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(root.findAllByProps({ testID: 'depth-picker-input' })).toHaveLength(0);
     expect(root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('10');
+  });
+
+  it('passes pickerHeight from NumericSliderField to NumberWheelPicker height', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumericSliderField
+          label="Maximum depth"
+          value={10}
+          min={0}
+          max={20}
+          step={5}
+          unitLabel="m"
+          pickerHeight={132}
+          onChange={onChange}
+          testID="depth-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const wheel = renderer!.root.findByProps({ testID: 'depth-picker-wheel' });
+    const list = renderer!.root.findByProps({ testID: 'depth-picker-wheel-list' });
+
+    expect(wheel.props.style).toEqual(expect.arrayContaining([expect.objectContaining({ height: 132 })]));
+    expect(list.props.contentContainerStyle).toEqual(expect.arrayContaining([expect.objectContaining({ paddingVertical: 48 })]));
   });
 });
