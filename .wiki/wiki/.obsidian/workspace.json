@@ -11,14 +11,10 @@
             "id": "ec651fb99c9a0a17",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "domains/dive-log.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "dive-log"
+              "title": "새 탭"
             }
           }
         ]
@@ -185,17 +181,21 @@
   },
   "active": "ec651fb99c9a0a17",
   "lastOpenFiles": [
+    "project/diving-app-product-roadmap.md",
+    "overview.md",
+    "project/diving-app-qa-test-plan.md",
+    "project/diving-app-references.md",
+    "algorithms/diving-app-algorithm-reference.md",
+    "index.md",
+    "domains/dive-log.md",
     "architecture/supabase.md",
     "architecture/mobile.md",
     "design/mobile-watch-ui-language.md",
     "decisions/adr-index.md",
     "design",
-    "domains/dive-log.md",
     "domains/diving-glossary.md",
     "questions/open-questions.md",
-    "index.md",
     "log.md",
-    "overview.md",
     "architecture/watch-app.md",
     "architecture/sync-flow.md",
     "architecture/monorepo.md"

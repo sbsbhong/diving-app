@@ -5,7 +5,7 @@
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "skillPath": "skills/find-skills/SKILL.md",
-      "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
+      "computedHash": "781bd6d3f9b19f8c9af6b53d8d0e4876d0183841b565db34ca7092ffa412d111"
     },
     "frontend-design": {
       "source": "anthropics/skills",
@@ -18,6 +18,12 @@
       "sourceType": "github",
       "skillPath": "skills/gluestack-ui-v4/SKILL.md",
       "computedHash": "5f00d8934fef415e31bbae36b1cb8bfe59452eeff0e48dea27172d620a00c612"
+    },
+    "karpathy-llm-wiki": {
+      "source": "astro-han/karpathy-llm-wiki",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "5a74b5e1a980b099ffee321b2dc104462bd64cd242ec385b94493bb7035b96fa"
     },
     "react-i18next": {
       "source": "yildizberkay/skills",
