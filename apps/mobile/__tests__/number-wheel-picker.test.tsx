@@ -75,7 +75,7 @@ describe('NumberWheelPicker', () => {
     expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('15');
   });
 
-  it('renders a vertical snapping wheel from min to max using step', async () => {
+  it('renders a plain scroll-backed snapping wheel from min to max using step', async () => {
     const onChange = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
@@ -88,8 +88,9 @@ describe('NumberWheelPicker', () => {
 
     const list = renderer!.root.findByProps({ testID: 'depth-picker-wheel-list' });
 
-    expect(list.props.data).toEqual([0, 5, 10, 15, 20]);
-    expect(list.props.getItemLayout(undefined, 3)).toEqual({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * 3, index: 3 });
+    expect(list.props.data).toBeUndefined();
+    expect(list.props.getItemLayout).toBeUndefined();
+    expect(React.Children.count(list.props.children)).toBe(5);
     expect(list.props.snapToInterval).toBe(ITEM_HEIGHT);
     expect(list.props.scrollEventThrottle).toBe(16);
     expect(list.props.showsVerticalScrollIndicator).toBe(false);
@@ -108,8 +109,13 @@ describe('NumberWheelPicker', () => {
     });
     renderers.push(renderer!);
 
-    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-150-value' }).props.children).toBe('150');
-    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-150-unit' }).props.children).toBe('m');
+    const centeredValue = renderer!.root.findByProps({ testID: 'depth-picker-option-150-value' });
+    const centeredUnit = renderer!.root.findByProps({ testID: 'depth-picker-option-150-unit' });
+
+    expect(centeredValue.props.children).toBe('150');
+    expect(centeredValue.props.className).toContain('opacity-0');
+    expect(centeredUnit.props.children).toBe('m');
+    expect(centeredUnit.props.className).toContain('opacity-0');
     expect(renderer!.root.findByProps({ testID: 'depth-picker-center-value-column' })).toBeTruthy();
     expect(renderer!.root.findByProps({ testID: 'depth-picker-center-unit-column' })).toBeTruthy();
   });
