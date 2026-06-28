@@ -1,8 +1,10 @@
-# Monorepo 구조
+Source URL: .wiki/wiki/architecture/monorepo.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: Monorepo 구조](../../raw/architecture/monorepo.md)
-Updated: 2026-06-28
+# Pre-Karpathy: Monorepo 구조
+
+# Monorepo 구조
 
 ## 요약
 
@@ -41,7 +43,7 @@ Root `turbo.json`은 `build`, `generate`, `lint`, `test` task를 정의한다. `
 
 ## 관련 문서
 
-- [모바일 구조](mobile.md)
-- [Watch 앱 구조](watch-app.md)
-- [동기화 흐름 구조](sync-flow.md)
-- [Supabase 구조](supabase.md)
+- [[architecture/mobile]]
+- [[architecture/watch-app]]
+- [[architecture/sync-flow]]
+- [[architecture/supabase]]

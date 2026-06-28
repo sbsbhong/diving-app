@@ -1,8 +1,10 @@
-# 모바일 로그북 로드맵
+Source URL: .wiki/wiki/architecture/mobile-logbook-roadmap.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: 모바일 로그북 로드맵](../../raw/architecture/mobile-logbook-roadmap.md)
-Updated: 2026-06-28
+# Pre-Karpathy: 모바일 로그북 로드맵
+
+# 모바일 로그북 로드맵
 
 ## 요약
 
@@ -65,11 +67,11 @@ Logbook/Planbook은 현재 v2 key namespace를 사용하고, 설정 선호 store
 
 ## 관련 문서
 
-- [모바일 구조](mobile.md)
-- [동기화 흐름 구조](sync-flow.md)
-- [Supabase 구조](supabase.md)
-- [다이브 로그 도메인](../domains/dive-log.md)
-- [ADR: Local-first mobile logbook with future Supabase sync](../decisions/adr-local-first-mobile-logbook.md)
+- [[architecture/mobile]]
+- [[architecture/sync-flow]]
+- [[architecture/supabase]]
+- [[domains/dive-log]]
+- [[decisions/adr-local-first-mobile-logbook]]
 - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
 - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`
 - `docs/mobile-logbook-local-first-roadmap.html`

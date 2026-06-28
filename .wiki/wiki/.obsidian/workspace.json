@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "domains/dive-log.md",
+                "file": "project/diving-app-product-roadmap.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "dive-log"
+              "title": "diving-app-product-roadmap"
             }
           }
         ]
@@ -185,15 +185,19 @@
   },
   "active": "ec651fb99c9a0a17",
   "lastOpenFiles": [
+    "project/diving-app-qa-test-plan.md",
+    "project/diving-app-product-roadmap.md",
+    "project/diving-app-references.md",
+    "algorithms/diving-app-algorithm-reference.md",
+    "index.md",
+    "domains/dive-log.md",
     "architecture/supabase.md",
     "architecture/mobile.md",
     "design/mobile-watch-ui-language.md",
     "decisions/adr-index.md",
     "design",
-    "domains/dive-log.md",
     "domains/diving-glossary.md",
     "questions/open-questions.md",
-    "index.md",
     "log.md",
     "overview.md",
     "architecture/watch-app.md",

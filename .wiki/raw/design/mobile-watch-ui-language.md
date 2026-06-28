@@ -1,8 +1,10 @@
-# Mobile/Watch UI 언어
+Source URL: .wiki/wiki/design/mobile-watch-ui-language.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: Mobile/Watch UI 언어](../../raw/design/mobile-watch-ui-language.md)
-Updated: 2026-06-28
+# Pre-Karpathy: Mobile/Watch UI 언어
+
+# Mobile/Watch UI 언어
 
 ## 요약
 
@@ -103,6 +105,6 @@ watchOS는 같은 제품 언어를 더 압축해서 쓴다.
 
 ## 관련 문서
 
-- [모바일 구조](../architecture/mobile.md)
-- [Watch 앱 구조](../architecture/watch-app.md)
-- [안전 규칙](../domains/safety-rules.md)
+- [[architecture/mobile]]
+- [[architecture/watch-app]]
+- [[domains/safety-rules]]

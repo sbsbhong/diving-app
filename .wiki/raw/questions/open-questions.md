@@ -1,9 +1,10 @@
-# 열린 질문
+Source URL: .wiki/wiki/questions/open-questions.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28; user pasted request, 2026-06-28; user requested v1 Air-only safety stop scope, 2026-06-28
-Raw: [Pre-Karpathy: 열린 질문](../../raw/questions/open-questions.md); [Diving app technical wiki request](../../raw/algorithms/2026-06-28-diving-app-technical-wiki-request.md); [v1 Air-only scuba safety stop scope](../../raw/project/2026-06-28-v1-air-only-scuba-safety-stop.md)
-Updated: 2026-06-28
-Last reviewed: 2026-06-28
+# Pre-Karpathy: 열린 질문
+
+# 열린 질문
 
 ## 요약
 
@@ -21,7 +22,6 @@ Last reviewed: 2026-06-28
 - `scuba`/`freedive` 두 모드 축소는 contract, generated type, validator, 모바일 UI, watch mode model에 구현됐고 Logbook/Planbook은 v2 storage key reset을 사용한다. Legacy local v1 데이터 retention/마이그레이션 정책은 future production 전환 전에는 여전히 별도 결정이 필요하다.
 - Home 위치 조건 UI는 provider-neutral interface와 static mock provider로 구현됐지만, 실제 API adapter와 위치 권한 정책은 아직 구현되지 않았다.
 - Generated Swift contract는 존재하지만 현재 `DiveWatchApp` target에서 참조되지 않는다.
-- Apple Watch Ultra급 프리다이빙/스쿠버 제품 방향에서 GF 기본값, v2 Air/Nitrox 범위, depth sensor sampling/background 검증, 수심 필터, v1 Air-only safety stop trigger/countdown/copy, CNS table, Bühlmann coefficient source, mandatory deco 처리, tank transmitter, export format은 별도 제품 질문으로 남아 있다.
 
 ## 상세
 
@@ -29,10 +29,9 @@ Last reviewed: 2026-06-28
 
 ## 관련 문서
 
-- [Watch 앱 구조](../architecture/watch-app.md)
-- [모바일 구조](../architecture/mobile.md)
-- [모바일 로그북 로드맵](../architecture/mobile-logbook-roadmap.md)
-- [Supabase 구조](../architecture/supabase.md)
-- [동기화 흐름 구조](../architecture/sync-flow.md)
-- [안전 규칙](../domains/safety-rules.md)
-- [Diving App / Open Questions](diving-app-open-questions.md)
+- [[architecture/watch-app]]
+- [[architecture/mobile]]
+- [[architecture/mobile-logbook-roadmap]]
+- [[architecture/supabase]]
+- [[architecture/sync-flow]]
+- [[domains/safety-rules]]

@@ -1,12 +1,10 @@
+Source URL: .wiki/wiki/decisions/adr-local-first-mobile-logbook.md
+Collected: 2026-06-28
+Published: Unknown
+
+# Pre-Karpathy: ADR: Local-first mobile logbook with future Supabase sync
+
 # ADR: Local-first mobile logbook with future Supabase sync
-
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: ADR: Local-first mobile logbook with future Supabase sync](../../raw/decisions/adr-local-first-mobile-logbook.md)
-Updated: 2026-06-28
-
-## 요약
-
-모바일 로그북은 Supabase와 인증을 먼저 붙이지 않고 local-first 저장소 경계 위에서 구현한다. 수동 로그와 watch 기반 로그를 모두 `DiveLogEntry`로 다루고, React Query는 저장소가 아니라 조회/변경 orchestration 계층으로만 사용한다.
 
 ## Status
 

@@ -1,8 +1,10 @@
-# 동기화 흐름 구조
+Source URL: .wiki/wiki/architecture/sync-flow.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: 동기화 흐름 구조](../../raw/architecture/sync-flow.md)
-Updated: 2026-06-28
+# Pre-Karpathy: 동기화 흐름 구조
+
+# 동기화 흐름 구조
 
 ## 요약
 
@@ -80,7 +82,7 @@ Watch sync notification 동작은 다음과 같다.
 
 ## 관련 문서
 
-- [모바일 구조](mobile.md)
-- [Watch 앱 구조](watch-app.md)
-- [Supabase 구조](supabase.md)
-- [다이브 로그 도메인](../domains/dive-log.md)
+- [[architecture/mobile]]
+- [[architecture/watch-app]]
+- [[architecture/supabase]]
+- [[domains/dive-log]]

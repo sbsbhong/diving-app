@@ -1,8 +1,10 @@
-# 다이빙 용어
+Source URL: .wiki/wiki/domains/diving-glossary.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: 다이빙 용어](../../raw/domains/diving-glossary.md)
-Updated: 2026-06-28
+# Pre-Karpathy: 다이빙 용어
+
+# 다이빙 용어
 
 ## 요약
 
@@ -31,6 +33,6 @@ Updated: 2026-06-28
 
 ## 관련 문서
 
-- [다이브 로그 도메인](dive-log.md)
-- [안전 규칙](safety-rules.md)
-- [동기화 흐름 구조](../architecture/sync-flow.md)
+- [[domains/dive-log]]
+- [[domains/safety-rules]]
+- [[architecture/sync-flow]]

@@ -1,8 +1,10 @@
-# 다이브 계획 도메인
+Source URL: .wiki/wiki/domains/dive-planning.md
+Collected: 2026-06-28
+Published: Unknown
 
-Sources: pre-Karpathy wiki page, 2026-06-28
-Raw: [Pre-Karpathy: 다이브 계획 도메인](../../raw/domains/dive-planning.md)
-Updated: 2026-06-28
+# Pre-Karpathy: 다이브 계획 도메인
+
+# 다이브 계획 도메인
 
 ## 요약
 
@@ -32,6 +34,6 @@ Watch 앱에서 모바일 계획을 선택해 기록을 시작하면 watch sessi
 
 ## 관련 문서
 
-- [모바일 구조](../architecture/mobile.md)
-- [다이브 로그 도메인](dive-log.md)
-- [안전 규칙](safety-rules.md)
+- [[architecture/mobile]]
+- [[domains/dive-log]]
+- [[domains/safety-rules]]

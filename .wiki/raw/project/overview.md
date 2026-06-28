@@ -1,3 +1,9 @@
+Source URL: .wiki/wiki/overview.md
+Collected: 2026-06-28
+Published: Unknown
+
+# Pre-Karpathy: 프로젝트 개요
+
 # 프로젝트 개요
 
 ## 요약
