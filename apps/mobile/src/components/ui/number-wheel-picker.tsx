@@ -277,7 +277,8 @@ function NumberWheelPickerRoot({
       return;
     }
 
-    const nextValue = clamp(roundToStep(parsedValue, safeStep), min, max);
+    const clampedDraftValue = clamp(parsedValue, min, max);
+    const nextValue = clamp(roundToStep(clampedDraftValue, safeStep), min, max);
     const nextIndex = getClosestOptionIndex(options, nextValue);
     setDraftValue(formatNumber(nextValue, safeStep));
     selectIndex(nextIndex, !areNumbersEqual(nextValue, value));

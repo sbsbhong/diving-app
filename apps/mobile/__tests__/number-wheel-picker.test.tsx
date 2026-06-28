@@ -186,4 +186,92 @@ describe('NumberWheelPicker', () => {
 
     expect(onChange).toHaveBeenCalledWith(15.3);
   });
+
+  it('accepts a large direct integer entry and emits the snapped value', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={0} min={0} max={200} step={1} unitLabel="m" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const root = renderer!.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'depth-picker-input-trigger' }).props.onPress();
+    });
+
+    const input = root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onChangeText === 'function');
+    expect(input).toBeTruthy();
+
+    await ReactTestRenderer.act(async () => {
+      input!.props.onChangeText('150');
+    });
+
+    const updatedInput = root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function');
+    await ReactTestRenderer.act(async () => {
+      updatedInput!.props.onSubmitEditing();
+    });
+
+    expect(onChange).toHaveBeenCalledWith(150);
+    expect(root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('150');
+  });
+
+  it('clamps direct entry to max and snaps to step before emitting', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={0} min={0} max={42} step={5} unitLabel="m" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const root = renderer!.root;
+
+    await ReactTestRenderer.act(async () => {
+      root.findByProps({ testID: 'depth-picker-input-trigger' }).props.onPress();
+    });
+
+    const input = root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onChangeText === 'function');
+    await ReactTestRenderer.act(async () => {
+      input!.props.onChangeText('999');
+    });
+
+    const updatedInput = root.findAllByProps({ testID: 'depth-picker-input' }).find(match => typeof match.props.onSubmitEditing === 'function');
+    await ReactTestRenderer.act(async () => {
+      updatedInput!.props.onSubmitEditing();
+    });
+
+    expect(onChange).toHaveBeenCalledWith(40);
+    expect(root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('40');
+  });
+
+  it('does not emit scroll or open input while disabled', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={10} min={0} max={20} step={5} unitLabel="m" disabled onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const root = renderer!.root;
+    const list = root.findByProps({ testID: 'depth-picker-wheel-list' });
+
+    await ReactTestRenderer.act(async () => {
+      list.props.onScroll({ nativeEvent: { contentOffset: { y: ITEM_HEIGHT * 3 } } });
+      root.findByProps({ testID: 'depth-picker-input-trigger' }).props.onPress();
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(root.findAllByProps({ testID: 'depth-picker-input' })).toHaveLength(0);
+    expect(root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('10');
+  });
 });
