@@ -7,6 +7,7 @@ import {
   OPTION_EMPHASIS_ANIMATION_DURATION_MS,
   getWheelLayout,
 } from '../src/components/ui/number-wheel-picker';
+import { MultiColumnNumberWheelPicker } from '../src/components/ui/multi-column-number-wheel-picker';
 import { NumericSliderField } from '../src/screens/common/form/numeric-slider-field';
 
 const renderers: ReactTestRenderer.ReactTestRenderer[] = [];
@@ -74,6 +75,104 @@ describe('NumberWheelPicker', () => {
 
     expect(onChange).toHaveBeenCalledWith(15);
     expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('15');
+  });
+
+  it('renders multiple numeric columns in one shared wheel box', async () => {
+    const onColumnChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <MultiColumnNumberWheelPicker
+          columns={[
+            { id: 'minutes', value: 10, min: 0, max: 240, step: 1, unitLabel: 'min' },
+            { id: 'seconds', value: 3, min: 0, max: 59, step: 1, unitLabel: 'sec', padStart: 2 },
+          ]}
+          onColumnChange={onColumnChange}
+          directInput={{
+            value: '10:03',
+            normalize: value => value,
+            onCommit: () => false,
+            keyboardType: 'numbers-and-punctuation',
+          }}
+          testID="duration-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-wheel' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-selection-frame' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-column-minutes-wheel-list' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-column-seconds-wheel-list' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-minutes-value' }).props.children).toBe('10');
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-minutes-unit' }).props.children).toBe('min');
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-seconds-value' }).props.children).toBe('03');
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-seconds-unit' }).props.children).toBe('sec');
+  });
+
+  it('emits only the changed multi-column value while scrolling', async () => {
+    const onColumnChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <MultiColumnNumberWheelPicker
+          columns={[
+            { id: 'minutes', value: 10, min: 0, max: 240, step: 1, unitLabel: 'min' },
+            { id: 'seconds', value: 0, min: 0, max: 59, step: 1, unitLabel: 'sec', padStart: 2 },
+          ]}
+          onColumnChange={onColumnChange}
+          directInput={{
+            value: '10:00',
+            normalize: value => value,
+            onCommit: () => false,
+            keyboardType: 'numbers-and-punctuation',
+          }}
+          testID="duration-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const secondsList = renderer!.root.findByProps({ testID: 'duration-picker-column-seconds-wheel-list' });
+    await ReactTestRenderer.act(async () => {
+      secondsList.props.onScroll({ nativeEvent: { contentOffset: { y: ITEM_HEIGHT * 3 } } });
+    });
+
+    expect(onColumnChange).toHaveBeenCalledWith('seconds', 3);
+    expect(renderer!.root.findByProps({ testID: 'duration-picker-seconds-value' }).props.children).toBe('03');
+  });
+
+  it('renders fixed columns in the shared center row without a scroll view', async () => {
+    const onColumnChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <MultiColumnNumberWheelPicker
+          columns={[
+            { id: 'meters', value: 19, min: 0, max: 60, step: 1 },
+            { id: 'tenths', value: 6, min: 0, max: 9, step: 1, formatValue: value => `.${value}` },
+            { id: 'unit', fixedLabel: 'm' },
+          ]}
+          onColumnChange={onColumnChange}
+          directInput={{
+            value: '19.6',
+            normalize: value => value,
+            onCommit: () => false,
+            keyboardType: 'decimal-pad',
+          }}
+          testID="depth-picker"
+        />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-meters-value' }).props.children).toBe('19');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-tenths-value' }).props.children).toBe('.6');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-unit-fixed' }).props.children).toBe('m');
+    expect(renderer!.root.findAllByProps({ testID: 'depth-picker-column-unit-wheel-list' })).toHaveLength(0);
   });
 
   it('renders a plain scroll-backed snapping wheel from min to max using step', async () => {
