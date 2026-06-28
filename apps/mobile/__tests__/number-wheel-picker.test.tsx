@@ -4,6 +4,7 @@ import {
   DEFAULT_WHEEL_HEIGHT,
   ITEM_HEIGHT,
   NumberWheelPicker,
+  OPTION_EMPHASIS_ANIMATION_DURATION_MS,
   getWheelLayout,
 } from '../src/components/ui/number-wheel-picker';
 import { NumericSliderField } from '../src/screens/common/form/numeric-slider-field';
@@ -90,12 +91,46 @@ describe('NumberWheelPicker', () => {
 
     expect(list.props.data).toBeUndefined();
     expect(list.props.getItemLayout).toBeUndefined();
-    expect(React.Children.count(list.props.children)).toBe(5);
+    expect(
+      new Set(
+        renderer!.root
+          .findAll(node => typeof node.props.testID === 'string' && node.props.testID.endsWith('-content'))
+          .map(node => node.props.testID),
+      ),
+    ).toEqual(
+      new Set([
+        'depth-picker-option-0-content',
+        'depth-picker-option-5-content',
+        'depth-picker-option-10-content',
+        'depth-picker-option-15-content',
+        'depth-picker-option-20-content',
+      ]),
+    );
     expect(list.props.snapToInterval).toBe(ITEM_HEIGHT);
     expect(list.props.scrollEventThrottle).toBe(16);
     expect(list.props.showsVerticalScrollIndicator).toBe(false);
     expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('10');
     expect(renderer!.root.findByProps({ testID: 'depth-picker-unit' }).props.children).toBe('m');
+  });
+
+  it('renders only a bounded option window for large numeric ranges', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={0} min={0} max={60} step={0.1} unitLabel="m" valueType="float" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const renderedOptionValues = renderer!.root.findAll(
+      node => typeof node.props.testID === 'string' && /^depth-picker-option-[\d.]+-value$/.test(node.props.testID),
+    );
+
+    expect(renderedOptionValues.length).toBeLessThan(40);
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-0-value' }).props.children).toBe('0');
+    expect(renderer!.root.findAllByProps({ testID: 'depth-picker-option-60-value' })).toHaveLength(0);
   });
 
   it('renders option rows with separate value and unit columns', async () => {
@@ -118,6 +153,46 @@ describe('NumberWheelPicker', () => {
     expect(centeredUnit.props.className).toContain('opacity-0');
     expect(renderer!.root.findByProps({ testID: 'depth-picker-center-value-column' })).toBeTruthy();
     expect(renderer!.root.findByProps({ testID: 'depth-picker-center-unit-column' })).toBeTruthy();
+  });
+
+  it('keeps the centered value layout wide enough for narrow two-column picker cards', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={10} min={0} max={240} step={1} unitLabel="min" onChange={onChange} testID="duration-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    const centerRow = renderer!.root.findByProps({ testID: 'duration-picker-center-row' });
+    const centerValue = renderer!.root.findByProps({ testID: 'duration-picker-value' });
+
+    expect(centerRow.props.className).toContain('w-full');
+    expect(centerValue.props.children).toBe('10');
+    expect(centerValue.props.numberOfLines).toBe(1);
+    expect(centerValue.props.adjustsFontSizeToFit).toBe(true);
+    expect(centerValue.props.minimumFontScale).toBe(0.75);
+  });
+
+  it('emphasizes adjacent options with a fast transform animation', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={10} min={0} max={20} step={5} unitLabel="m" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(OPTION_EMPHASIS_ANIMATION_DURATION_MS).toBeLessThanOrEqual(120);
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-5-value' }).props.className).toContain('text-lg');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-15-value' }).props.className).toContain('text-lg');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-5-content' }).props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ transform: expect.any(Array) })]),
+    );
   });
 
   it('selects the nearest value when momentum scrolling ends', async () => {

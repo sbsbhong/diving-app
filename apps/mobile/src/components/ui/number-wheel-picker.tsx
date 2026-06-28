@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Animated,
+  Easing,
   Keyboard,
   StyleSheet,
   type NativeScrollEvent,
@@ -15,9 +17,11 @@ import { Text } from './text';
 
 export const ITEM_HEIGHT = 36;
 export const DEFAULT_WHEEL_HEIGHT = 176;
+export const OPTION_EMPHASIS_ANIMATION_DURATION_MS = 90;
 
 const MIN_VISIBLE_ITEM_COUNT = 3;
 const MIN_WHEEL_HEIGHT = ITEM_HEIGHT * MIN_VISIBLE_ITEM_COUNT;
+const WINDOW_BUFFER_ITEM_COUNT = 6;
 
 export type NumberWheelLayout = {
   wheelHeight: number;
@@ -99,6 +103,20 @@ type NumberWheelPickerMeta = {
   listRef: React.RefObject<RNScrollView | null>;
   inputRef: React.RefObject<React.ComponentRef<typeof InputField> | null>;
   onBlur?: () => void;
+};
+
+type WheelRenderWindow = {
+  startIndex: number;
+  endIndex: number;
+  topSpacerHeight: number;
+  bottomSpacerHeight: number;
+};
+
+type OptionPresentation = {
+  valueClassName: string;
+  unitClassName: string;
+  scale: number;
+  opacity: number;
 };
 
 type NumberWheelPickerContextValue = {
@@ -374,6 +392,14 @@ function NumberWheelPickerWheel(): React.JSX.Element {
     actions: { beginWheelInteraction, endDragWheelScroll, finishWheelScroll, updateFromScrollOffset },
     meta: { listRef },
   } = useNumberWheelPicker('NumberWheelPicker.Wheel');
+  const renderWindow = React.useMemo(
+    () => getWheelRenderWindow(options.length, displayIndex, layout.visibleItemCount),
+    [displayIndex, layout.visibleItemCount, options.length],
+  );
+  const visibleOptions = React.useMemo(
+    () => options.slice(renderWindow.startIndex, renderWindow.endIndex + 1),
+    [options, renderWindow.endIndex, renderWindow.startIndex],
+  );
 
   return (
     <ScrollView
@@ -404,9 +430,15 @@ function NumberWheelPickerWheel(): React.JSX.Element {
       style={[styles.scroller, { height: layout.wheelHeight }]}
       contentContainerStyle={[styles.contentContainer, { paddingVertical: layout.centerPadding }]}
     >
-      {options.map((option, index) => (
-        <NumberWheelPickerOption key={keyExtractor(option)} value={option} index={index} />
+      {renderWindow.topSpacerHeight > 0 ? (
+        <Box testID={`${testID}-top-spacer`} style={{ height: renderWindow.topSpacerHeight }} />
+      ) : null}
+      {visibleOptions.map((option, offset) => (
+        <NumberWheelPickerOption key={keyExtractor(option)} value={option} index={renderWindow.startIndex + offset} />
       ))}
+      {renderWindow.bottomSpacerHeight > 0 ? (
+        <Box testID={`${testID}-bottom-spacer`} style={{ height: renderWindow.bottomSpacerHeight }} />
+      ) : null}
     </ScrollView>
   );
 }
@@ -421,36 +453,59 @@ function NumberWheelPickerOption({ value, index }: NumberWheelPickerOptionProps)
     state: { displayIndex, step, testID, unitLabel },
   } = useNumberWheelPicker('NumberWheelPicker.Option');
   const distanceFromCenter = Math.abs(index - displayIndex);
-  const itemTextClassName =
-    distanceFromCenter === 0
-      ? 'text-xl font-semibold text-foreground'
-      : distanceFromCenter === 1
-        ? 'text-base font-medium text-muted-foreground'
-        : 'text-sm font-medium text-muted-foreground/50';
-  const unitTextClassName =
-    distanceFromCenter === 0
-      ? 'text-xs font-semibold text-foreground'
-      : distanceFromCenter === 1
-        ? 'text-xs font-semibold text-muted-foreground'
-        : 'text-xs font-semibold text-muted-foreground/50';
+  const presentation = getOptionPresentation(distanceFromCenter);
+  const scale = React.useRef(new Animated.Value(presentation.scale)).current;
+  const opacity = React.useRef(new Animated.Value(presentation.opacity)).current;
+  const hasMountedRef = React.useRef(false);
   const centerHiddenClassName = distanceFromCenter === 0 ? ' opacity-0' : '';
   const formattedValue = formatNumber(value, step);
 
+  React.useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(scale, {
+        toValue: presentation.scale,
+        duration: OPTION_EMPHASIS_ANIMATION_DURATION_MS,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: presentation.opacity,
+        duration: OPTION_EMPHASIS_ANIMATION_DURATION_MS,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacity, presentation.opacity, presentation.scale, scale]);
+
   return (
-    <HStack style={styles.item} className="items-center justify-center">
+    <Animated.View
+      testID={`${testID}-option-${formattedValue}-content`}
+      style={[styles.item, styles.optionContent, { opacity, transform: [{ scale }] }]}
+    >
       <Box testID={`${testID}-option-${formattedValue}-value-column`} style={styles.valueColumn} className="items-end justify-center">
-        <Text testID={`${testID}-option-${formattedValue}-value`} className={`${itemTextClassName}${centerHiddenClassName}`}>
+        <Text
+          testID={`${testID}-option-${formattedValue}-value`}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+          className={`${presentation.valueClassName}${centerHiddenClassName}`}
+        >
           {formattedValue}
         </Text>
       </Box>
       <Box testID={`${testID}-option-${formattedValue}-unit-column`} style={styles.unitColumn} className="items-start justify-center">
         {unitLabel ? (
-          <Text testID={`${testID}-option-${formattedValue}-unit`} className={`${unitTextClassName}${centerHiddenClassName}`}>
+          <Text testID={`${testID}-option-${formattedValue}-unit`} numberOfLines={1} className={`${presentation.unitClassName}${centerHiddenClassName}`}>
             {unitLabel}
           </Text>
         ) : null}
       </Box>
-    </HStack>
+    </Animated.View>
   );
 }
 
@@ -485,10 +540,10 @@ function NumberWheelPickerCenterInputTrigger(): React.JSX.Element {
       disabled={disabled}
       onPress={openInput}
       style={[styles.centerInputTrigger, { top: layout.centerPadding }]}
-      className="self-center px-4 data-[active=true]:bg-primary/10"
+      className="self-center px-2 data-[active=true]:bg-primary/10"
     >
       {isEditing ? (
-        <HStack className="w-full items-center justify-center">
+        <HStack testID={`${testID}-center-row`} className="w-full items-center justify-center">
           <Box testID={`${testID}-center-value-column`} style={styles.valueColumn} className="items-end justify-center">
             <Input className="h-10 w-full rounded-none border-0 bg-transparent px-0 shadow-none">
               <InputField
@@ -516,9 +571,15 @@ function NumberWheelPickerCenterInputTrigger(): React.JSX.Element {
           </Box>
         </HStack>
       ) : (
-        <HStack className="items-baseline justify-center">
+        <HStack testID={`${testID}-center-row`} className="w-full items-baseline justify-center">
           <Box testID={`${testID}-center-value-column`} style={styles.valueColumn} className="items-end justify-center">
-            <Text testID={`${testID}-value`} className="text-2xl font-semibold text-foreground">
+            <Text
+              testID={`${testID}-value`}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              className="text-2xl font-semibold text-foreground"
+            >
               {formatNumber(displayValue, step)}
             </Text>
           </Box>
@@ -562,9 +623,15 @@ const styles = StyleSheet.create({
   },
   centerInputTrigger: {
     height: ITEM_HEIGHT,
-    left: 24,
+    left: 8,
     position: 'absolute',
-    right: 24,
+    right: 8,
+  },
+  optionContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '100%',
   },
   topShade: {
     left: 0,
@@ -573,11 +640,11 @@ const styles = StyleSheet.create({
     top: 0,
   },
   unitColumn: {
-    width: 44,
+    width: 52,
   },
   valueColumn: {
     flex: 1,
-    paddingRight: 8,
+    paddingRight: 6,
   },
   wheel: {},
 });
@@ -602,6 +669,64 @@ function makeNumberOptions(min: number, max: number, step: number): number[] {
 
 function keyExtractor(value: number): string {
   return `${value}`;
+}
+
+function getWheelRenderWindow(optionsLength: number, displayIndex: number, visibleItemCount: number): WheelRenderWindow {
+  if (optionsLength <= 0) {
+    return {
+      startIndex: 0,
+      endIndex: -1,
+      topSpacerHeight: 0,
+      bottomSpacerHeight: 0,
+    };
+  }
+
+  const radius = Math.ceil(visibleItemCount / 2) + WINDOW_BUFFER_ITEM_COUNT;
+  const startIndex = Math.max(0, displayIndex - radius);
+  const endIndex = Math.min(optionsLength - 1, displayIndex + radius);
+
+  return {
+    startIndex,
+    endIndex,
+    topSpacerHeight: startIndex * ITEM_HEIGHT,
+    bottomSpacerHeight: (optionsLength - endIndex - 1) * ITEM_HEIGHT,
+  };
+}
+
+function getOptionPresentation(distanceFromCenter: number): OptionPresentation {
+  if (distanceFromCenter === 0) {
+    return {
+      valueClassName: 'text-xl font-semibold text-foreground',
+      unitClassName: 'text-sm font-semibold text-foreground',
+      scale: 1,
+      opacity: 1,
+    };
+  }
+
+  if (distanceFromCenter === 1) {
+    return {
+      valueClassName: 'text-lg font-semibold text-muted-foreground',
+      unitClassName: 'text-sm font-semibold text-muted-foreground',
+      scale: 1.06,
+      opacity: 0.72,
+    };
+  }
+
+  if (distanceFromCenter === 2) {
+    return {
+      valueClassName: 'text-base font-medium text-muted-foreground/60',
+      unitClassName: 'text-xs font-semibold text-muted-foreground/60',
+      scale: 0.98,
+      opacity: 0.42,
+    };
+  }
+
+  return {
+    valueClassName: 'text-sm font-medium text-muted-foreground/40',
+    unitClassName: 'text-xs font-semibold text-muted-foreground/40',
+    scale: 0.94,
+    opacity: 0.24,
+  };
 }
 
 function getClosestOptionIndex(options: readonly number[], value: number): number {
