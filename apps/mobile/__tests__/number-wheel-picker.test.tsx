@@ -87,12 +87,30 @@ describe('NumberWheelPicker', () => {
 
     const list = renderer!.root.findByProps({ testID: 'depth-picker-wheel-list' });
 
-    expect(React.Children.count(list.props.children)).toBe(5);
+    expect(list.props.data).toEqual([0, 5, 10, 15, 20]);
+    expect(list.props.getItemLayout(undefined, 3)).toEqual({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * 3, index: 3 });
     expect(list.props.snapToInterval).toBe(ITEM_HEIGHT);
     expect(list.props.scrollEventThrottle).toBe(16);
     expect(list.props.showsVerticalScrollIndicator).toBe(false);
     expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('10');
     expect(renderer!.root.findByProps({ testID: 'depth-picker-unit' }).props.children).toBe('m');
+  });
+
+  it('renders option rows with separate value and unit columns', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker value={150} min={148} max={152} step={1} unitLabel="m" onChange={onChange} testID="depth-picker" />,
+      );
+    });
+    renderers.push(renderer!);
+
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-150-value' }).props.children).toBe('150');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-option-150-unit' }).props.children).toBe('m');
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-center-value-column' })).toBeTruthy();
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-center-unit-column' })).toBeTruthy();
   });
 
   it('selects the nearest value when momentum scrolling ends', async () => {

@@ -2,14 +2,15 @@ import React from 'react';
 import {
   Keyboard,
   StyleSheet,
+  type FlatList as RNFlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
 import { Box } from './box';
+import { FlatList } from './flat-list';
 import { HStack } from './hstack';
 import { Input, InputField } from './input';
 import { Pressable } from './pressable';
-import { ScrollView } from './scroll-view';
 import { Text } from './text';
 
 export const ITEM_HEIGHT = 36;
@@ -95,7 +96,7 @@ type NumberWheelPickerActions = {
 };
 
 type NumberWheelPickerMeta = {
-  listRef: React.RefObject<React.ComponentRef<typeof ScrollView> | null>;
+  listRef: React.RefObject<RNFlatList<number> | null>;
   inputRef: React.RefObject<React.ComponentRef<typeof InputField> | null>;
   onBlur?: () => void;
 };
@@ -147,7 +148,7 @@ function NumberWheelPickerRoot({
   testID = 'number-wheel-picker',
   children,
 }: NumberWheelPickerRootProps): React.JSX.Element {
-  const listRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const listRef = React.useRef<RNFlatList<number>>(null);
   const inputRef = React.useRef<React.ComponentRef<typeof InputField>>(null);
   const safeStep = step > 0 ? step : 1;
   const options = React.useMemo(() => makeNumberOptions(min, max, safeStep), [max, min, safeStep]);
@@ -176,7 +177,7 @@ function NumberWheelPickerRoot({
     setDisplayIndex(nextIndex);
 
     if (!isWheelInteractingRef.current) {
-      listRef.current?.scrollTo({ y: nextIndex * ITEM_HEIGHT, animated: false });
+      listRef.current?.scrollToOffset({ offset: nextIndex * ITEM_HEIGHT, animated: false });
     }
   }, [options.length, selectedIndex, selectedValue]);
 
@@ -280,7 +281,7 @@ function NumberWheelPickerRoot({
     const nextIndex = getClosestOptionIndex(options, nextValue);
     setDraftValue(formatNumber(nextValue, safeStep));
     selectIndex(nextIndex, !areNumbersEqual(nextValue, value));
-    listRef.current?.scrollTo({ y: nextIndex * ITEM_HEIGHT, animated: false });
+    listRef.current?.scrollToOffset({ offset: nextIndex * ITEM_HEIGHT, animated: false });
   }, [displayValue, draftValue, max, min, onBlur, options, safeStep, selectIndex, value]);
 
   const contextValue = React.useMemo<NumberWheelPickerContextValue>(
@@ -366,38 +367,41 @@ function NumberWheelPickerRoot({
   );
 }
 
+type NumberWheelOptionRenderItem = {
+  item: number;
+  index: number;
+};
+
+function getOptionItemLayout(_: ArrayLike<number> | null | undefined, index: number): { length: number; offset: number; index: number } {
+  return {
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  };
+}
+
 function NumberWheelPickerWheel(): React.JSX.Element {
   const {
-    state: { disabled, isEditing, layout, options, displayIndex, step, testID },
+    state: { disabled, isEditing, layout, options, displayIndex, testID },
     actions: { beginWheelInteraction, endDragWheelScroll, finishWheelScroll, updateFromScrollOffset },
     meta: { listRef },
   } = useNumberWheelPicker('NumberWheelPicker.Wheel');
 
-  const optionRows = React.useMemo(
-    () =>
-      options.map((item, index) => {
-        const distanceFromCenter = Math.abs(index - displayIndex);
-        const itemTextClassName =
-          distanceFromCenter === 0
-            ? 'text-xl font-semibold text-foreground'
-            : distanceFromCenter === 1
-              ? 'text-base font-medium text-muted-foreground'
-              : 'text-sm font-medium text-muted-foreground/50';
-
-        return (
-          <Box key={keyExtractor(item)} style={styles.item} className="items-center justify-center">
-            <Text className={itemTextClassName}>{formatNumber(item, step)}</Text>
-          </Box>
-        );
-      }),
-    [displayIndex, options, step],
+  const renderItem = React.useCallback(
+    ({ item, index }: NumberWheelOptionRenderItem) => <NumberWheelPickerOption value={item} index={index} />,
+    [],
   );
 
   return (
-    <ScrollView
+    <FlatList
       ref={listRef}
       testID={`${testID}-wheel-list`}
-      contentOffset={{ x: 0, y: displayIndex * ITEM_HEIGHT }}
+      data={options}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      getItemLayout={getOptionItemLayout}
+      initialScrollIndex={displayIndex}
+      extraData={displayIndex}
       onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
         if (!disabled && !isEditing) {
           updateFromScrollOffset(event.nativeEvent.contentOffset.y);
@@ -421,9 +425,49 @@ function NumberWheelPickerWheel(): React.JSX.Element {
       scrollEventThrottle={16}
       style={[styles.scroller, { height: layout.wheelHeight }]}
       contentContainerStyle={[styles.contentContainer, { paddingVertical: layout.centerPadding }]}
-    >
-      {optionRows}
-    </ScrollView>
+    />
+  );
+}
+
+type NumberWheelPickerOptionProps = {
+  value: number;
+  index: number;
+};
+
+function NumberWheelPickerOption({ value, index }: NumberWheelPickerOptionProps): React.JSX.Element {
+  const {
+    state: { displayIndex, step, testID, unitLabel },
+  } = useNumberWheelPicker('NumberWheelPicker.Option');
+  const distanceFromCenter = Math.abs(index - displayIndex);
+  const itemTextClassName =
+    distanceFromCenter === 0
+      ? 'text-xl font-semibold text-foreground'
+      : distanceFromCenter === 1
+        ? 'text-base font-medium text-muted-foreground'
+        : 'text-sm font-medium text-muted-foreground/50';
+  const unitTextClassName =
+    distanceFromCenter === 0
+      ? 'text-xs font-semibold text-foreground'
+      : distanceFromCenter === 1
+        ? 'text-xs font-semibold text-muted-foreground'
+        : 'text-xs font-semibold text-muted-foreground/50';
+  const formattedValue = formatNumber(value, step);
+
+  return (
+    <HStack style={styles.item} className="items-center justify-center">
+      <Box testID={`${testID}-option-${formattedValue}-value-column`} style={styles.valueColumn} className="items-end justify-center">
+        <Text testID={`${testID}-option-${formattedValue}-value`} className={itemTextClassName}>
+          {formattedValue}
+        </Text>
+      </Box>
+      <Box testID={`${testID}-option-${formattedValue}-unit-column`} style={styles.unitColumn} className="items-start justify-center">
+        {unitLabel ? (
+          <Text testID={`${testID}-option-${formattedValue}-unit`} className={unitTextClassName}>
+            {unitLabel}
+          </Text>
+        ) : null}
+      </Box>
+    </HStack>
   );
 }
 
@@ -457,43 +501,51 @@ function NumberWheelPickerCenterInputTrigger(): React.JSX.Element {
       accessibilityLabel="Enter number"
       disabled={disabled}
       onPress={openInput}
-      style={[styles.selectionFrame, { top: layout.centerPadding }]}
-      className="items-center justify-center px-4 data-[active=true]:bg-primary/10"
+      style={[styles.centerInputTrigger, { top: layout.centerPadding }]}
+      className="self-center px-4 data-[active=true]:bg-primary/10"
     >
       {isEditing ? (
-        <HStack space="xs" className="w-full items-center justify-center">
-          <Input className="h-10 flex-1 rounded-none border-0 bg-transparent px-0 shadow-none">
-            <InputField
-              ref={inputRef}
-              testID={`${testID}-input`}
-              value={draftValue}
-              onChangeText={changeDraft}
-              onSubmitEditing={commitDraft}
-              onBlur={commitDraft}
-              keyboardType={valueType === 'float' ? 'decimal-pad' : 'number-pad'}
-              returnKeyType="done"
-              selectTextOnFocus
-              autoFocus
-              editable={!disabled}
-              className="text-center text-2xl font-semibold text-foreground"
-            />
-          </Input>
-          {unitLabel ? (
-            <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
-              {unitLabel}
-            </Text>
-          ) : null}
+        <HStack className="w-full items-center justify-center">
+          <Box testID={`${testID}-center-value-column`} style={styles.valueColumn} className="items-end justify-center">
+            <Input className="h-10 w-full rounded-none border-0 bg-transparent px-0 shadow-none">
+              <InputField
+                ref={inputRef}
+                testID={`${testID}-input`}
+                value={draftValue}
+                onChangeText={changeDraft}
+                onSubmitEditing={commitDraft}
+                onBlur={commitDraft}
+                keyboardType={valueType === 'float' ? 'decimal-pad' : 'number-pad'}
+                returnKeyType="done"
+                selectTextOnFocus
+                autoFocus
+                editable={!disabled}
+                className="text-right text-2xl font-semibold text-foreground"
+              />
+            </Input>
+          </Box>
+          <Box testID={`${testID}-center-unit-column`} style={styles.unitColumn} className="items-start justify-center">
+            {unitLabel ? (
+              <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
+                {unitLabel}
+              </Text>
+            ) : null}
+          </Box>
         </HStack>
       ) : (
-        <HStack space="xs" className="items-baseline justify-center">
-          <Text testID={`${testID}-value`} className="text-2xl font-semibold text-foreground">
-            {formatNumber(displayValue, step)}
-          </Text>
-          {unitLabel ? (
-            <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
-              {unitLabel}
+        <HStack className="items-baseline justify-center">
+          <Box testID={`${testID}-center-value-column`} style={styles.valueColumn} className="items-end justify-center">
+            <Text testID={`${testID}-value`} className="text-2xl font-semibold text-foreground">
+              {formatNumber(displayValue, step)}
             </Text>
-          ) : null}
+          </Box>
+          <Box testID={`${testID}-center-unit-column`} style={styles.unitColumn} className="items-start justify-center">
+            {unitLabel ? (
+              <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
+                {unitLabel}
+              </Text>
+            ) : null}
+          </Box>
         </HStack>
       )}
     </Pressable>
@@ -525,6 +577,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
   },
+  centerInputTrigger: {
+    height: ITEM_HEIGHT,
+    left: 24,
+    position: 'absolute',
+    right: 24,
+  },
   selectionRail: {
     borderRadius: 2,
     height: 28,
@@ -537,6 +595,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+  },
+  unitColumn: {
+    width: 44,
+  },
+  valueColumn: {
+    flex: 1,
+    paddingRight: 8,
   },
   wheel: {},
 });
