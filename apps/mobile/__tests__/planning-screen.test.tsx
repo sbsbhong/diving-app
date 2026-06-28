@@ -270,12 +270,38 @@ describe('Planning screen planbook flow', () => {
     expect(root.findByProps({ testID: 'planning-editor-planned-duration-wheel' })).toBeTruthy();
     expect(root.findByProps({ testID: 'planning-editor-planned-duration-wheel-list' })).toBeTruthy();
     expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-wheel' })).toBeTruthy();
-    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-wheel-list' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-column-meters-wheel-list' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-column-tenths-wheel-list' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-unit-fixed' }).props.children).toBe('m');
     expect(root.findAllByProps({ testID: 'planning-editor-planned-at' }).filter(match => typeof match.props.onChangeText === 'function')).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-slider' })).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-decrement' })).toHaveLength(0);
     expect(root.findAllByProps({ testID: 'planning-editor-planned-duration-increment' })).toHaveLength(0);
     expect(root.findAllByProps({ children: 'OPTIONAL' })).toHaveLength(0);
+  });
+
+  it('keeps planned duration single-column while planned depth uses split meter columns', async () => {
+    const renderer = await renderPlanning(
+      new LocalDivePlanRepository([
+        plan({
+          localId: 'plan-depth-split',
+          status: 'draft',
+          site: { name: 'Split Depth Reef' },
+          plannedValues: {
+            plannedMaxDepthMeters: 19.6,
+            plannedDurationMinutes: 45,
+          },
+        }),
+      ]),
+    );
+    const root = renderer.root;
+
+    await press(root, 'planning-plan-row-Split Depth Reef');
+    await press(root, 'planning-detail-edit');
+
+    expect(root.findByProps({ testID: 'planning-editor-planned-duration-value' }).props.children).toBe('45');
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-meters-value' }).props.children).toBe('19');
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-tenths-value' }).props.children).toBe('.6');
   });
 
   it('commits plan lists as badges and removes them before saving', async () => {

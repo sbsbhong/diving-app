@@ -7,6 +7,7 @@ import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { WatchSession } from '../../types/dive-session';
+import { DepthWheelField } from '../common/form/compound-number-wheel-fields';
 import { EditorField } from '../common/form/editor-field';
 import { FixedOptionField } from '../common/form/fixed-option-field';
 import { NumericSliderField } from '../common/form/numeric-slider-field';
@@ -39,20 +40,15 @@ export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
           control={props.control}
           name="plannedMaxDepthMeters"
           render={({ field }) => (
-            <NumericSliderField
+            <DepthWheelField
               className="flex-1"
               label={t('planning.plannedMaxDepthMeters', { defaultValue: 'Planned max (m)' })}
-              value={field.value}
+              valueMeters={field.value}
               onChange={field.onChange}
-              min={0}
-              max={60}
-              step={0.1}
-              unitLabel="m"
-              valueType="float"
+              maxMeters={60}
               required
               error={props.errors.plannedMaxDepthMeters?.message}
               testID="planning-editor-planned-max-depth"
-              placeholder="18"
             />
           )}
         />
