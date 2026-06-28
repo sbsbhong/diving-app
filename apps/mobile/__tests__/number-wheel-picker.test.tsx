@@ -47,6 +47,33 @@ describe('NumberWheelPicker', () => {
     expect(getWheelLayout(80)).toEqual({ wheelHeight: 108, visibleItemCount: 3, centerPadding: 36 });
   });
 
+  it('supports compound Root, Wheel, SelectionOverlay, and CenterInputTrigger composition', async () => {
+    const onChange = jest.fn();
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(async () => {
+      renderer = ReactTestRenderer.create(
+        <NumberWheelPicker.Root value={10} min={0} max={20} step={5} unitLabel="m" onChange={onChange} testID="depth-picker">
+          <NumberWheelPicker.Wheel />
+          <NumberWheelPicker.SelectionOverlay />
+          <NumberWheelPicker.CenterInputTrigger />
+        </NumberWheelPicker.Root>,
+      );
+    });
+    renderers.push(renderer!);
+
+    const list = renderer!.root.findByProps({ testID: 'depth-picker-wheel-list' });
+    expect(list.props.snapToInterval).toBe(ITEM_HEIGHT);
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('10');
+
+    await ReactTestRenderer.act(async () => {
+      list.props.onScroll({ nativeEvent: { contentOffset: { y: ITEM_HEIGHT * 3 } } });
+    });
+
+    expect(onChange).toHaveBeenCalledWith(15);
+    expect(renderer!.root.findByProps({ testID: 'depth-picker-value' }).props.children).toBe('15');
+  });
+
   it('renders a vertical snapping wheel from min to max using step', async () => {
     const onChange = jest.fn();
     let renderer: ReactTestRenderer.ReactTestRenderer | undefined;

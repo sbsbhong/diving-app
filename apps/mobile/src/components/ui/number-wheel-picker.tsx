@@ -61,7 +61,79 @@ export type NumberWheelPickerProps = {
   testID?: string;
 };
 
-export function NumberWheelPicker({
+type NumberWheelPickerRootProps = NumberWheelPickerProps & {
+  children: React.ReactNode;
+};
+
+type NumberWheelPickerState = {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  unitLabel?: string;
+  disabled: boolean;
+  valueType: 'int' | 'float';
+  testID: string;
+  layout: NumberWheelLayout;
+  options: number[];
+  selectedIndex: number;
+  selectedValue: number;
+  displayIndex: number;
+  displayValue: number;
+  draftValue: string;
+  isEditing: boolean;
+};
+
+type NumberWheelPickerActions = {
+  beginWheelInteraction: () => void;
+  updateFromScrollOffset: (offsetY: number) => void;
+  finishWheelScroll: (offsetY: number) => void;
+  endDragWheelScroll: (offsetY: number, velocityY?: number) => void;
+  openInput: () => void;
+  changeDraft: (nextDraftValue: string) => void;
+  commitDraft: () => void;
+};
+
+type NumberWheelPickerMeta = {
+  listRef: React.RefObject<React.ComponentRef<typeof ScrollView> | null>;
+  inputRef: React.RefObject<React.ComponentRef<typeof InputField> | null>;
+  onBlur?: () => void;
+};
+
+type NumberWheelPickerContextValue = {
+  state: NumberWheelPickerState;
+  actions: NumberWheelPickerActions;
+  meta: NumberWheelPickerMeta;
+};
+
+const NumberWheelPickerContext = React.createContext<NumberWheelPickerContextValue | null>(null);
+
+function useNumberWheelPicker(componentName: string): NumberWheelPickerContextValue {
+  const context = React.use(NumberWheelPickerContext);
+  if (context === null) {
+    throw new Error(`${componentName} must be used within NumberWheelPicker.Root`);
+  }
+
+  return context;
+}
+
+function NumberWheelPickerPreset(props: NumberWheelPickerProps): React.JSX.Element {
+  return (
+    <NumberWheelPickerRoot {...props}>
+      <Box
+        testID={`${props.testID ?? 'number-wheel-picker'}-wheel`}
+        className={props.disabled ? 'overflow-hidden rounded-xl border border-border bg-muted' : 'overflow-hidden rounded-xl border border-border bg-card'}
+        style={[styles.wheel, { height: getWheelLayout(props.height).wheelHeight }]}
+      >
+        <NumberWheelPickerWheel />
+        <NumberWheelPickerSelectionOverlay />
+        <NumberWheelPickerCenterInputTrigger />
+      </Box>
+    </NumberWheelPickerRoot>
+  );
+}
+
+function NumberWheelPickerRoot({
   value,
   min,
   max,
@@ -73,28 +145,29 @@ export function NumberWheelPicker({
   onBlur,
   height = DEFAULT_WHEEL_HEIGHT,
   testID = 'number-wheel-picker',
-}: NumberWheelPickerProps): React.JSX.Element {
-  const scrollViewRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
+  children,
+}: NumberWheelPickerRootProps): React.JSX.Element {
+  const listRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null);
   const inputRef = React.useRef<React.ComponentRef<typeof InputField>>(null);
-  const options = React.useMemo(() => makeNumberOptions(min, max, step), [max, min, step]);
+  const safeStep = step > 0 ? step : 1;
+  const options = React.useMemo(() => makeNumberOptions(min, max, safeStep), [max, min, safeStep]);
   const selectedIndex = React.useMemo(() => getClosestOptionIndex(options, value), [options, value]);
-  const selectedValue = options[selectedIndex] ?? clamp(roundToStep(value, step), min, max);
-  const inputValueType = valueType ?? (getStepPrecision(step) > 0 ? 'float' : 'int');
+  const selectedValue = options[selectedIndex] ?? clamp(roundToStep(value, safeStep), min, max);
+  const inputValueType = valueType ?? (getStepPrecision(safeStep) > 0 ? 'float' : 'int');
   const layout = React.useMemo(() => getWheelLayout(height), [height]);
   const [displayIndex, setDisplayIndex] = React.useState(selectedIndex);
   const [isEditing, setIsEditing] = React.useState(false);
-  const [draftValue, setDraftValue] = React.useState(() => formatNumber(selectedValue, step));
+  const [draftValue, setDraftValue] = React.useState(() => formatNumber(selectedValue, safeStep));
   const displayIndexRef = React.useRef(selectedIndex);
   const isWheelInteractingRef = React.useRef(false);
   const lastEmittedValueRef = React.useRef(selectedValue);
   const displayValue = options[displayIndex] ?? selectedValue;
-  const initialContentOffset = React.useMemo(() => ({ x: 0, y: selectedIndex * ITEM_HEIGHT }), [selectedIndex]);
 
   React.useEffect(() => {
     if (!isEditing) {
-      setDraftValue(formatNumber(displayValue, step));
+      setDraftValue(formatNumber(displayValue, safeStep));
     }
-  }, [displayValue, isEditing, step]);
+  }, [displayValue, isEditing, safeStep]);
 
   React.useEffect(() => {
     const nextIndex = clampIndex(selectedIndex, options.length);
@@ -103,9 +176,30 @@ export function NumberWheelPicker({
     setDisplayIndex(nextIndex);
 
     if (!isWheelInteractingRef.current) {
-      scrollViewRef.current?.scrollTo({ y: nextIndex * ITEM_HEIGHT, animated: false });
+      listRef.current?.scrollTo({ y: nextIndex * ITEM_HEIGHT, animated: false });
     }
   }, [options.length, selectedIndex, selectedValue]);
+
+  const selectIndex = React.useCallback(
+    (nextIndex: number, shouldEmit: boolean) => {
+      const clampedIndex = clampIndex(nextIndex, options.length);
+      const nextValue = options[clampedIndex];
+      if (nextValue === undefined) {
+        return;
+      }
+
+      if (clampedIndex !== displayIndexRef.current) {
+        displayIndexRef.current = clampedIndex;
+        setDisplayIndex(clampedIndex);
+      }
+
+      if (shouldEmit && !areNumbersEqual(nextValue, lastEmittedValueRef.current)) {
+        lastEmittedValueRef.current = nextValue;
+        onChange(nextValue);
+      }
+    },
+    [onChange, options],
+  );
 
   const updateFromScrollOffset = React.useCallback(
     (offsetY: number) => {
@@ -113,24 +207,63 @@ export function NumberWheelPicker({
         return;
       }
 
-      const nextIndex = clampIndex(Math.round(offsetY / ITEM_HEIGHT), options.length);
-      const nextValue = options[nextIndex];
-      if (nextValue === undefined) {
+      selectIndex(Math.round(offsetY / ITEM_HEIGHT), true);
+    },
+    [options.length, selectIndex],
+  );
+
+  const beginWheelInteraction = React.useCallback(() => {
+    if (disabled) {
+      return;
+    }
+
+    isWheelInteractingRef.current = true;
+  }, [disabled]);
+
+  const finishWheelScroll = React.useCallback(
+    (offsetY: number) => {
+      if (disabled || isEditing) {
         return;
       }
 
-      if (nextIndex !== displayIndexRef.current) {
-        displayIndexRef.current = nextIndex;
-        setDisplayIndex(nextIndex);
+      updateFromScrollOffset(offsetY);
+      isWheelInteractingRef.current = false;
+    },
+    [disabled, isEditing, updateFromScrollOffset],
+  );
+
+  const endDragWheelScroll = React.useCallback(
+    (offsetY: number, velocityY = 0) => {
+      if (disabled || isEditing) {
+        return;
       }
 
-      if (!areNumbersEqual(nextValue, lastEmittedValueRef.current)) {
-        lastEmittedValueRef.current = nextValue;
-        onChange(nextValue);
+      updateFromScrollOffset(offsetY);
+      if (Math.abs(velocityY) < 0.05) {
+        isWheelInteractingRef.current = false;
       }
     },
-    [onChange, options],
+    [disabled, isEditing, updateFromScrollOffset],
   );
+
+  const changeDraft = React.useCallback(
+    (nextDraftValue: string) => {
+      setDraftValue(normalizeDraftValue(nextDraftValue, inputValueType));
+    },
+    [inputValueType],
+  );
+
+  const openInput = React.useCallback(() => {
+    if (disabled) {
+      return;
+    }
+
+    setDraftValue(formatNumber(displayValue, safeStep));
+    setIsEditing(true);
+    setTimeout(() => {
+      inputRef.current?.focus?.();
+    }, 0);
+  }, [disabled, displayValue, safeStep]);
 
   const commitDraft = React.useCallback(() => {
     const parsedValue = parseDraftValue(draftValue);
@@ -139,80 +272,106 @@ export function NumberWheelPicker({
     onBlur?.();
 
     if (parsedValue === undefined) {
-      setDraftValue(formatNumber(displayValue, step));
+      setDraftValue(formatNumber(displayValue, safeStep));
       return;
     }
 
-    const nextValue = clamp(roundToStep(parsedValue, step), min, max);
-    setDraftValue(formatNumber(nextValue, step));
-    if (!areNumbersEqual(nextValue, value)) {
-      lastEmittedValueRef.current = nextValue;
-      onChange(nextValue);
-    }
-  }, [displayValue, draftValue, max, min, onBlur, onChange, step, value]);
+    const nextValue = clamp(roundToStep(parsedValue, safeStep), min, max);
+    const nextIndex = getClosestOptionIndex(options, nextValue);
+    setDraftValue(formatNumber(nextValue, safeStep));
+    selectIndex(nextIndex, !areNumbersEqual(nextValue, value));
+    listRef.current?.scrollTo({ y: nextIndex * ITEM_HEIGHT, animated: false });
+  }, [displayValue, draftValue, max, min, onBlur, options, safeStep, selectIndex, value]);
 
-  const handleDraftChange = React.useCallback(
-    (nextDraftValue: string) => {
-      setDraftValue(normalizeDraftValue(nextDraftValue, inputValueType));
-    },
-    [inputValueType],
+  const contextValue = React.useMemo<NumberWheelPickerContextValue>(
+    () => ({
+      state: {
+        value,
+        min,
+        max,
+        step: safeStep,
+        unitLabel,
+        disabled,
+        valueType: inputValueType,
+        testID,
+        layout,
+        options,
+        selectedIndex,
+        selectedValue,
+        displayIndex,
+        displayValue,
+        draftValue,
+        isEditing,
+      },
+      actions: {
+        beginWheelInteraction,
+        updateFromScrollOffset,
+        finishWheelScroll,
+        endDragWheelScroll,
+        openInput,
+        changeDraft,
+        commitDraft,
+      },
+      meta: {
+        listRef,
+        inputRef,
+        onBlur,
+      },
+    }),
+    [
+      beginWheelInteraction,
+      changeDraft,
+      commitDraft,
+      disabled,
+      displayIndex,
+      displayValue,
+      draftValue,
+      endDragWheelScroll,
+      finishWheelScroll,
+      inputValueType,
+      isEditing,
+      layout,
+      max,
+      min,
+      onBlur,
+      openInput,
+      options,
+      safeStep,
+      selectedIndex,
+      selectedValue,
+      testID,
+      unitLabel,
+      updateFromScrollOffset,
+      value,
+    ],
   );
 
-  const handleInputPress = React.useCallback(() => {
-    if (disabled) {
-      return;
-    }
-
-    setDraftValue(formatNumber(displayValue, step));
-    setIsEditing(true);
-    setTimeout(() => {
-      (inputRef.current as unknown as { focus?: () => void } | null)?.focus?.();
-    }, 0);
-  }, [disabled, displayValue, step]);
-
-  const handleWheelScroll = React.useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (disabled || isEditing) {
-        return;
-      }
-
-      updateFromScrollOffset(event.nativeEvent.contentOffset.y);
-    },
-    [disabled, isEditing, updateFromScrollOffset],
+  return (
+    <NumberWheelPickerContext.Provider value={contextValue}>
+      <Box
+        testID={testID}
+        accessibilityRole="adjustable"
+        accessibilityLabel={unitLabel ? `Number picker, ${unitLabel}` : 'Number picker'}
+        accessibilityState={{ disabled }}
+        accessibilityValue={{
+          min,
+          max,
+          now: displayValue,
+          text: unitLabel ? `${formatNumber(displayValue, safeStep)} ${unitLabel}` : formatNumber(displayValue, safeStep),
+        }}
+      >
+        {children}
+      </Box>
+    </NumberWheelPickerContext.Provider>
   );
+}
 
-  const handleScrollBeginDrag = React.useCallback(() => {
-    if (!disabled) {
-      isWheelInteractingRef.current = true;
-    }
-  }, [disabled]);
-
-  const finishWheelScroll = React.useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (disabled || isEditing) {
-        return;
-      }
-
-      updateFromScrollOffset(event.nativeEvent.contentOffset.y);
-      isWheelInteractingRef.current = false;
-    },
-    [disabled, isEditing, updateFromScrollOffset],
-  );
-
-  const handleScrollEndDrag = React.useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (disabled || isEditing) {
-        return;
-      }
-
-      updateFromScrollOffset(event.nativeEvent.contentOffset.y);
-      const velocityY = event.nativeEvent.velocity?.y ?? 0;
-      if (Math.abs(velocityY) < 0.05) {
-        isWheelInteractingRef.current = false;
-      }
-    },
-    [disabled, isEditing, updateFromScrollOffset],
-  );
+function NumberWheelPickerWheel(): React.JSX.Element {
+  const {
+    state: { disabled, isEditing, layout, options, displayIndex, step, testID },
+    actions: { beginWheelInteraction, endDragWheelScroll, finishWheelScroll, updateFromScrollOffset },
+    meta: { listRef },
+  } = useNumberWheelPicker('NumberWheelPicker.Wheel');
 
   const optionRows = React.useMemo(
     () =>
@@ -234,101 +393,119 @@ export function NumberWheelPicker({
     [displayIndex, options, step],
   );
 
-  const wheelClassName = disabled
-    ? 'overflow-hidden rounded-xl border border-border bg-muted'
-    : 'overflow-hidden rounded-xl border border-border bg-card';
+  return (
+    <ScrollView
+      ref={listRef}
+      testID={`${testID}-wheel-list`}
+      contentOffset={{ x: 0, y: displayIndex * ITEM_HEIGHT }}
+      onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        if (!disabled && !isEditing) {
+          updateFromScrollOffset(event.nativeEvent.contentOffset.y);
+        }
+      }}
+      onScrollBeginDrag={beginWheelInteraction}
+      onMomentumScrollBegin={beginWheelInteraction}
+      onScrollEndDrag={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        endDragWheelScroll(event.nativeEvent.contentOffset.y, event.nativeEvent.velocity?.y);
+      }}
+      onMomentumScrollEnd={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        finishWheelScroll(event.nativeEvent.contentOffset.y);
+      }}
+      snapToInterval={ITEM_HEIGHT}
+      snapToAlignment="start"
+      decelerationRate="fast"
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={!disabled && !isEditing}
+      nestedScrollEnabled
+      bounces={false}
+      scrollEventThrottle={16}
+      style={[styles.scroller, { height: layout.wheelHeight }]}
+      contentContainerStyle={[styles.contentContainer, { paddingVertical: layout.centerPadding }]}
+    >
+      {optionRows}
+    </ScrollView>
+  );
+}
+
+function NumberWheelPickerSelectionOverlay(): React.JSX.Element {
+  const {
+    state: { disabled, layout },
+  } = useNumberWheelPicker('NumberWheelPicker.SelectionOverlay');
   const shadeClassName = disabled ? 'bg-muted/80' : 'bg-card/80';
 
   return (
-    <Box
-      testID={testID}
-      accessibilityRole="adjustable"
-      accessibilityLabel={unitLabel ? `Number picker, ${unitLabel}` : 'Number picker'}
-      accessibilityState={{ disabled }}
-      accessibilityValue={{
-        min,
-        max,
-        now: displayValue,
-        text: unitLabel ? `${formatNumber(displayValue, step)} ${unitLabel}` : formatNumber(displayValue, step),
-      }}
-    >
-      <Box testID={`${testID}-wheel`} className={wheelClassName} style={[styles.wheel, { height: layout.wheelHeight }]}>
-        <ScrollView
-          ref={scrollViewRef}
-          testID={`${testID}-wheel-list`}
-          contentOffset={initialContentOffset}
-          onScroll={handleWheelScroll}
-          onScrollBeginDrag={handleScrollBeginDrag}
-          onMomentumScrollBegin={handleScrollBeginDrag}
-          onScrollEndDrag={handleScrollEndDrag}
-          onMomentumScrollEnd={finishWheelScroll}
-          snapToInterval={ITEM_HEIGHT}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={!disabled && !isEditing}
-          nestedScrollEnabled
-          bounces={false}
-          scrollEventThrottle={16}
-          style={[styles.scroller, { height: layout.wheelHeight }]}
-          contentContainerStyle={[styles.contentContainer, { paddingVertical: layout.centerPadding }]}
-        >
-          {optionRows}
-        </ScrollView>
-        <Box pointerEvents="none" style={[styles.topShade, { height: layout.centerPadding }]} className={shadeClassName} />
-        <Box pointerEvents="none" style={[styles.bottomShade, { height: layout.centerPadding }]} className={shadeClassName} />
-        <Box pointerEvents="none" style={[styles.selectionFrame, { top: layout.centerPadding }]} className="border-y border-primary/30 bg-primary/10" />
-        <Box pointerEvents="none" style={[styles.selectionRail, { top: layout.centerPadding + 8 }]} className="bg-primary" />
-        <Pressable
-          testID={`${testID}-input-trigger`}
-          accessibilityRole="button"
-          accessibilityLabel="Enter number"
-          disabled={disabled}
-          onPress={handleInputPress}
-          style={[styles.selectionFrame, { top: layout.centerPadding }]}
-          className="items-center justify-center px-4 data-[active=true]:bg-primary/10"
-        >
-          {isEditing ? (
-            <HStack space="xs" className="w-full items-center justify-center">
-              <Input className="h-10 flex-1 rounded-none border-0 bg-transparent px-0 shadow-none">
-                <InputField
-                  ref={inputRef}
-                  testID={`${testID}-input`}
-                  value={draftValue}
-                  onChangeText={handleDraftChange}
-                  onSubmitEditing={commitDraft}
-                  onBlur={commitDraft}
-                  keyboardType={inputValueType === 'float' ? 'decimal-pad' : 'number-pad'}
-                  returnKeyType="done"
-                  selectTextOnFocus
-                  autoFocus
-                  editable={!disabled}
-                  className="text-center text-2xl font-semibold text-foreground"
-                />
-              </Input>
-              {unitLabel ? (
-                <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
-                  {unitLabel}
-                </Text>
-              ) : null}
-            </HStack>
-          ) : (
-            <HStack space="xs" className="items-baseline justify-center">
-              <Text testID={`${testID}-value`} className="text-2xl font-semibold text-foreground">
-                {formatNumber(displayValue, step)}
-              </Text>
-              {unitLabel ? (
-                <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
-                  {unitLabel}
-                </Text>
-              ) : null}
-            </HStack>
-          )}
-        </Pressable>
-      </Box>
-    </Box>
+    <>
+      <Box pointerEvents="none" style={[styles.topShade, { height: layout.centerPadding }]} className={shadeClassName} />
+      <Box pointerEvents="none" style={[styles.bottomShade, { height: layout.centerPadding }]} className={shadeClassName} />
+      <Box pointerEvents="none" style={[styles.selectionFrame, { top: layout.centerPadding }]} className="border-y border-primary/30 bg-primary/10" />
+      <Box pointerEvents="none" style={[styles.selectionRail, { top: layout.centerPadding + 8 }]} className="bg-primary" />
+    </>
   );
 }
+
+function NumberWheelPickerCenterInputTrigger(): React.JSX.Element {
+  const {
+    state: { disabled, displayValue, draftValue, isEditing, layout, step, testID, unitLabel, valueType },
+    actions: { changeDraft, commitDraft, openInput },
+    meta: { inputRef },
+  } = useNumberWheelPicker('NumberWheelPicker.CenterInputTrigger');
+
+  return (
+    <Pressable
+      testID={`${testID}-input-trigger`}
+      accessibilityRole="button"
+      accessibilityLabel="Enter number"
+      disabled={disabled}
+      onPress={openInput}
+      style={[styles.selectionFrame, { top: layout.centerPadding }]}
+      className="items-center justify-center px-4 data-[active=true]:bg-primary/10"
+    >
+      {isEditing ? (
+        <HStack space="xs" className="w-full items-center justify-center">
+          <Input className="h-10 flex-1 rounded-none border-0 bg-transparent px-0 shadow-none">
+            <InputField
+              ref={inputRef}
+              testID={`${testID}-input`}
+              value={draftValue}
+              onChangeText={changeDraft}
+              onSubmitEditing={commitDraft}
+              onBlur={commitDraft}
+              keyboardType={valueType === 'float' ? 'decimal-pad' : 'number-pad'}
+              returnKeyType="done"
+              selectTextOnFocus
+              autoFocus
+              editable={!disabled}
+              className="text-center text-2xl font-semibold text-foreground"
+            />
+          </Input>
+          {unitLabel ? (
+            <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
+              {unitLabel}
+            </Text>
+          ) : null}
+        </HStack>
+      ) : (
+        <HStack space="xs" className="items-baseline justify-center">
+          <Text testID={`${testID}-value`} className="text-2xl font-semibold text-foreground">
+            {formatNumber(displayValue, step)}
+          </Text>
+          {unitLabel ? (
+            <Text testID={`${testID}-unit`} className="text-xs font-semibold text-primary">
+              {unitLabel}
+            </Text>
+          ) : null}
+        </HStack>
+      )}
+    </Pressable>
+  );
+}
+
+export const NumberWheelPicker = Object.assign(NumberWheelPickerPreset, {
+  Root: NumberWheelPickerRoot,
+  Wheel: NumberWheelPickerWheel,
+  SelectionOverlay: NumberWheelPickerSelectionOverlay,
+  CenterInputTrigger: NumberWheelPickerCenterInputTrigger,
+});
 
 const styles = StyleSheet.create({
   bottomShade: {
