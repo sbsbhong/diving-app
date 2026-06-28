@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  Animated,
-  Easing,
   Keyboard,
   StyleSheet,
   type NativeScrollEvent,
@@ -14,43 +12,36 @@ import { Input, InputField } from './input';
 import { Pressable } from './pressable';
 import { ScrollView } from './scroll-view';
 import { Text } from './text';
+import {
+  DEFAULT_WHEEL_HEIGHT,
+  ITEM_HEIGHT,
+  OPTION_EMPHASIS_ANIMATION_DURATION_MS,
+  WheelOptionContent,
+  WheelSelectionOverlay,
+  areNumbersEqual,
+  clamp,
+  clampIndex,
+  coreStyles,
+  formatNumber,
+  getClosestOptionIndex,
+  getStepPrecision,
+  getWheelLayout,
+  getWheelRenderWindow,
+  keyExtractor,
+  makeNumberOptions,
+  normalizeDraftValue,
+  parseDraftValue,
+  roundToStep,
+  type NumberWheelLayout,
+} from './wheel-picker-core';
 
-export const ITEM_HEIGHT = 36;
-export const DEFAULT_WHEEL_HEIGHT = 176;
-export const OPTION_EMPHASIS_ANIMATION_DURATION_MS = 90;
-
-const MIN_VISIBLE_ITEM_COUNT = 3;
-const MIN_WHEEL_HEIGHT = ITEM_HEIGHT * MIN_VISIBLE_ITEM_COUNT;
-const WINDOW_BUFFER_ITEM_COUNT = 6;
-
-export type NumberWheelLayout = {
-  wheelHeight: number;
-  visibleItemCount: number;
-  centerPadding: number;
+export {
+  DEFAULT_WHEEL_HEIGHT,
+  ITEM_HEIGHT,
+  OPTION_EMPHASIS_ANIMATION_DURATION_MS,
+  getWheelLayout,
 };
-
-export function getWheelLayout(height = DEFAULT_WHEEL_HEIGHT): NumberWheelLayout {
-  const requestedHeight = Number.isFinite(height) ? height : DEFAULT_WHEEL_HEIGHT;
-  const wheelHeight = Math.max(MIN_WHEEL_HEIGHT, Math.round(requestedHeight));
-  const approximateCount = Math.max(MIN_VISIBLE_ITEM_COUNT, wheelHeight / ITEM_HEIGHT);
-  const visibleItemCount = toOddVisibleItemCount(approximateCount);
-
-  return {
-    wheelHeight,
-    visibleItemCount,
-    centerPadding: (wheelHeight - ITEM_HEIGHT) / 2,
-  };
-}
-
-function toOddVisibleItemCount(value: number): number {
-  const count = Math.max(MIN_VISIBLE_ITEM_COUNT, value);
-  const floor = Math.floor(count);
-  const ceiling = Math.ceil(count);
-  const lowerOdd = Math.max(MIN_VISIBLE_ITEM_COUNT, floor % 2 === 1 ? floor : floor - 1);
-  const upperOdd = Math.max(MIN_VISIBLE_ITEM_COUNT, ceiling % 2 === 1 ? ceiling : ceiling + 1);
-
-  return count - lowerOdd <= upperOdd - count ? lowerOdd : upperOdd;
-}
+export type { NumberWheelLayout };
 
 export type NumberWheelPickerProps = {
   value: number;
@@ -103,20 +94,6 @@ type NumberWheelPickerMeta = {
   listRef: React.RefObject<RNScrollView | null>;
   inputRef: React.RefObject<React.ComponentRef<typeof InputField> | null>;
   onBlur?: () => void;
-};
-
-type WheelRenderWindow = {
-  startIndex: number;
-  endIndex: number;
-  topSpacerHeight: number;
-  bottomSpacerHeight: number;
-};
-
-type OptionPresentation = {
-  valueClassName: string;
-  unitClassName: string;
-  scale: number;
-  opacity: number;
 };
 
 type NumberWheelPickerContextValue = {
@@ -453,59 +430,16 @@ function NumberWheelPickerOption({ value, index }: NumberWheelPickerOptionProps)
     state: { displayIndex, step, testID, unitLabel },
   } = useNumberWheelPicker('NumberWheelPicker.Option');
   const distanceFromCenter = Math.abs(index - displayIndex);
-  const presentation = getOptionPresentation(distanceFromCenter);
-  const scale = React.useRef(new Animated.Value(presentation.scale)).current;
-  const opacity = React.useRef(new Animated.Value(presentation.opacity)).current;
-  const hasMountedRef = React.useRef(false);
-  const centerHiddenClassName = distanceFromCenter === 0 ? ' opacity-0' : '';
   const formattedValue = formatNumber(value, step);
 
-  React.useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
-    }
-
-    Animated.parallel([
-      Animated.timing(scale, {
-        toValue: presentation.scale,
-        duration: OPTION_EMPHASIS_ANIMATION_DURATION_MS,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: presentation.opacity,
-        duration: OPTION_EMPHASIS_ANIMATION_DURATION_MS,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [opacity, presentation.opacity, presentation.scale, scale]);
-
   return (
-    <Animated.View
-      testID={`${testID}-option-${formattedValue}-content`}
-      style={[styles.item, styles.optionContent, { opacity, transform: [{ scale }] }]}
-    >
-      <Box testID={`${testID}-option-${formattedValue}-value-column`} style={styles.valueColumn} className="items-end justify-center">
-        <Text
-          testID={`${testID}-option-${formattedValue}-value`}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.75}
-          className={`${presentation.valueClassName}${centerHiddenClassName}`}
-        >
-          {formattedValue}
-        </Text>
-      </Box>
-      <Box testID={`${testID}-option-${formattedValue}-unit-column`} style={styles.unitColumn} className="items-start justify-center">
-        {unitLabel ? (
-          <Text testID={`${testID}-option-${formattedValue}-unit`} numberOfLines={1} className={`${presentation.unitClassName}${centerHiddenClassName}`}>
-            {unitLabel}
-          </Text>
-        ) : null}
-      </Box>
-    </Animated.View>
+    <WheelOptionContent
+      testIDPrefix={`${testID}-option-${formattedValue}`}
+      valueText={formattedValue}
+      unitLabel={unitLabel}
+      distanceFromCenter={distanceFromCenter}
+      hideWhenCentered
+    />
   );
 }
 
@@ -513,16 +447,8 @@ function NumberWheelPickerSelectionOverlay(): React.JSX.Element {
   const {
     state: { disabled, layout },
   } = useNumberWheelPicker('NumberWheelPicker.SelectionOverlay');
-  const shadeClassName = disabled ? 'bg-muted/80' : 'bg-card/80';
-  const frameClassName = disabled ? 'border-y border-border bg-muted/40' : 'border-y border-border bg-muted/30';
 
-  return (
-    <>
-      <Box pointerEvents="none" style={[styles.topShade, { height: layout.centerPadding }]} className={shadeClassName} />
-      <Box pointerEvents="none" style={[styles.bottomShade, { height: layout.centerPadding }]} className={shadeClassName} />
-      <Box pointerEvents="none" style={[styles.selectionFrame, { top: layout.centerPadding }]} className={frameClassName} />
-    </>
-  );
+  return <WheelSelectionOverlay disabled={disabled} layout={layout} />;
 }
 
 function NumberWheelPickerCenterInputTrigger(): React.JSX.Element {
@@ -604,199 +530,15 @@ export const NumberWheelPicker = Object.assign(NumberWheelPickerPreset, {
 });
 
 const styles = StyleSheet.create({
-  bottomShade: {
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-  },
-  contentContainer: {},
-  item: {
-    height: ITEM_HEIGHT,
-  },
-  scroller: {},
-  selectionFrame: {
-    height: ITEM_HEIGHT,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-  },
   centerInputTrigger: {
     height: ITEM_HEIGHT,
     left: 8,
     position: 'absolute',
     right: 8,
   },
-  optionContent: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  topShade: {
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  unitColumn: {
-    width: 52,
-  },
-  valueColumn: {
-    flex: 1,
-    paddingRight: 6,
-  },
+  contentContainer: {},
+  scroller: {},
+  unitColumn: coreStyles.unitColumn,
+  valueColumn: coreStyles.valueColumn,
   wheel: {},
 });
-
-function makeNumberOptions(min: number, max: number, step: number): number[] {
-  const safeStep = step > 0 ? step : 1;
-  const precision = getStepPrecision(safeStep);
-  const count = Math.floor((max - min) / safeStep);
-  const options: number[] = [];
-
-  for (let index = 0; index <= count; index += 1) {
-    options.push(Number((min + safeStep * index).toFixed(precision)));
-  }
-
-  const roundedMax = Number(max.toFixed(precision));
-  if (!areNumbersEqual(options[options.length - 1] ?? min, roundedMax)) {
-    options.push(roundedMax);
-  }
-
-  return options;
-}
-
-function keyExtractor(value: number): string {
-  return `${value}`;
-}
-
-function getWheelRenderWindow(optionsLength: number, displayIndex: number, visibleItemCount: number): WheelRenderWindow {
-  if (optionsLength <= 0) {
-    return {
-      startIndex: 0,
-      endIndex: -1,
-      topSpacerHeight: 0,
-      bottomSpacerHeight: 0,
-    };
-  }
-
-  const radius = Math.ceil(visibleItemCount / 2) + WINDOW_BUFFER_ITEM_COUNT;
-  const startIndex = Math.max(0, displayIndex - radius);
-  const endIndex = Math.min(optionsLength - 1, displayIndex + radius);
-
-  return {
-    startIndex,
-    endIndex,
-    topSpacerHeight: startIndex * ITEM_HEIGHT,
-    bottomSpacerHeight: (optionsLength - endIndex - 1) * ITEM_HEIGHT,
-  };
-}
-
-function getOptionPresentation(distanceFromCenter: number): OptionPresentation {
-  if (distanceFromCenter === 0) {
-    return {
-      valueClassName: 'text-xl font-semibold text-foreground',
-      unitClassName: 'text-sm font-semibold text-foreground',
-      scale: 1,
-      opacity: 1,
-    };
-  }
-
-  if (distanceFromCenter === 1) {
-    return {
-      valueClassName: 'text-lg font-semibold text-muted-foreground',
-      unitClassName: 'text-sm font-semibold text-muted-foreground',
-      scale: 1.06,
-      opacity: 0.72,
-    };
-  }
-
-  if (distanceFromCenter === 2) {
-    return {
-      valueClassName: 'text-base font-medium text-muted-foreground/60',
-      unitClassName: 'text-xs font-semibold text-muted-foreground/60',
-      scale: 0.98,
-      opacity: 0.42,
-    };
-  }
-
-  return {
-    valueClassName: 'text-sm font-medium text-muted-foreground/40',
-    unitClassName: 'text-xs font-semibold text-muted-foreground/40',
-    scale: 0.94,
-    opacity: 0.24,
-  };
-}
-
-function getClosestOptionIndex(options: readonly number[], value: number): number {
-  if (options.length === 0) {
-    return 0;
-  }
-
-  let closestIndex = 0;
-  let closestDistance = Math.abs(options[0] - value);
-  for (let index = 1; index < options.length; index += 1) {
-    const distance = Math.abs(options[index] - value);
-    if (distance < closestDistance) {
-      closestDistance = distance;
-      closestIndex = index;
-    }
-  }
-
-  return closestIndex;
-}
-
-function normalizeDraftValue(value: string, valueType: 'int' | 'float'): string {
-  const normalized = value.replace(',', '.').replace(/[^\d.]/g, '');
-  if (valueType === 'int') {
-    return normalized.replace(/\./g, '');
-  }
-
-  const [wholePart, ...decimalParts] = normalized.split('.');
-  if (decimalParts.length === 0) {
-    return wholePart;
-  }
-
-  return `${wholePart}.${decimalParts.join('')}`;
-}
-
-function parseDraftValue(value: string): number | undefined {
-  if (value.trim().length === 0 || value === '.') {
-    return undefined;
-  }
-
-  const parsedValue = Number(value);
-  return Number.isFinite(parsedValue) ? parsedValue : undefined;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
-
-function clampIndex(value: number, length: number): number {
-  return Math.max(0, Math.min(length - 1, value));
-}
-
-function roundToStep(value: number, step: number): number {
-  if (step <= 0) {
-    return value;
-  }
-
-  const precision = getStepPrecision(step);
-  return Number((Math.round(value / step) * step).toFixed(precision));
-}
-
-function formatNumber(value: number, step: number): string {
-  const precision = getStepPrecision(step);
-  return value.toFixed(precision).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
-}
-
-function getStepPrecision(step: number): number {
-  const decimalPart = `${step}`.split('.')[1];
-  return decimalPart?.length ?? 0;
-}
-
-function areNumbersEqual(left: number, right: number): boolean {
-  return Math.abs(left - right) < 0.000001;
-}
