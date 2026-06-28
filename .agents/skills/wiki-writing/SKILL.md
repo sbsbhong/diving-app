@@ -1,48 +1,37 @@
 ---
 name: wiki-writing
-description: Maintain durable project knowledge in the diving-app llm-wiki. Use when creating, updating, or reviewing `.wiki/wiki/` pages, when work changes app architecture, package responsibility, mobile/watch boundaries, Supabase schema or RLS, auth, sync behavior, domain models, dive-log terminology, safety rules, important decisions, or recurring pitfalls.
+description: Repository-specific companion rules for maintaining the diving-app Karpathy LLM Wiki. Use with karpathy-llm-wiki when creating, updating, querying, linting, or reviewing `.wiki/raw/` and `.wiki/wiki/`, especially when work changes app architecture, package responsibility, mobile/watch boundaries, Supabase schema or RLS, auth, sync behavior, domain models, dive-log terminology, safety rules, important decisions, or recurring pitfalls.
 ---
 
 # Wiki Writing
 
 ## Purpose
 
-Maintain durable project knowledge in `.wiki/wiki/`. Treat llm-wiki as a repository method, not a plugin.
+This is the repository-specific adapter for `.agents/skills/karpathy-llm-wiki/SKILL.md`.
 
-The wiki should help future agents and developers understand architecture, domain concepts, module boundaries, important decisions, Supabase schema and RLS behavior, mobile/watch sync behavior, safety boundaries, and recurring pitfalls.
+Use `karpathy-llm-wiki` as the canonical workflow for Ingest, Query, Lint, Archive, article metadata, index updates, raw preservation, and log format. Use this skill only to apply `diving-app` scope, language, and safety rules.
 
-## Structure
+The wiki should help future agents and developers understand architecture, domain concepts, module boundaries, important decisions, future Supabase schema and RLS behavior, mobile/watch sync behavior, safety boundaries, and recurring pitfalls.
 
-Expected structure:
+## Repository Root
 
 ```txt
 .wiki/
   raw/
-    decisions/
-    meetings/
-    external-docs/
-    code-notes/
+    <topic>/
+      <source>.md
   wiki/
     index.md
-    overview.md
-    architecture/
-      monorepo.md
-      mobile.md
-      watch-app.md
-      supabase.md
-      sync-flow.md
-    domains/
-      diving-glossary.md
-      dive-log.md
-      safety-rules.md
-    decisions/
-      adr-index.md
-    questions/
-      open-questions.md
-      resolved-questions.md
+    log.md
+    <topic>/
+      <article>.md
 ```
 
-Create missing directories or pages only when the current wiki update needs them.
+In this repository, `.wiki/` is the Karpathy wiki root. Do not create top-level `raw/` or `wiki/` directories at the repository root.
+
+`.wiki/wiki/` supports one level of topic directories only. Root-level compiled pages other than `index.md` and `log.md` are not used.
+
+Current topics include `project`, `architecture`, `domains`, `design`, `decisions`, and `questions`. Reuse an existing topic unless a source introduces a genuinely distinct long-lived concept.
 
 ## Core Rules
 
@@ -51,6 +40,9 @@ Create missing directories or pages only when the current wiki update needs them
 - Do not update the wiki for trivial refactors, formatting changes, typo fixes, or local-only experiments.
 - Do not use OpenSpec unless the user explicitly asks for it.
 - If something is uncertain, put it in `.wiki/wiki/questions/open-questions.md` instead of presenting it as fact.
+- Preserve source material in `.wiki/raw/` before changing compiled articles. Do not modify existing raw files.
+- Use standard markdown relative links inside `.wiki/wiki/`; do not use Obsidian double-bracket links in compiled articles.
+- Generated contract output is not source material for manual rewrite. If contract facts change, cite schema/generator/source files and regenerate outputs through the proper package scripts.
 
 ## Source Order
 
@@ -82,21 +74,25 @@ Update `.wiki/wiki/` when work changes:
 
 ## Workflow
 
-1. Identify what durable knowledge changed.
-2. Read `.wiki/wiki/index.md`.
-3. Read the relevant existing wiki pages.
-4. Inspect code or source files if needed.
-5. Update the smallest relevant set of pages.
-6. Add new pages only when existing pages would become too broad.
-7. Update `.wiki/wiki/index.md` if a new page is created.
-8. Append a concise factual entry to `.wiki/wiki/log.md`; create it if missing.
+1. Read `.agents/skills/karpathy-llm-wiki/SKILL.md`.
+2. Read `.wiki/wiki/index.md` and the relevant compiled articles.
+3. Fetch or capture the source into `.wiki/raw/<topic>/...` using the Karpathy raw template.
+4. Update the smallest relevant compiled article set under `.wiki/wiki/<topic>/...`.
+5. Refresh each touched article's `Updated:` date when its knowledge content changes.
+6. Update `.wiki/wiki/index.md` for every touched article.
+7. Append `.wiki/wiki/log.md` using the Karpathy log header format.
+8. Run the smallest relevant verification gate; for wiki or architecture-rule changes, use `yarn codex:check` when feasible.
 
 ## Page Format
 
-Normal page는 이 형식을 기본으로 사용한다:
+Compiled articles use the Karpathy article metadata fields:
 
 ```md
 # Page Title
+
+Sources: <source name/date>; <source name/date>
+Raw: [source title](../../raw/<topic>/<source>.md)
+Updated: YYYY-MM-DD
 
 ## 요약
 
@@ -112,15 +108,21 @@ Normal page는 이 형식을 기본으로 사용한다:
 
 ## 관련 문서
 
-- [[...]]
+- [Article title](../topic/article.md)
 ```
+
+Use Korean section names in article bodies unless the page is an ADR or imported archive whose native format is clearer.
 
 ## Decision Format
 
-Accepted decision은 이 형식을 사용한다:
+Accepted decisions are normal compiled articles with Karpathy metadata, then this body format:
 
 ```md
 # ADR: Decision title
+
+Sources: <source name/date>
+Raw: [source title](../../raw/decisions/<source>.md)
+Updated: YYYY-MM-DD
 
 ## Status
 
@@ -147,18 +149,14 @@ Add accepted decisions to `.wiki/wiki/decisions/adr-index.md`.
 
 ## Wiki Log Format
 
-`.wiki/wiki/log.md`에는 다음 형식으로 entry를 추가한다:
+Use the Karpathy operation log format:
 
 ```md
-## YYYY-MM-DD - update type - title
-
-- 수정:
-  - `.wiki/wiki/...`
-- 근거:
-  - `path/to/source`
-- 요약:
-  - 바뀐 내용의 짧은 요약.
+## [YYYY-MM-DD] ingest | <primary article title>
+- Updated: <cascade-updated article title>
 ```
+
+Use `query | Archived: <page title>` for archived query answers and `lint | <N> issues found, <M> auto-fixed` for lint runs.
 
 ## Safety Boundary
 

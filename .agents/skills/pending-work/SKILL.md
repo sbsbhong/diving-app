@@ -7,13 +7,14 @@ description: Summarize remaining, unresolved, or next implementation work in the
 
 ## Overview
 
-Report the current remaining work for `diving-app` from durable project sources. Prefer implemented facts from code and wiki over stale plan checkboxes.
+Report the current remaining work for `diving-app` from durable project sources. Prefer implemented facts from code and the Karpathy LLM Wiki over stale plan checkboxes.
 
 ## Workflow
 
 1. Read the repository context before answering:
    - `AGENTS.md`
    - `.wiki/wiki/index.md`
+   - `.wiki/wiki/project/wiki-workflow.md`
    - `.wiki/wiki/architecture/implementation-priorities.md`
    - `.wiki/wiki/questions/open-questions.md`
    - relevant `.wiki/wiki/architecture/*.md` and `.wiki/wiki/domains/*.md`
@@ -21,7 +22,7 @@ Report the current remaining work for `diving-app` from durable project sources.
 2. Check current code state for drift:
    - `git status --short`
    - `rg -n "TODO|FIXME|not implemented|미구현|검증|후속|남은|pending" README.md .wiki docs apps packages -g '!node_modules'`
-3. Treat old `docs/superpowers/plans/*.md` checkbox lists as historical unless the current wiki or code still confirms them.
+3. Treat old `docs/superpowers/plans/*.md` checkbox lists as historical unless the current `.wiki/wiki/index.md` articles or code still confirm them.
 4. Separate the answer into:
    - completed or already implemented foundations
    - approved but not implemented work
