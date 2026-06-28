@@ -1,36 +1,78 @@
-# Dive App Wiki
+# Knowledge Base Index
 
-## 요약
+## project
 
-이 wiki는 `diving-app` monorepo에서 오래 유지해야 할 프로젝트 지식을 기록한다. 현재 구조, 앱 경계, 동기화 계약, 안전 규칙, 열린 질문을 구현된 사실과 계획이 섞이지 않게 정리하는 것이 목적이다.
+프로젝트 수준의 개요와 위키 운영 규칙을 담는다.
 
-## 현재 상태
+| Article                                                               | Summary                                                                                                                                                                                                            | Updated    |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| [Diving App / Overview](project/diving-app-overview.md)               | Apple Watch Ultra급 워치를 중심으로 프리다이빙, Air-only safety-stop 리마인더를 포함한 레크리에이션 스쿠버, 로그 앱의 제품 방향을 정리하되, 현재 구현 상태와 certified dive-computer 기능을 분리한다.                                                                       | 2026-06-28 |
+| [Diving App / Product Roadmap](project/diving-app-product-roadmap.md) | 추천 제품 범위는 v1 Gauge + Freedive + Air-only safety stop + Log에서 시작하고, v2 스쿠버 계산, v3 gas integration, v4 technical/trimix/deco를 단계별 검증 뒤 다룬다.                                                               | 2026-06-28 |
+| [Diving App / QA and Test Plan](project/diving-app-qa-test-plan.md)   | Mobile app, Watch app, v1 Air-only safety-stop reminder, shared algorithm core, cross-device sync, failure fallback이 출시 전에 통과해야 하는 QA 기준과 regression policy를 정리한다.                                                 | 2026-06-28 |
+| [Diving App / References](project/diving-app-references.md)           | 알고리즘과 제품 요구사항을 검증할 때 먼저 확인할 Apple, Oceanic+, NOAA, PADI, DAN, DecoTengu, Shearwater, Subsurface reference를 used-for, confidence, notes 기준으로 정리한다.                                                                  | 2026-06-28 |
+| [프로젝트 개요](project/overview.md)                                        | `diving-app`은 레크리에이션 다이빙 로그 보조 앱을 위한 Yarn 1/Turborepo monorepo다. 현재 구현은 bare React Native 모바일 앱, 모바일 iOS project 안의 embedded SwiftUI watchOS companion target, 공유 watch 동기화 계약, 비어 있는 공유 utility package를 함께 관리한다. | 2026-06-28 |
+| [위키 운영 방식](project/wiki-workflow.md)                                  | 이 저장소의 장기 지식 저장소는 Karpathy LLM Wiki 방식으로 관리한다. 이 저장소에서는 project root 대신 `.wiki/`를 wiki root로 보고, immutable source는 `.wiki/raw/`, compiled article은 `.wiki/wiki/`에 둔다.                                              | 2026-06-28 |
 
-- [[overview]]는 프로젝트 수준의 현재 모습을 담는다.
-- [[architecture/monorepo]]는 workspace 구조, package 책임, root command를 설명한다.
-- [[architecture/mobile]]은 React Native 모바일 앱의 현재 구조를 설명한다.
-- [[architecture/mobile-logbook-roadmap]]은 local-first 모바일 로그북과 future Supabase sync의 승인된 구현 순서를 기록한다.
-- [[architecture/implementation-priorities]]는 1순위 영구 저장소 이후 나중에 확인할 2~10번 구현 우선순위를 기록한다.
-- [[architecture/watch-app]]은 현재 동작하는 watchOS 앱과 Xcode project 상태를 설명한다.
-- [[architecture/sync-flow]]는 watch-to-mobile 동기화 계약과 import 흐름을 설명한다.
-- [[architecture/supabase]]는 현재 Supabase가 없다는 사실과 향후 경계를 기록한다.
-- [[domains/dive-log]]는 현재 dive log 데이터 모델을 정리한다.
-- [[domains/dive-planning]]은 모바일 Planbook의 계획값, 로그 전환, 안전 경계를 정리한다.
-- [[domains/diving-glossary]]는 앱에서 오래 유지할 다이빙 용어를 정의한다.
-- [[domains/safety-rules]]는 제품 안전 경계를 기록한다.
-- [[design/mobile-watch-ui-language]]는 모바일과 watchOS에 적용할 공통 UI look and feel을 기록한다.
-- [[decisions/adr-index]]는 승인된 ADR 목록 역할을 한다.
-- [[questions/open-questions]]는 구현되지 않았거나 불확실한 영역을 추적한다.
-- [[log]]는 wiki 수정 이력을 기록한다.
+## algorithms
 
-## 상세
+수심, 기체, tissue loading, NDL, oxygen exposure, gas management 계산 reference를 담는다.
 
-wiki를 수정할 때는 명시적인 사용자 지시와 현재 코드를 우선 근거로 삼는다. 구조, 계약, 앱 경계, 동기화 동작, Supabase 동작, domain 의미, 안전 문구가 바뀌면 가장 작은 관련 문서만 수정하고 [[log]]에 사실 중심 기록을 추가한다.
+| Article | Summary | Updated |
+|---|---|---|
+| [Diving App / Immutable Algorithm Reference](algorithms/diving-app-algorithm-reference.md) | 프리다이빙/스쿠버 제품 검토에서 반복 참조할 공식과 한계를 보존하고, Current Formula, Needs Validation, Future Extension 같은 status label과 Bühlmann coefficient 검증 TODO를 둔다. | 2026-06-28 |
 
-## 관련 문서
+## architecture
 
-- [[overview]]
-- [[architecture/monorepo]]
-- [[domains/dive-planning]]
-- [[domains/safety-rules]]
-- [[design/mobile-watch-ui-language]]
+모노레포, 모바일 앱, watch 앱, 동기화, Supabase 경계를 설명한다.
+
+| Article | Summary | Updated |
+|---|---|---|
+| [Diving App / State Management](architecture/diving-app-state-management.md) | 향후 스쿠버 계산 기능에서는 tissue state 유실이 가장 위험한 오류 중 하나이며, compact state와 1초 로그 저장, crash/reboot 복구, gauge fallback 정책이 필요하다. | 2026-06-28 |
+| [구현 우선순위 기록](architecture/implementation-priorities.md) | 이 문서는 현재 앱에서 나중에 다시 확인해야 할 구현 우선순위를 기록한다. 모바일 영구 저장소, Watch-mobile sync contract 검증 경로, WatchConnectivity PoC, watch app mobile migration, 두 모드 계약/UX reset, watch sync notification, Home 위치 조건 mock interface는 완료됐고, 실기기 WatchConnectivity 검증과 실제 provider 연동은 아직 남아 있다. | 2026-06-28 |
+| [모바일 로그북 로드맵](architecture/mobile-logbook-roadmap.md) | 모바일 앱은 로그북의 중심이 되고, watch 앱은 측정 가능한 세션 데이터를 제공하는 캡처 source가 된다. 승인된 방향은 local-first 모바일 로그북을 먼저 만들고, 이후 로그인과 Supabase 동기화를 같은 저장소 경계 위에 붙이는 것이다. | 2026-06-28 |
+| [모바일 구조](architecture/mobile.md) | `apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server와 database 없이 React Navigation, React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다. | 2026-06-28 |
+| [Monorepo 구조](architecture/monorepo.md) | 이 저장소는 Turborepo로 관리되는 Yarn 1 workspace monorepo다. 앱 workspace는 `apps/` 아래에 있고, 공유 package는 `packages/` 아래에 있다. | 2026-06-28 |
+| [Supabase 구조](architecture/supabase.md) | 현재 저장소에는 구현된 Supabase 영역이 없다. | 2026-06-28 |
+| [동기화 흐름 구조](architecture/sync-flow.md) | 현재 동기화 모델은 계약을 먼저 정의하는 방식이다. `packages/contracts`가 watch sync message를 정의하고, watch 앱은 동기화 가능한 JSON을 encode한 뒤 WatchConnectivity `transferUserInfo` envelope로 enqueue한다. 양쪽 앱이 reachable이면 같은 envelope를 `sendMessage`로도 보내 활성 상태의 수신 지연을 줄인다. 모바일 iOS native code는 WatchConnectivity userInfo와 message를 원시 JSON payload로 복원해 durable inbox에 저장하고 React Native로 전달한다. 모바일 JS는 payload를 실행 시점에 검증한 뒤 `DiveLogEntry`로 변환해 영구 저장 repository에 import하고, import가 끝난 payload는 native inbox에서 제거하면서 watch에 `watchSyncAcknowledgement`를 돌려보낸다. 반대 방향으로는 모바일의 실행하지 않은 planned dive 목록을 `watchPlannedDives` envelope로 watch companion에 전달해 watch Dive Plan setup 화면에서 선택해 recording을 시작할 수 있게 한다. | 2026-06-28 |
+| [Watch 앱 구조](architecture/watch-app.md) | `apps/mobile/ios/DiveWatchApp`는 현재 동작하는 SwiftUI watchOS companion 앱 source를 담는다. Xcode project는 `apps/mobile/ios/DiveMobile.xcodeproj`이고, watch target과 scheme은 `DiveWatchApp`이다. | 2026-06-28 |
+
+## domains
+
+다이빙 로그, 계획, 용어, 안전 경계를 설명한다.
+
+| Article | Summary | Updated |
+|---|---|---|
+| [Diving App / Freediving Mode](domains/diving-app-freediving-mode.md) | Freedive mode는 압축공기 기반 NDL 계산이 아니라 수심, 시간, 속도, 수면 회복, 반복 부하, 로그, 행동 경고를 중심으로 하며 블랙아웃이나 저산소 위험을 확정 예측하지 않는다. | 2026-06-28 |
+| [Diving App / Non-Negotiable Safety Rules](domains/diving-app-non-negotiable-safety-rules.md) | 제품 구현에서 절대 위반하면 안 되는 safety-critical 규칙을 정리하고, v1 Air-only safety stop을 감압 의무나 상승 안전 보장처럼 표현하지 않는 규칙을 포함한다. | 2026-06-28 |
+| [Diving App / Safety UX and Legal Notes](domains/diving-app-safety-ux-legal-notes.md) | 안전 copy, warning hierarchy, 책임 관련 UX 원칙을 정리하고, v1 Air-only safety stop을 reminder/timer/reference로 제한하는 표현 경계를 유지한다. | 2026-06-28 |
+| [Diving App / Scuba Mode](domains/diving-app-scuba-mode.md) | Scuba mode v1은 Air-only gauge/log에 기본 safety-stop 리마인더를 포함하지만, NDL, ceiling, TTS, CNS, gas remaining 같은 계산 기능은 v2 이후 고위험 검증 범위로 분리한다. | 2026-06-28 |
+| [다이브 로그 도메인](domains/dive-log.md) | Dive log domain은 현재 watch에서 기록한 레크리에이션 세션과 모바일에서 직접 작성한 수동 로그를 과거 기록 확인, 모바일 import, 비중요 계획/기억 화면에 쓰기 위해 model한다. | 2026-06-28 |
+| [다이브 계획 도메인](domains/dive-planning.md) | 모바일 Planbook은 레크리에이션 다이빙 전 준비 내용을 기록하는 비중요 계획 알림이다. 계획값은 사용자의 의도와 준비 맥락이며, 실제 다이빙 기록이나 안전 계산 결과가 아니다. | 2026-06-28 |
+| [다이빙 용어](domains/diving-glossary.md) | 이 glossary는 현재 앱에서 오래 유지할 domain 용어를 정의한다. 정의 범위는 레크리에이션 기록과 확인이며, certified dive-computer behavior가 아니다. | 2026-06-28 |
+| [안전 규칙](domains/safety-rules.md) | 이 앱은 레크리에이션 다이빙 로그 companion 앱이며, v1 Air-only safety stop은 비인증 참고 리마인더이지 감압 의무나 certified dive-computer 판단이 아니다. | 2026-06-28 |
+
+## design
+
+모바일과 watchOS의 제품 UI 언어를 설명한다.
+
+| Article | Summary | Updated |
+|---|---|---|
+| [Mobile/Watch UI 언어](design/mobile-watch-ui-language.md) | `diving-app`의 모바일과 watchOS UI는 **iOS grouped base + dive instrument accent**를 공통 방향으로 삼는다. 기본 구조는 Apple 앱처럼 조용하고 정돈된 grouped 화면을 따르고, 다이빙 앱의 성격은 수심, 시간, profile, 상태 같은 계기 요소 한두 곳에만 집중한다. | 2026-06-28 |
+
+## decisions
+
+승인된 architecture decision record를 관리한다.
+
+| Article | Summary | Updated |
+|---|---|---|
+| [ADR 목록](decisions/adr-index.md) | 이 문서는 accepted architecture decision record 목록을 관리한다. | 2026-06-28 |
+| [ADR: Local-first mobile logbook with future Supabase sync](decisions/adr-local-first-mobile-logbook.md) | 모바일 로그북은 Supabase와 인증을 먼저 붙이지 않고 local-first 저장소 경계 위에서 구현한다. 수동 로그와 watch 기반 로그를 모두 `DiveLogEntry`로 다루고, React Query는 저장소가 아니라 조회/변경 orchestration 계층으로만 사용한다. | 2026-06-28 |
+
+## questions
+
+구현되지 않았거나 검증되지 않은 열린 질문을 추적한다.
+
+| Article | Summary | Updated |
+|---|---|---|
+| [Diving App / Open Questions](questions/diving-app-open-questions.md) | Apple Watch Ultra급 프리다이빙/스쿠버 제품 방향에서 GF 기본값, v2 Air/Nitrox 범위, depth sensor 검증, 필터링, v1 Air-only safety stop trigger/copy, CNS table, Bühlmann coefficient source, mandatory deco 처리, tank transmitter, export format을 열린 질문으로 둔다. | 2026-06-28 |
+| [열린 질문](questions/open-questions.md) | 이 문서는 완료된 동작처럼 쓰면 안 되는 오래 유지할 미확정 사항과 미구현 영역을 기록하며, v1 Air-only safety stop의 trigger/countdown/copy 미확정 사항을 포함한다. | 2026-06-28 |

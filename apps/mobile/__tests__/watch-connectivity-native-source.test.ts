@@ -113,6 +113,18 @@ describe('WatchConnectivity native source contract', () => {
     expect(transport).toContain('handlePlannedDives(userInfo: userInfo)');
   });
 
+  it('does not assert when planned dives are queued without an installed watch companion', () => {
+    const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
+    const flushBlock = inbox.slice(
+      inbox.indexOf('private func flushPendingPlannedDivesContextOnMainQueue()'),
+      inbox.indexOf('private func linkedWatchInfoOnMainQueue()'),
+    );
+
+    expect(flushBlock).toContain('connectivitySession.isPaired');
+    expect(flushBlock).toContain('connectivitySession.isWatchAppInstalled');
+    expect(flushBlock).not.toContain('assertionFailure("Failed to update watch planned dives');
+  });
+
   it('exposes linked watch status to the settings screen', () => {
     const mobileNative = readRepoFile('apps/mobile/src/native/watch-connectivity.ts');
     const module = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityModule.swift');

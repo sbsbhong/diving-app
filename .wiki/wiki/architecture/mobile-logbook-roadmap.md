@@ -1,5 +1,9 @@
 # 모바일 로그북 로드맵
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: 모바일 로그북 로드맵](../../raw/architecture/mobile-logbook-roadmap.md)
+Updated: 2026-06-28
+
 ## 요약
 
 모바일 앱은 로그북의 중심이 되고, watch 앱은 측정 가능한 세션 데이터를 제공하는 캡처 source가 된다. 승인된 방향은 local-first 모바일 로그북을 먼저 만들고, 이후 로그인과 Supabase 동기화를 같은 저장소 경계 위에 붙이는 것이다.
@@ -61,11 +65,11 @@ Logbook/Planbook은 현재 v2 key namespace를 사용하고, 설정 선호 store
 
 ## 관련 문서
 
-- [[architecture/mobile]]
-- [[architecture/sync-flow]]
-- [[architecture/supabase]]
-- [[domains/dive-log]]
-- [[decisions/adr-local-first-mobile-logbook]]
+- [모바일 구조](mobile.md)
+- [동기화 흐름 구조](sync-flow.md)
+- [Supabase 구조](supabase.md)
+- [다이브 로그 도메인](../domains/dive-log.md)
+- [ADR: Local-first mobile logbook with future Supabase sync](../decisions/adr-local-first-mobile-logbook.md)
 - `docs/superpowers/specs/2026-06-21-mobile-logbook-local-first-design.md`
 - `docs/superpowers/plans/2026-06-21-mobile-logbook-local-first.md`
 - `docs/mobile-logbook-local-first-roadmap.html`

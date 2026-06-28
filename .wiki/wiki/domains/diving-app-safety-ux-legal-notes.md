@@ -1,0 +1,83 @@
+# Diving App / Safety UX and Legal Notes
+
+Sources: user pasted request, 2026-06-28; user pasted hardening request, 2026-06-28; user requested v1 Air-only safety stop scope, 2026-06-28
+Raw: [Diving app technical wiki request](../../raw/algorithms/2026-06-28-diving-app-technical-wiki-request.md); [Diving app wiki hardening request](../../raw/algorithms/2026-06-28-diving-app-wiki-hardening-request.md); [v1 Air-only scuba safety stop scope](../../raw/project/2026-06-28-v1-air-only-scuba-safety-stop.md)
+Updated: 2026-06-28
+Status: Reference / Safety Critical
+Owner: local product/dev agent
+Last reviewed: 2026-06-28
+Change policy: safety wording changes require explicit review
+Related pages: [Diving App / Non-Negotiable Safety Rules](diving-app-non-negotiable-safety-rules.md); [Diving App / Scuba Mode](diving-app-scuba-mode.md); [Diving App / Freediving Mode](diving-app-freediving-mode.md); [Diving App / QA and Test Plan](../project/diving-app-qa-test-plan.md)
+Slug: diving-app-safety-ux-legal-notes
+
+## 요약
+
+이 문서는 safety copy, warning hierarchy, liability-related UX를 정리한다. 앱은 훈련, 인증, 전문 다이브 컴퓨터, 백업 수심계, 타이머, 감압표를 대체하지 않는다.
+
+## 필수 메시지
+
+- 이 앱은 훈련과 인증을 대체하지 않는다.
+- 워치 앱은 전문 다이브 컴퓨터, 백업 수심계, 타이머, 감압표를 대체하지 않는다.
+- 프리다이빙은 혼자 하지 않는다.
+- 앱은 블랙아웃, DCS, 산소 독성, 질소 마취, CO2 retention을 확정 예측하지 못한다.
+- 센서/배터리/앱 상태 이상 시 즉시 보수적인 절차를 따른다.
+- 스쿠버에서 NDL/ceiling을 표시하는 경우, 이전 다이브 정보가 누락되면 값이 틀릴 수 있다.
+- 다른 다이브 앱/컴퓨터와 혼용하면 residual nitrogen/tissue loading이 일치하지 않을 수 있다.
+
+## UX 원칙
+
+- 위험 경고는 haptic + visual + persistent state로 제공한다.
+- critical warning은 사용자가 실수로 dismiss해도 상태가 해결되기 전까지 계속 남긴다.
+- NDL, ceiling, TTS, CNS, gas remaining은 항상 단위와 기준을 함께 표시한다.
+- `safe`라는 단어를 함부로 쓰지 않는다.
+- `within model limit`, `no mandatory deco obligation currently shown`처럼 제한된 표현을 사용한다.
+- v1 Air-only safety stop은 `reminder`, `timer`, `reference`처럼 제한된 표현을 사용하고, 감압 의무나 상승 안전 보장처럼 표현하지 않는다.
+
+## 경고 계층
+
+| 계층 | 예 | UX 처리 |
+|---|---|---|
+| Critical | MOD 초과, 상승속도 초과, ceiling violation, 센서/배터리/app failure | haptic + visual + persistent state, dismiss 후에도 상태가 해결될 때까지 유지 |
+| Important | NDL 임박, safety stop 이탈, CNS 높음, gas 부족 | 명확한 단위와 기준 표시, 로그 marker |
+| Context | 저수온, 장시간 노출, 짧은 surface interval, residual load 높음 | 보수성 reminder와 사후 review |
+
+## 표현 제한
+
+`safe`, `guaranteed`, `medically safe`, `certified`, `emergency recommendation`처럼 생명안전 보장으로 읽힐 수 있는 표현을 피한다. 계산값은 `model-based`, `currently shown`, `reference`, `reminder` 같은 제한 표현과 함께 표시한다.
+
+금지 표현:
+
+- `safe`
+- `guaranteed`
+- `no risk`
+- `prevents blackout`
+- `prevents DCS`
+- `medical-grade`
+- `professional dive computer replacement`
+
+권장 표현:
+
+- `currently within configured model limits`
+- `no mandatory decompression obligation currently shown`
+- `based on available dive history`
+- `based on current sensor data`
+- `verify with training and backup instruments`
+- `use conservative procedures`
+- `computation unavailable, fallback to gauge information`
+
+## Critical Warning UX
+
+- haptic + visual + persistent state를 함께 사용한다.
+- dismiss 가능하더라도 resolved 전까지 warning state를 유지한다.
+- warning 발생과 해제를 모두 로그에 기록한다.
+- 수중에서는 긴 문장보다 짧고 명확한 문구를 사용한다.
+- iPhone companion app에는 사후 설명과 세부 로그를 제공한다.
+
+## 관련 문서
+
+- [안전 규칙](safety-rules.md)
+- [Diving App / Scuba Mode](diving-app-scuba-mode.md)
+- [Diving App / Freediving Mode](diving-app-freediving-mode.md)
+- [Diving App / Non-Negotiable Safety Rules](diving-app-non-negotiable-safety-rules.md)
+- [Diving App / QA and Test Plan](../project/diving-app-qa-test-plan.md)
+- [Diving App / Immutable Algorithm Reference](../algorithms/diving-app-algorithm-reference.md)

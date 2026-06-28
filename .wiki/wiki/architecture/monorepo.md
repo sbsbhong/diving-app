@@ -1,5 +1,9 @@
 # Monorepo 구조
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: Monorepo 구조](../../raw/architecture/monorepo.md)
+Updated: 2026-06-28
+
 ## 요약
 
 이 저장소는 Turborepo로 관리되는 Yarn 1 workspace monorepo다. 앱 workspace는 `apps/` 아래에 있고, 공유 package는 `packages/` 아래에 있다.
@@ -37,7 +41,7 @@ Root `turbo.json`은 `build`, `generate`, `lint`, `test` task를 정의한다. `
 
 ## 관련 문서
 
-- [[architecture/mobile]]
-- [[architecture/watch-app]]
-- [[architecture/sync-flow]]
-- [[architecture/supabase]]
+- [모바일 구조](mobile.md)
+- [Watch 앱 구조](watch-app.md)
+- [동기화 흐름 구조](sync-flow.md)
+- [Supabase 구조](supabase.md)

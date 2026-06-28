@@ -1,5 +1,9 @@
 # 모바일 구조
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: 모바일 구조](../../raw/architecture/mobile.md)
+Updated: 2026-06-28
+
 ## 요약
 
 `apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server와 database 없이 React Navigation, React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다.
@@ -94,8 +98,8 @@ iOS project는 `apps/mobile/ios/DiveMobile.xcworkspace`와 `apps/mobile/ios/Dive
 
 ## 관련 문서
 
-- [[architecture/sync-flow]]
-- [[architecture/supabase]]
-- [[domains/dive-log]]
-- [[domains/safety-rules]]
-- [[design/mobile-watch-ui-language]]
+- [동기화 흐름 구조](sync-flow.md)
+- [Supabase 구조](supabase.md)
+- [다이브 로그 도메인](../domains/dive-log.md)
+- [안전 규칙](../domains/safety-rules.md)
+- [Mobile/Watch UI 언어](../design/mobile-watch-ui-language.md)

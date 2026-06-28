@@ -82,7 +82,7 @@
 - React component API나 architecture refactor가 중심이면 Vercel React skill을 추가로 사용한다.
 - iOS native project, CocoaPods, Xcode build, signing, native module 관련 작업에는 `xcode-harness`를 사용한다.
 - Supabase/auth/RLS/repository 변경에는 `supabase` skill을 사용한다.
-- app boundary, sync behavior, domain model, safety wording이 바뀌면 `wiki-writing`을 사용한다.
+- app boundary, sync behavior, domain model, safety wording이 바뀌면 `karpathy-llm-wiki`를 기준으로 `.wiki/raw/`와 `.wiki/wiki/`를 함께 갱신하고, 저장소별 한국어 작성 스타일과 안전 경계는 `wiki-writing`에서 확인한다.
 
 ## Commands
 

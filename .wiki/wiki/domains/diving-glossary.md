@@ -1,5 +1,9 @@
 # 다이빙 용어
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: 다이빙 용어](../../raw/domains/diving-glossary.md)
+Updated: 2026-06-28
+
 ## 요약
 
 이 glossary는 현재 앱에서 오래 유지할 domain 용어를 정의한다. 정의 범위는 레크리에이션 기록과 확인이며, certified dive-computer behavior가 아니다.
@@ -27,6 +31,6 @@
 
 ## 관련 문서
 
-- [[domains/dive-log]]
-- [[domains/safety-rules]]
-- [[architecture/sync-flow]]
+- [다이브 로그 도메인](dive-log.md)
+- [안전 규칙](safety-rules.md)
+- [동기화 흐름 구조](../architecture/sync-flow.md)

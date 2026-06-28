@@ -179,6 +179,21 @@ describe('SettingsScreen', () => {
     expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('연동된 워치 없음');
   });
 
+  test('shows a concise status when the companion watch app is missing', async () => {
+    const renderer = await renderSettings({
+      loadLinkedWatchInfo: () =>
+        Promise.resolve({
+          isSupported: true,
+          isPaired: true,
+          isWatchAppInstalled: false,
+          isReachable: false,
+        }),
+    });
+    const root = renderer.root;
+
+    expect(root.findByProps({ testID: 'settings-linked-watch-status' }).props.children).toBe('워치 앱 없음');
+  });
+
   test('explains when the iOS native watch bridge is missing from the installed app', async () => {
     const renderer = await renderSettings({
       loadLinkedWatchInfo: () =>

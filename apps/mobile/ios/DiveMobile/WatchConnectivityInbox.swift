@@ -221,6 +221,11 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
       return
     }
 
+    guard connectivitySession.isPaired,
+          connectivitySession.isWatchAppInstalled else {
+      return
+    }
+
     let context: [String: Any] = [
       WatchConnectivityEnvelopeKey.kind: WatchConnectivityEnvelopeValue.plannedDivesKind,
       WatchConnectivityEnvelopeKey.plannedDivesJson: plannedDivesJson,
@@ -235,7 +240,8 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     do {
       try connectivitySession.updateApplicationContext(context)
     } catch {
-      assertionFailure("Failed to update watch planned dives: \(error)")
+      // The latest payload stays persisted and will be retried on the next watch state change.
+      return
     }
   }
 

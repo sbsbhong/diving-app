@@ -1,4 +1,4 @@
 interface:
   display_name: "Wiki Writing"
-  short_description: "Maintain durable llm-wiki knowledge"
-  default_prompt: "Use $wiki-writing to update durable project wiki knowledge."
+  short_description: "Maintain Karpathy LLM Wiki knowledge"
+  default_prompt: "Use $wiki-writing with $karpathy-llm-wiki to update durable project wiki knowledge."

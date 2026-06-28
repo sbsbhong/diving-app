@@ -1,5 +1,9 @@
 # Supabase 구조
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: Supabase 구조](../../raw/architecture/supabase.md)
+Updated: 2026-06-28
+
 ## 요약
 
 현재 저장소에는 구현된 Supabase 영역이 없다.
@@ -23,9 +27,9 @@ Watch sync contract는 현재 `userId`를 생략한다. 사용자 소유권은 w
 
 ## 관련 문서
 
-- [[architecture/mobile]]
-- [[architecture/mobile-logbook-roadmap]]
-- [[architecture/sync-flow]]
-- [[domains/dive-log]]
-- [[decisions/adr-local-first-mobile-logbook]]
-- [[questions/open-questions]]
+- [모바일 구조](mobile.md)
+- [모바일 로그북 로드맵](mobile-logbook-roadmap.md)
+- [동기화 흐름 구조](sync-flow.md)
+- [다이브 로그 도메인](../domains/dive-log.md)
+- [ADR: Local-first mobile logbook with future Supabase sync](../decisions/adr-local-first-mobile-logbook.md)
+- [열린 질문](../questions/open-questions.md)

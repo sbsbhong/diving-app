@@ -1,5 +1,9 @@
 # 다이브 계획 도메인
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: 다이브 계획 도메인](../../raw/domains/dive-planning.md)
+Updated: 2026-06-28
+
 ## 요약
 
 모바일 Planbook은 레크리에이션 다이빙 전 준비 내용을 기록하는 비중요 계획 알림이다. 계획값은 사용자의 의도와 준비 맥락이며, 실제 다이빙 기록이나 안전 계산 결과가 아니다.
@@ -28,6 +32,6 @@ Watch 앱에서 모바일 계획을 선택해 기록을 시작하면 watch sessi
 
 ## 관련 문서
 
-- [[architecture/mobile]]
-- [[domains/dive-log]]
-- [[domains/safety-rules]]
+- [모바일 구조](../architecture/mobile.md)
+- [다이브 로그 도메인](dive-log.md)
+- [안전 규칙](safety-rules.md)

@@ -1,5 +1,9 @@
 # Mobile/Watch UI 언어
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: Mobile/Watch UI 언어](../../raw/design/mobile-watch-ui-language.md)
+Updated: 2026-06-28
+
 ## 요약
 
 `diving-app`의 모바일과 watchOS UI는 **iOS grouped base + dive instrument accent**를 공통 방향으로 삼는다. 기본 구조는 Apple 앱처럼 조용하고 정돈된 grouped 화면을 따르고, 다이빙 앱의 성격은 수심, 시간, profile, 상태 같은 계기 요소 한두 곳에만 집중한다.
@@ -99,6 +103,6 @@ watchOS는 같은 제품 언어를 더 압축해서 쓴다.
 
 ## 관련 문서
 
-- [[architecture/mobile]]
-- [[architecture/watch-app]]
-- [[domains/safety-rules]]
+- [모바일 구조](../architecture/mobile.md)
+- [Watch 앱 구조](../architecture/watch-app.md)
+- [안전 규칙](../domains/safety-rules.md)

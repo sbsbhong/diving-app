@@ -1,5 +1,9 @@
 # Watch 앱 구조
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: Watch 앱 구조](../../raw/architecture/watch-app.md)
+Updated: 2026-06-28
+
 ## 요약
 
 `apps/mobile/ios/DiveWatchApp`는 현재 동작하는 SwiftUI watchOS companion 앱 source를 담는다. Xcode project는 `apps/mobile/ios/DiveMobile.xcodeproj`이고, watch target과 scheme은 `DiveWatchApp`이다.
@@ -44,8 +48,8 @@ Watch `DiveMode`는 현재 `scuba`와 `freedive` 두 모드로 축소됐다. Scu
 
 ## 관련 문서
 
-- [[architecture/sync-flow]]
-- [[domains/dive-log]]
-- [[domains/safety-rules]]
-- [[design/mobile-watch-ui-language]]
-- [[questions/open-questions]]
+- [동기화 흐름 구조](sync-flow.md)
+- [다이브 로그 도메인](../domains/dive-log.md)
+- [안전 규칙](../domains/safety-rules.md)
+- [Mobile/Watch UI 언어](../design/mobile-watch-ui-language.md)
+- [열린 질문](../questions/open-questions.md)

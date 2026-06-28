@@ -1,12 +1,16 @@
 # ADR 목록
 
+Sources: pre-Karpathy wiki page, 2026-06-28
+Raw: [Pre-Karpathy: ADR 목록](../../raw/decisions/adr-index.md)
+Updated: 2026-06-28
+
 ## 요약
 
 이 문서는 accepted architecture decision record 목록을 관리한다.
 
 ## 현재 상태
 
-- [[decisions/adr-local-first-mobile-logbook]]: 모바일 로그북을 local-first로 구현하고, 이후 Supabase sync를 같은 저장소 경계 위에 붙이는 결정을 기록한다.
+- [ADR: Local-first mobile logbook with future Supabase sync](adr-local-first-mobile-logbook.md): 모바일 로그북을 local-first로 구현하고, 이후 Supabase sync를 같은 저장소 경계 위에 붙이는 결정을 기록한다.
 
 ## 상세
 
@@ -14,7 +18,7 @@ Repository instruction, README note, product planning doc에는 작업 지침과
 
 ## 관련 문서
 
-- [[overview]]
-- [[architecture/monorepo]]
-- [[architecture/mobile-logbook-roadmap]]
-- [[questions/open-questions]]
+- [프로젝트 개요](../project/overview.md)
+- [Monorepo 구조](../architecture/monorepo.md)
+- [모바일 로그북 로드맵](../architecture/mobile-logbook-roadmap.md)
+- [열린 질문](../questions/open-questions.md)
