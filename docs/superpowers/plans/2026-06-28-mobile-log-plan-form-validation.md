@@ -12,7 +12,7 @@
 
 ## Files
 
-- Modify: `apps/mobile/package.json` to add `react-hook-form`, `@hookform/resolvers`, and `zod`.
+- Modify: `apps/mobile/package.json` to add `react-hook-form`, `@hookform/resolvers`, `zod`, `@react-native-community/datetimepicker`, and `@react-native-community/slider`.
 - Modify: `yarn.lock` through Yarn 1.
 - Modify: `apps/mobile/src/types/dive-log-entry.ts` to add `DivePressureUnit`, `DivePressureValues`, and optional manual measured pressure metadata.
 - Modify: `apps/mobile/src/types/dive-plan.ts` to add `DivePressureUnit`, `DivePressureValues`, and optional planned pressure metadata.
@@ -26,12 +26,12 @@
 - Create: `apps/mobile/src/screens/logbook/log-entry-form-schema.ts` for Logbook form values, schema, and conversions.
 - Modify: `apps/mobile/src/screens/logbook/log-entry-editor.tsx` to use `react-hook-form` and shared controls.
 - Modify: `apps/mobile/src/screens/logbook/log-entry-mode-fields.tsx` to render controlled mode-specific fields.
-- Create: `apps/mobile/src/screens/planning/plan-form-schema.ts` for Planning form values, draft/planned schemas, and conversions.
-- Modify: `apps/mobile/src/screens/planning/plan-editor.tsx` to use `react-hook-form` and action-specific validation.
+- Create: `apps/mobile/src/screens/planning/plan-form-schema.ts` for Planning form values, schema, and conversions.
+- Modify: `apps/mobile/src/screens/planning/plan-editor.tsx` to use `react-hook-form` validation for draft and planned saves.
 - Modify: `apps/mobile/src/screens/planning/plan-mode-fields.tsx` to render controlled mode-specific fields.
 - Modify: `apps/mobile/src/utils/dive-plan-to-log-entry.ts` to copy planned pressure as editable draft metadata.
 - Modify: `apps/mobile/src/utils/watch-session-to-dive-log-entry.ts` only if type construction needs explicit empty pressure handling.
-- Modify: `apps/mobile/src/i18n/resources.ts` for KO/EN labels and validation messages.
+- Modify: `apps/mobile/src/i18n/resources.ts` for KO/EN labels.
 - Modify: `.wiki/wiki/domains/dive-log.md`, `.wiki/wiki/domains/dive-planning.md`, `.wiki/wiki/domains/safety-rules.md`, `.wiki/wiki/index.md`, and `.wiki/wiki/log.md`.
 - Add raw wiki source: `.wiki/raw/domains/2026-06-28-mobile-form-validation-pressure-metadata.md`.
 - Modify tests: `apps/mobile/__tests__/logbook-manual-entry.test.tsx`.
@@ -45,7 +45,7 @@
 Run:
 
 ```bash
-yarn workspace @repo/mobile add react-hook-form @hookform/resolvers zod
+yarn workspace @repo/mobile add react-hook-form @hookform/resolvers zod @react-native-community/datetimepicker @react-native-community/slider
 ```
 
 Expected: `apps/mobile/package.json` and `yarn.lock` change. Use Yarn 1 only.

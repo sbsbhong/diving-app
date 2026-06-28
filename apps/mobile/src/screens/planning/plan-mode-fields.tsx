@@ -1,4 +1,5 @@
 import React from 'react';
+import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { SelectorPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
@@ -6,105 +7,167 @@ import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { WatchSession } from '../../types/dive-session';
-import { EditorField, type PlanEditorState } from './plan-editor';
+import { EditorField } from '../common/form/editor-field';
+import { FixedOptionField } from '../common/form/fixed-option-field';
+import { NumericSliderField } from '../common/form/numeric-slider-field';
+import { PressureFields } from '../common/form/pressure-fields';
+import { StarRatingField } from '../common/form/star-rating-field';
+import type { PlanFormValues } from './plan-form-schema';
 
 type PlanModeFieldsProps = {
-  draft: PlanEditorState;
+  control: Control<PlanFormValues>;
+  errors: FieldErrors<PlanFormValues>;
   diveMode: NonNullable<WatchSession['diveMode']>;
-  setValue: (key: keyof PlanEditorState, value: string) => void;
 };
 
 const waterConditionOptions: NonNullable<WatchSession['waterCondition']>[] = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'];
 
 export function PlanModeFields(props: PlanModeFieldsProps): React.JSX.Element {
   const { t } = useTranslation();
+  const pressureErrors = props.errors.plannedPressure as
+    | {
+        unit?: { message?: string };
+        start?: { message?: string };
+        end?: { message?: string };
+      }
+    | undefined;
 
   return (
     <ModeSection title={t(`planning.${props.diveMode}Section`, { defaultValue: `${props.diveMode} plan details` })}>
       <HStack space="md">
-        <EditorField className="flex-1" label={t('planning.plannedMaxDepthMeters', { defaultValue: 'Planned max (m)' })}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
+        <Controller
+          control={props.control}
+          name="plannedMaxDepthMeters"
+          render={({ field }) => (
+            <NumericSliderField
+              className="flex-1"
+              label={t('planning.plannedMaxDepthMeters', { defaultValue: 'Planned max (m)' })}
+              value={field.value}
+              onChange={field.onChange}
+              min={0}
+              max={60}
+              step={0.5}
+              required
+              error={props.errors.plannedMaxDepthMeters?.message}
               testID="planning-editor-planned-max-depth"
-              value={props.draft.plannedMaxDepth}
-              onChangeText={value => props.setValue('plannedMaxDepth', value)}
-              keyboardType="numeric"
               placeholder="18"
             />
-          </Input>
-        </EditorField>
-        <EditorField className="flex-1" label={t('planning.plannedDurationMinutes', { defaultValue: 'Planned duration (min)' })}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
+          )}
+        />
+        <Controller
+          control={props.control}
+          name="plannedDurationMinutes"
+          render={({ field }) => (
+            <NumericSliderField
+              className="flex-1"
+              label={t('planning.plannedDurationMinutes', { defaultValue: 'Planned duration (min)' })}
+              value={field.value}
+              onChange={field.onChange}
+              min={0}
+              max={240}
+              step={1}
+              required
+              error={props.errors.plannedDurationMinutes?.message}
               testID="planning-editor-planned-duration"
-              value={props.draft.plannedDuration}
-              onChangeText={value => props.setValue('plannedDuration', value)}
-              keyboardType="numeric"
               placeholder="45"
             />
-          </Input>
-        </EditorField>
+          )}
+        />
       </HStack>
       {props.diveMode === 'scuba' ? (
-        <EditorField label={t('planning.gasLabel', { defaultValue: 'Gas label' })}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="planning-editor-gas-label"
-              value={props.draft.gasLabel}
-              onChangeText={value => props.setValue('gasLabel', value)}
-              placeholder="Air"
-            />
-          </Input>
-        </EditorField>
+        <>
+          <FixedOptionField label={t('planning.gasLabel', { defaultValue: 'Gas label' })} value={t('logbook.airGas', { defaultValue: 'Air' })} testID="planning-editor-gas-label-air" />
+          <Controller
+            control={props.control}
+            name="plannedPressure"
+            render={({ field }) => (
+              <PressureFields
+                unit={field.value.unit}
+                start={field.value.start}
+                end={field.value.end}
+                onChange={field.onChange}
+                errors={{
+                  unit: pressureErrors?.unit?.message,
+                  start: pressureErrors?.start?.message,
+                  end: pressureErrors?.end?.message,
+                }}
+                testIDPrefix="planning-editor-pressure"
+                labels={{
+                  unit: t('planning.pressureUnit', { defaultValue: 'Pressure unit' }),
+                  start: t('planning.startPressure', { defaultValue: 'Start pressure' }),
+                  end: t('planning.endPressure', { defaultValue: 'End pressure' }),
+                }}
+              />
+            )}
+          />
+        </>
       ) : null}
       {props.diveMode === 'freedive' ? (
-        <HStack space="md">
-          <EditorField className="flex-1" label={t('planning.repetitionTarget', { defaultValue: 'Repetition target' })}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="planning-editor-repetition-target"
-                value={props.draft.repetitionTarget}
-                onChangeText={value => props.setValue('repetitionTarget', value)}
-                keyboardType="numeric"
-                placeholder="8"
-              />
-            </Input>
-          </EditorField>
-          <EditorField className="flex-1" label={t('planning.perceivedDifficulty', { defaultValue: 'Difficulty' })}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="planning-editor-perceived-difficulty"
-                value={props.draft.perceivedDifficulty}
-                onChangeText={value => props.setValue('perceivedDifficulty', value)}
-                keyboardType="numeric"
-                placeholder="3"
-              />
-            </Input>
-          </EditorField>
-        </HStack>
+        <Controller
+          control={props.control}
+          name="repetitionTarget"
+          render={({ field }) => (
+            <NumericSliderField
+              label={t('planning.repetitionTarget', { defaultValue: 'Repetition target' })}
+              value={field.value}
+              onChange={field.onChange}
+              min={0}
+              max={200}
+              step={1}
+              error={props.errors.repetitionTarget?.message}
+              testID="planning-editor-repetition-target"
+              placeholder="8"
+            />
+          )}
+        />
       ) : null}
-      <WaterConditionPicker value={props.draft.waterCondition} onChange={value => props.setValue('waterCondition', value)} />
-      <EditorField label={t('planning.visibilityExpectation', { defaultValue: 'Visibility expectation' })}>
-        <Input className="h-11 rounded-xl bg-background">
-          <InputField
+      <Controller
+        control={props.control}
+        name="waterCondition"
+        render={({ field }) => <WaterConditionPicker value={field.value} onChange={field.onChange} />}
+      />
+      <Controller
+        control={props.control}
+        name="visibilityExpectation"
+        render={({ field }) => (
+          <StarRatingField
+            label={t('planning.visibilityExpectation', { defaultValue: 'Visibility expectation' })}
+            value={field.value}
+            onChange={field.onChange}
+            error={props.errors.visibilityExpectation?.message}
             testID="planning-editor-visibility-expectation"
-            value={props.draft.visibilityExpectation}
-            onChangeText={value => props.setValue('visibilityExpectation', value)}
-            keyboardType="numeric"
-            placeholder="4"
           />
-        </Input>
-      </EditorField>
-      <EditorField label={t('planning.trainingFocus', { defaultValue: 'Training focus' })}>
-        <Input className="h-11 rounded-xl bg-background">
-          <InputField
-            testID="planning-editor-training-focus"
-            value={props.draft.trainingFocus}
-            onChangeText={value => props.setValue('trainingFocus', value)}
-            placeholder={t('planning.trainingFocusPlaceholder', { defaultValue: 'e.g. buoyancy check' })}
+        )}
+      />
+      <Controller
+        control={props.control}
+        name="perceivedDifficulty"
+        render={({ field }) => (
+          <StarRatingField
+            label={t('planning.perceivedDifficulty', { defaultValue: 'Difficulty' })}
+            value={field.value}
+            onChange={field.onChange}
+            error={props.errors.perceivedDifficulty?.message}
+            testID="planning-editor-perceived-difficulty"
           />
-        </Input>
-      </EditorField>
+        )}
+      />
+      <Controller
+        control={props.control}
+        name="trainingFocus"
+        render={({ field }) => (
+          <EditorField label={t('planning.trainingFocus', { defaultValue: 'Training focus' })} error={props.errors.trainingFocus?.message}>
+            <Input className="h-11 rounded-xl bg-background">
+              <InputField
+                testID="planning-editor-training-focus"
+                value={field.value ?? ''}
+                onChangeText={field.onChange}
+                placeholder={t('planning.trainingFocusPlaceholder', { defaultValue: 'e.g. buoyancy check' })}
+              />
+            </Input>
+          </EditorField>
+        )}
+      />
     </ModeSection>
   );
 }
@@ -118,20 +181,23 @@ function ModeSection(props: { title: string; children: React.ReactNode }): React
   );
 }
 
-function WaterConditionPicker(props: { value: string; onChange: (value: string) => void }): React.JSX.Element {
+function WaterConditionPicker(props: {
+  value: WatchSession['waterCondition'];
+  onChange: (value: WatchSession['waterCondition']) => void;
+}): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
     <EditorField label={t('planning.waterCondition', { defaultValue: 'Water condition' })}>
-      <HStack space="xs">
-        {waterConditionOptions.slice(0, 3).map(condition => (
+      <HStack space="xs" className="flex-wrap">
+        {waterConditionOptions.map(condition => (
           <SelectorPill
             key={condition}
             testID={`planning-editor-water-condition-${condition}`}
-            className="flex-1"
+            className="min-w-24 flex-1"
             label={condition}
             selected={props.value === condition}
-            onPress={() => props.onChange(condition)}
+            onPress={() => props.onChange(props.value === condition ? undefined : condition)}
           />
         ))}
       </HStack>

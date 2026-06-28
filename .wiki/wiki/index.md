@@ -33,7 +33,7 @@
 | [모바일 구조](architecture/mobile.md) | `apps/mobile`은 watch에서 기록한 레크리에이션 다이빙 로그를 확인하고 모바일에서 수동 로그를 작성하기 위한 bare React Native 앱이며, iPhone app과 embedded watchOS companion target을 함께 소유한다. 현재는 server와 database 없이 React Navigation, React Query, AsyncStorage 기반 persistent repository, generated watch contract TypeScript type, Gluestack UI v4/NativeWind styling stack을 사용한다. | 2026-06-28 |
 | [Monorepo 구조](architecture/monorepo.md) | 이 저장소는 Turborepo로 관리되는 Yarn 1 workspace monorepo다. 앱 workspace는 `apps/` 아래에 있고, 공유 package는 `packages/` 아래에 있다. | 2026-06-28 |
 | [Supabase 구조](architecture/supabase.md) | 현재 저장소에는 구현된 Supabase 영역이 없다. | 2026-06-28 |
-| [동기화 흐름 구조](architecture/sync-flow.md) | 현재 동기화 모델은 계약을 먼저 정의하는 방식이다. `packages/contracts`가 watch sync message를 정의하고, watch 앱은 동기화 가능한 JSON을 encode한 뒤 WatchConnectivity `transferUserInfo` envelope로 enqueue한다. 양쪽 앱이 reachable이면 같은 envelope를 `sendMessage`로도 보내 활성 상태의 수신 지연을 줄인다. 모바일 iOS native code는 WatchConnectivity userInfo와 message를 원시 JSON payload로 복원해 durable inbox에 저장하고 React Native로 전달한다. 모바일 JS는 payload를 실행 시점에 검증한 뒤 `DiveLogEntry`로 변환해 영구 저장 repository에 import하고, import가 끝난 payload는 native inbox에서 제거하면서 watch에 `watchSyncAcknowledgement`를 돌려보낸다. 반대 방향으로는 모바일의 실행하지 않은 planned dive 목록을 `watchPlannedDives` envelope로 watch companion에 전달해 watch Dive Plan setup 화면에서 선택해 recording을 시작할 수 있게 한다. | 2026-06-28 |
+| [동기화 흐름 구조](architecture/sync-flow.md) | 현재 동기화 모델은 계약을 먼저 정의하는 방식이다. Watch-to-mobile session과 acknowledgement는 event-style delivery에 맞게 WatchConnectivity queued envelope와 live message를 함께 쓰고, mobile-to-watch planned dive 목록은 최신 상태이므로 `updateApplicationContext`와 reachable `sendMessage`로 전달하며 stale snapshot을 `transferUserInfo(context)`로 enqueue하지 않는다. | 2026-06-28 |
 | [Watch 앱 구조](architecture/watch-app.md) | `apps/mobile/ios/DiveWatchApp`는 현재 동작하는 SwiftUI watchOS companion 앱 source를 담는다. Xcode project는 `apps/mobile/ios/DiveMobile.xcodeproj`이고, watch target과 scheme은 `DiveWatchApp`이다. | 2026-06-28 |
 
 ## domains
@@ -46,10 +46,10 @@
 | [Diving App / Non-Negotiable Safety Rules](domains/diving-app-non-negotiable-safety-rules.md) | 제품 구현에서 절대 위반하면 안 되는 safety-critical 규칙을 정리하고, v1 Air-only safety stop을 감압 의무나 상승 안전 보장처럼 표현하지 않는 규칙을 포함한다. | 2026-06-28 |
 | [Diving App / Safety UX and Legal Notes](domains/diving-app-safety-ux-legal-notes.md) | 안전 copy, warning hierarchy, 책임 관련 UX 원칙을 정리하고, v1 Air-only safety stop을 reminder/timer/reference로 제한하는 표현 경계를 유지한다. | 2026-06-28 |
 | [Diving App / Scuba Mode](domains/diving-app-scuba-mode.md) | Scuba mode v1은 Air-only gauge/log에 기본 safety-stop 리마인더를 포함하지만, NDL, ceiling, TTS, CNS, gas remaining 같은 계산 기능은 v2 이후 고위험 검증 범위로 분리한다. | 2026-06-28 |
-| [다이브 로그 도메인](domains/dive-log.md) | Dive log domain은 현재 watch에서 기록한 레크리에이션 세션과 모바일에서 직접 작성한 수동 로그를 과거 기록 확인, 모바일 import, 비중요 계획/기억 화면에 쓰기 위해 model한다. | 2026-06-28 |
-| [다이브 계획 도메인](domains/dive-planning.md) | 모바일 Planbook은 레크리에이션 다이빙 전 준비 내용을 기록하는 비중요 계획 알림이다. 계획값은 사용자의 의도와 준비 맥락이며, 실제 다이빙 기록이나 안전 계산 결과가 아니다. | 2026-06-28 |
+| [다이브 로그 도메인](domains/dive-log.md) | Dive log domain은 watch/import/manual 로그를 model하며, scuba pressure는 사용자가 입력한 기록 metadata일 뿐 gas remaining이나 reserve 판단이 아니다. | 2026-06-28 |
+| [다이브 계획 도메인](domains/dive-planning.md) | 모바일 Planbook은 비중요 계획 알림이며, optional planned pressure는 준비 맥락 metadata일 뿐 실제 측정값이나 안전 계산 결과가 아니다. | 2026-06-28 |
 | [다이빙 용어](domains/diving-glossary.md) | 이 glossary는 현재 앱에서 오래 유지할 domain 용어를 정의한다. 정의 범위는 레크리에이션 기록과 확인이며, certified dive-computer behavior가 아니다. | 2026-06-28 |
-| [안전 규칙](domains/safety-rules.md) | 이 앱은 레크리에이션 다이빙 로그 companion 앱이며, v1 Air-only safety stop은 비인증 참고 리마인더이지 감압 의무나 certified dive-computer 판단이 아니다. | 2026-06-28 |
+| [안전 규칙](domains/safety-rules.md) | 이 앱은 레크리에이션 다이빙 로그 companion 앱이며, Air-only reminders와 manual pressure metadata를 gas/deco/safety decision으로 해석하지 않는다. | 2026-06-28 |
 
 ## design
 

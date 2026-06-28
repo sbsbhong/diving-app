@@ -6,7 +6,7 @@ import { HStack } from '../../components/ui/hstack';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
 import type { DivePlan } from '../../types/dive-plan';
-import { formatDate, formatDepth } from '../../utils/dive-formatters';
+import { formatDate, formatDepth, formatPressure } from '../../utils/dive-formatters';
 
 type PlanDetailProps = {
   plan: DivePlan;
@@ -106,12 +106,16 @@ export function PlanDetail(props: PlanDetailProps): React.JSX.Element {
 function ModeFacts(props: { plan: DivePlan }): React.JSX.Element {
   const { t } = useTranslation();
   const values = props.plan.plannedValues;
+  const pressureValue = formatPressure(values.plannedPressure);
   const facts = [
     { id: 'planned-max', label: t('planning.plannedMax', { defaultValue: 'Planned max' }), value: formatDepth(values.plannedMaxDepthMeters) },
     values.plannedDurationMinutes !== undefined
       ? { id: 'duration', label: t('planning.plannedDurationMinutes', { defaultValue: 'Planned duration (min)' }), value: `${values.plannedDurationMinutes} min` }
       : undefined,
-    values.gasLabel ? { id: 'gas', label: t('planning.gasLabel', { defaultValue: 'Gas label' }), value: values.gasLabel } : undefined,
+    props.plan.diveMode === 'scuba'
+      ? { id: 'gas', label: t('planning.gasLabel', { defaultValue: 'Gas label' }), value: t('logbook.airGas', { defaultValue: 'Air' }) }
+      : undefined,
+    pressureValue ? { id: 'pressure', label: t('planning.pressure', { defaultValue: 'Pressure' }), value: pressureValue } : undefined,
     values.trainingFocus ? { id: 'training-focus', label: t('planning.trainingFocus', { defaultValue: 'Training focus' }), value: values.trainingFocus } : undefined,
   ].filter((fact): fact is { id: string; label: string; value: string } => Boolean(fact));
 
@@ -121,11 +125,17 @@ function ModeFacts(props: { plan: DivePlan }): React.JSX.Element {
       {facts.map(fact => (
         <HStack key={fact.id} className="items-center justify-between">
           <Text className="text-sm text-muted-foreground">{fact.label}</Text>
-          <Text className="text-sm font-semibold text-card-foreground">{fact.value}</Text>
+          <Text testID={`planning-detail-planned-value-${fact.id}-${toTestIdValue(fact.value)}`} className="text-sm font-semibold text-card-foreground">
+            {fact.value}
+          </Text>
         </HStack>
       ))}
     </VStack>
   );
+}
+
+function toTestIdValue(value: string): string {
+  return value.replace(/\s+/g, '');
 }
 
 function PlanFact(props: { label: string; value: string }): React.JSX.Element {

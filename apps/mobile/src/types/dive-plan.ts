@@ -1,4 +1,5 @@
 import type { WatchSession } from './dive-session';
+import type { DivePressureValues } from './dive-log-entry';
 
 export type DivePlanStatus = 'draft' | 'planned' | 'completed';
 export type DiveEntryStyle = 'shore' | 'boat' | 'pool';
@@ -19,6 +20,7 @@ export type DivePlanValues = {
   repetitionTarget?: number;
   poolLengthMeters?: number;
   lapTarget?: number;
+  plannedPressure?: DivePressureValues;
 };
 
 export type DivePlanChecklistItem = {

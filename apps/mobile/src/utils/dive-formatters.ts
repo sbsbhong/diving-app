@@ -1,3 +1,5 @@
+import type { DivePressureValues } from '../types/dive-log-entry';
+
 export const formatDate = (seconds?: number, locale = 'ko', unknownLabel = '알 수 없는 날짜') => {
   if (!seconds) {
     return unknownLabel;
@@ -56,6 +58,28 @@ export const formatRating = (rating?: number, notRatedLabel = '평가 없음') =
   return '★'.repeat(Math.max(1, Math.min(5, rating)));
 };
 
+export const formatPressure = (pressure?: DivePressureValues) => {
+  if (!pressure || (pressure.start === undefined && pressure.end === undefined)) {
+    return undefined;
+  }
+
+  const unit = pressure.unit ?? 'bar';
+
+  if (pressure.start !== undefined && pressure.end !== undefined) {
+    return `${formatPressureNumber(pressure.start)} ${unit} -> ${formatPressureNumber(pressure.end)} ${unit}`;
+  }
+
+  if (pressure.start !== undefined) {
+    return `${formatPressureNumber(pressure.start)} ${unit}`;
+  }
+
+  return `${formatPressureNumber(pressure.end!)} ${unit}`;
+};
+
 function formatDecimal(value: number): string {
   return (Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2);
+}
+
+function formatPressureNumber(value: number): string {
+  return Number.isInteger(value) ? `${value}` : `${Math.round((value + Number.EPSILON) * 10) / 10}`;
 }

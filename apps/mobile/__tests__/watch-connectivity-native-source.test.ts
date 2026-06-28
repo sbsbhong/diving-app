@@ -99,14 +99,15 @@ describe('WatchConnectivity native source contract', () => {
     expect(transport).toContain('handleReceivedApplicationContext(from: session)');
   });
 
-  it('keeps the latest planned dive payload durable and sends it through a queued fallback', () => {
+  it('keeps the latest planned dive payload durable without queueing stale planned dive snapshots', () => {
     const inbox = readRepoFile('apps/mobile/ios/DiveMobile/WatchConnectivityInbox.swift');
     const transport = readRepoFile('apps/mobile/ios/DiveWatchApp/Sync/WatchSyncTransport.swift');
 
     expect(inbox).toContain('plannedDivesContextStorageKey');
     expect(inbox).toContain('userDefaults.string(forKey: Self.plannedDivesContextStorageKey)');
     expect(inbox).toContain('userDefaults.set(plannedDivesJson, forKey: Self.plannedDivesContextStorageKey)');
-    expect(inbox).toContain('connectivitySession.transferUserInfo(context)');
+    expect(inbox).toContain('try connectivitySession.updateApplicationContext(context)');
+    expect(inbox).not.toContain('connectivitySession.transferUserInfo(context)');
     expect(inbox).not.toContain('pendingPlannedDivesJson = nil');
     expect(inbox).toContain('func sessionWatchStateDidChange(_ session: WCSession)');
     expect(transport).toContain('didReceiveUserInfo userInfo');

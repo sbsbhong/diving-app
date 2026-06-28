@@ -11,6 +11,7 @@ import {
   formatDate,
   formatDepth,
   formatDuration,
+  formatPressure,
   formatRating,
   formatTemperature,
 } from '../../utils/dive-formatters';
@@ -175,11 +176,12 @@ function getModeFacts(entry: DiveLogEntry, t: ReturnType<typeof useTranslation>[
   if (measuredValues.diveMode === 'scuba') {
     return compactFacts([
       entryStyleFact,
-      { id: 'gas-label', label: t('logbook.gasLabel'), value: measuredValues.gasLabel },
+      { id: 'gas-label', label: t('logbook.gasLabel'), value: t('logbook.airGas', { defaultValue: 'Air' }) },
       { id: 'gear', label: t('logbook.gear'), value: entry.manual.gearIds.length ? entry.manual.gearIds.join(', ') : undefined },
       { id: 'water-condition', label: t('logbook.waterCondition'), value: measuredValues.waterCondition },
       { id: 'visibility-rating', label: t('logbook.visibilityRating'), value: numberToText(measuredValues.visibilityRating) },
       { id: 'perceived-exertion', label: t('logbook.perceivedExertion'), value: numberToText(measuredValues.perceivedExertion) },
+      { id: 'pressure', label: t('logbook.pressure', { defaultValue: 'Pressure' }), value: formatPressure(measuredValues.pressure) },
     ]);
   }
 

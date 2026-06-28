@@ -32,6 +32,7 @@ export const divePlanToDiveLogEntryDraft = (
         diveMode: plan.diveMode,
         gasLabel: plan.plannedValues.gasLabel,
         trainingFocus: plan.plannedValues.trainingFocus,
+        pressure: plan.diveMode === 'scuba' ? plan.plannedValues.plannedPressure : undefined,
       },
     },
   };

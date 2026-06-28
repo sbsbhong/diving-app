@@ -1,50 +1,27 @@
 import React from 'react';
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { SelectorPill } from '../../components/ui/instrument';
 import { HStack } from '../../components/ui/hstack';
 import { Input, InputField } from '../../components/ui/input';
 import { Text } from '../../components/ui/text';
 import { VStack } from '../../components/ui/vstack';
-import type { DiveEntryStyle } from '../../types/dive-plan';
-import type { WatchSession } from '../../types/dive-session';
-
-export type LogEntryEditorState = {
-  startedAt: string;
-  diveMode: WatchSession['diveMode'] | undefined;
-  entryStyle: DiveEntryStyle | '';
-  siteName: string;
-  duration: string;
-  maxDepth: string;
-  gasLabel: string;
-  gearIds: string;
-  waterCondition: string;
-  visibilityRating: string;
-  perceivedExertion: string;
-  repetitionCount: string;
-  trainingFocus: string;
-  buddies: string;
-  tags: string;
-  observedMarineLife: string;
-  notes: string;
-  rating: string;
-};
+import { BadgeListField } from '../common/form/badge-list-field';
+import { EditorField } from '../common/form/editor-field';
+import { FixedOptionField } from '../common/form/fixed-option-field';
+import { NumericSliderField } from '../common/form/numeric-slider-field';
+import { PressureFields } from '../common/form/pressure-fields';
+import { StarRatingField } from '../common/form/star-rating-field';
+import type { LogEntryFormValues } from './log-entry-form-schema';
 
 type ModeSpecificFieldsProps = {
-  draft: LogEntryEditorState;
-  diveMode: NonNullable<WatchSession['diveMode']>;
-  setValue: (key: keyof LogEntryEditorState, value: string) => void;
+  control: Control<LogEntryFormValues>;
+  errors: FieldErrors<LogEntryFormValues>;
+  diveMode: LogEntryFormValues['diveMode'];
 };
 
-const waterConditionOptions: NonNullable<WatchSession['waterCondition']>[] = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'];
-
-export function EditorField(props: { label: string; children: React.ReactNode; className?: string }): React.JSX.Element {
-  return (
-    <VStack space="xs" className={props.className}>
-      <Text className="text-xs font-semibold uppercase text-muted-foreground">{props.label}</Text>
-      {props.children}
-    </VStack>
-  );
-}
+const waterConditionOptions: NonNullable<LogEntryFormValues['waterCondition']>[] = ['calm', 'mild', 'choppy', 'surge', 'current', 'unknown'];
 
 export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.Element | null {
   const { t } = useTranslation();
@@ -52,51 +29,77 @@ export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.El
   if (props.diveMode === 'scuba') {
     return (
       <ModeSection title={t('logbook.scubaSection')}>
-        <EditorField label={t('logbook.gasLabel')}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="log-entry-editor-gas-label"
-              value={props.draft.gasLabel}
-              onChangeText={value => props.setValue('gasLabel', value)}
-              placeholder="Air"
-            />
-          </Input>
-        </EditorField>
-        <EditorField label={t('logbook.gear')}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="log-entry-editor-gear"
-              value={props.draft.gearIds}
-              onChangeText={value => props.setValue('gearIds', value)}
+        <FixedOptionField label={t('logbook.gasLabel')} value={t('logbook.airGas', { defaultValue: 'Air' })} testID="log-entry-editor-gas-label-air" />
+        <Controller
+          control={props.control}
+          name="gearIds"
+          render={({ field }) => (
+            <BadgeListField
+              label={t('logbook.gear')}
+              values={field.value}
+              onChange={field.onChange}
+              inputTestID="log-entry-editor-gear"
+              badgeTestIDPrefix="log-entry-editor-gear"
               placeholder={t('logbook.commaSeparatedPlaceholder')}
             />
-          </Input>
-        </EditorField>
-        <WaterConditionPicker value={props.draft.waterCondition} onChange={value => props.setValue('waterCondition', value)} />
-        <HStack space="md">
-          <EditorField className="flex-1" label={t('logbook.visibilityRating')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
-                testID="log-entry-editor-visibility-rating"
-                value={props.draft.visibilityRating}
-                onChangeText={value => props.setValue('visibilityRating', value)}
-                keyboardType="numeric"
-                placeholder="4"
-              />
-            </Input>
-          </EditorField>
-        </HStack>
-        <EditorField label={t('logbook.perceivedExertion')}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="log-entry-editor-perceived-exertion"
-              value={props.draft.perceivedExertion}
-              onChangeText={value => props.setValue('perceivedExertion', value)}
-              keyboardType="numeric"
-              placeholder="3"
+          )}
+        />
+        <Controller
+          control={props.control}
+          name="waterCondition"
+          render={({ field }) => (
+            <WaterConditionPicker value={field.value} onChange={field.onChange} />
+          )}
+        />
+        <Controller
+          control={props.control}
+          name="visibilityRating"
+          render={({ field }) => (
+            <StarRatingField
+              label={t('logbook.visibilityRating')}
+              value={field.value}
+              onChange={field.onChange}
+              error={props.errors.visibilityRating?.message}
+              testID="log-entry-editor-visibility-rating"
             />
-          </Input>
-        </EditorField>
+          )}
+        />
+        <Controller
+          control={props.control}
+          name="perceivedExertion"
+          render={({ field }) => (
+            <StarRatingField
+              label={t('logbook.perceivedExertion')}
+              value={field.value}
+              onChange={field.onChange}
+              error={props.errors.perceivedExertion?.message}
+              testID="log-entry-editor-perceived-exertion"
+            />
+          )}
+        />
+        <Controller
+          control={props.control}
+          name="pressure"
+          render={({ field }) => (
+            <PressureFields
+              unit={field.value.unit}
+              start={field.value.start}
+              end={field.value.end}
+              onChange={field.onChange}
+              errors={{
+                unit: props.errors.pressure?.unit?.message,
+                start: props.errors.pressure?.start?.message,
+                end: props.errors.pressure?.end?.message,
+              }}
+              testIDPrefix="log-entry-editor-pressure"
+              labels={{
+                unit: t('logbook.pressureUnit', { defaultValue: 'Pressure unit' }),
+                start: t('logbook.startPressure', { defaultValue: 'Start pressure' }),
+                end: t('logbook.endPressure', { defaultValue: 'End pressure' }),
+              }}
+            />
+          )}
+        />
       </ModeSection>
     );
   }
@@ -105,39 +108,54 @@ export function ModeSpecificFields(props: ModeSpecificFieldsProps): React.JSX.El
     return (
       <ModeSection title={t('logbook.freediveSection')}>
         <HStack space="md">
-          <EditorField className="flex-1" label={t('logbook.repetitionCount')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
+          <Controller
+            control={props.control}
+            name="repetitionCount"
+            render={({ field }) => (
+              <NumericSliderField
+                className="flex-1"
+                label={t('logbook.repetitionCount')}
+                value={field.value}
+                onChange={field.onChange}
+                min={0}
+                max={200}
+                step={1}
+                error={props.errors.repetitionCount?.message}
                 testID="log-entry-editor-repetition-count"
-                value={props.draft.repetitionCount}
-                onChangeText={value => props.setValue('repetitionCount', value)}
-                keyboardType="numeric"
                 placeholder="8"
               />
-            </Input>
-          </EditorField>
-          <EditorField className="flex-1" label={t('logbook.perceivedExertion')}>
-            <Input className="h-11 rounded-xl bg-background">
-              <InputField
+            )}
+          />
+          <Controller
+            control={props.control}
+            name="perceivedExertion"
+            render={({ field }) => (
+              <StarRatingField
+                label={t('logbook.perceivedExertion')}
+                value={field.value}
+                onChange={field.onChange}
+                error={props.errors.perceivedExertion?.message}
                 testID="log-entry-editor-perceived-exertion"
-                value={props.draft.perceivedExertion}
-                onChangeText={value => props.setValue('perceivedExertion', value)}
-                keyboardType="numeric"
-                placeholder="3"
               />
-            </Input>
-          </EditorField>
+            )}
+          />
         </HStack>
-        <EditorField label={t('logbook.trainingFocus')}>
-          <Input className="h-11 rounded-xl bg-background">
-            <InputField
-              testID="log-entry-editor-training-focus"
-              value={props.draft.trainingFocus}
-              onChangeText={value => props.setValue('trainingFocus', value)}
-              placeholder={t('logbook.trainingFocusPlaceholder')}
-            />
-          </Input>
-        </EditorField>
+        <Controller
+          control={props.control}
+          name="trainingFocus"
+          render={({ field }) => (
+            <EditorField label={t('logbook.trainingFocus')} error={props.errors.trainingFocus?.message}>
+              <Input className="h-11 rounded-xl bg-background">
+                <InputField
+                  testID="log-entry-editor-training-focus"
+                  value={field.value ?? ''}
+                  onChangeText={field.onChange}
+                  placeholder={t('logbook.trainingFocusPlaceholder')}
+                />
+              </Input>
+            </EditorField>
+          )}
+        />
       </ModeSection>
     );
   }
@@ -154,7 +172,10 @@ function ModeSection(props: { title: string; children: React.ReactNode }): React
   );
 }
 
-function WaterConditionPicker(props: { value: string; onChange: (value: string) => void }): React.JSX.Element {
+function WaterConditionPicker(props: {
+  value: LogEntryFormValues['waterCondition'];
+  onChange: (value: LogEntryFormValues['waterCondition']) => void;
+}): React.JSX.Element {
   const { t } = useTranslation();
 
   return (

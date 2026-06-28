@@ -102,8 +102,34 @@ const press = async (root: ReactTestRenderer.ReactTestInstance, testID: string) 
 
 const changeText = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: string) => {
   await ReactTestRenderer.act(async () => {
-    root.findByProps({ testID }).props.onChangeText(value);
+    const field = findInputLike(root, testID);
+    if (typeof field.props.onChangeText === 'function') {
+      field.props.onChangeText(value);
+      return;
+    }
+    if (typeof field.props.onChange === 'function') {
+      field.props.onChange(value);
+      return;
+    }
+    field.props.onValueChange(value);
   });
+};
+
+const changeDateTime = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: Date) => {
+  await ReactTestRenderer.act(async () => {
+    const field = findInputLike(root, testID);
+    field.props.onChange(value);
+  });
+};
+
+const findInputLike = (root: ReactTestRenderer.ReactTestInstance, testID: string): ReactTestRenderer.ReactTestInstance => {
+  const matches = root.findAllByProps({ testID });
+  return (
+    matches.find(match => typeof match.props.onChangeText === 'function') ??
+    matches.find(match => typeof match.props.onChange === 'function') ??
+    matches.find(match => typeof match.props.onValueChange === 'function') ??
+    root.findByProps({ testID })
+  );
 };
 
 describe('Planning screen planbook flow', () => {
@@ -127,19 +153,24 @@ describe('Planning screen planbook flow', () => {
     await press(root, 'planning-create-action');
     expect(root.findByProps({ testID: 'planning-editor-title' }).props.children).toBe('New dive plan');
     await changeText(root, 'planning-editor-plan-title', 'Blue Wall morning');
+    await changeDateTime(root, 'planning-editor-planned-at', new Date('2026-06-20T09:30:00'));
     await changeText(root, 'planning-editor-site-name', 'Blue Wall');
     await press(root, 'planning-editor-mode-scuba');
     await press(root, 'planning-editor-entry-style-boat');
+    expect(root.findByProps({ testID: 'planning-editor-gas-label-air' })).toBeTruthy();
     await changeText(root, 'planning-editor-planned-max-depth', '24');
     await changeText(root, 'planning-editor-planned-duration', '45');
-    await changeText(root, 'planning-editor-gas-label', 'EAN32');
-    await changeText(root, 'planning-editor-gear', 'bcd-1, computer-1');
+    await changeText(root, 'planning-editor-gear-input', 'bcd-1, computer-1,');
+    await press(root, 'planning-editor-pressure-unit-psi');
+    await changeText(root, 'planning-editor-pressure-start', '3000');
+    await changeText(root, 'planning-editor-pressure-end', '900');
     await press(root, 'planning-editor-save-planned');
 
     const [savedPlan] = await repository.list();
     expect(savedPlan).toMatchObject({
       status: 'planned',
       title: 'Blue Wall morning',
+      plannedAt: new Date('2026-06-20T09:30:00').getTime() / 1000,
       site: { name: 'Blue Wall' },
       diveMode: 'scuba',
       entryStyle: 'boat',
@@ -147,10 +178,68 @@ describe('Planning screen planbook flow', () => {
       plannedValues: {
         plannedMaxDepthMeters: 24,
         plannedDurationMinutes: 45,
-        gasLabel: 'EAN32',
+        gasLabel: 'Air',
+        plannedPressure: { unit: 'psi', start: 3000, end: 900 },
       },
     });
     expect(root.findByProps({ testID: 'planning-plan-row-Blue Wall' })).toBeTruthy();
+    await press(root, 'planning-plan-row-Blue Wall');
+    expect(root.findByProps({ testID: 'planning-detail-planned-value-gas-Air' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'planning-detail-planned-value-pressure-3000psi->900psi' })).toBeTruthy();
+  });
+
+  it('blocks saving a planned dive until required fields are valid', async () => {
+    const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
+    const renderer = await renderPlanning(repository);
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+    await press(root, 'planning-editor-save-planned');
+
+    expect(root.findByProps({ testID: 'planning-editor-planned-at-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'planning-editor-site-name-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'planning-editor-planned-duration-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'planning-editor-planned-max-depth-error' }).props.children).toBe('Required');
+    expect(await repository.list()).toEqual([]);
+  });
+
+  it('commits plan lists as badges and removes them before saving', async () => {
+    const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
+    const renderer = await renderPlanning(repository);
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+    await changeDateTime(root, 'planning-editor-planned-at', new Date('2026-06-20T09:30:00'));
+    await changeText(root, 'planning-editor-site-name', 'Badge Reef');
+    await changeText(root, 'planning-editor-planned-max-depth', '24');
+    await changeText(root, 'planning-editor-planned-duration', '45');
+    await changeText(root, 'planning-editor-buddies-input', 'Mina, Alex,');
+    await changeText(root, 'planning-editor-tags-input', 'reef, training,');
+    await press(root, 'planning-editor-buddies-remove-Mina');
+    await press(root, 'planning-editor-save-planned');
+
+    const [savedPlan] = await repository.list();
+    expect(savedPlan.buddyIds).toEqual(['Alex']);
+    expect(savedPlan.tags).toEqual(['reef', 'training']);
+  });
+
+  it('saves plan visibility and difficulty as star ratings', async () => {
+    const repository = new LocalDivePlanRepository([], { now: () => 1781354000 });
+    const renderer = await renderPlanning(repository);
+    const root = renderer.root;
+
+    await press(root, 'planning-create-action');
+    await changeDateTime(root, 'planning-editor-planned-at', new Date('2026-06-20T09:30:00'));
+    await changeText(root, 'planning-editor-site-name', 'Star Reef');
+    await changeText(root, 'planning-editor-planned-max-depth', '18');
+    await changeText(root, 'planning-editor-planned-duration', '40');
+    await press(root, 'planning-editor-visibility-expectation-star-4');
+    await press(root, 'planning-editor-perceived-difficulty-star-3');
+    await press(root, 'planning-editor-save-planned');
+
+    const [savedPlan] = await repository.list();
+    expect(savedPlan.plannedValues.visibilityExpectation).toBe(4);
+    expect(savedPlan.plannedValues.perceivedDifficulty).toBe(3);
   });
 
   it('shows a back icon on the local plan editor', async () => {
@@ -237,9 +326,14 @@ describe('Planning screen planbook flow', () => {
         localId: 'plan-1',
         status: 'planned',
         title: 'Original plan',
+        plannedAt: 1781355000,
         site: { name: 'Original Reef' },
         diveMode: 'freedive',
         entryStyle: 'shore',
+        plannedValues: {
+          plannedMaxDepthMeters: 16,
+          plannedDurationMinutes: 30,
+        },
       }),
     ]);
     const renderer = await renderPlanning(repository);

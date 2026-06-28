@@ -1,5 +1,16 @@
 # Wiki Log
 
+## [2026-06-28] ingest | Mobile form validation and pressure metadata
+- Added: Mobile form validation and pressure metadata raw source
+- Updated: 다이브 로그 도메인
+- Updated: 다이브 계획 도메인
+- Updated: 안전 규칙
+- Updated: Knowledge Base Index
+- 근거:
+  - 사용자 요청: Logbook/Planbook form validation, date picker, numeric sliders, star ratings, Air-only scuba gas, badge inputs, scuba pressure metadata
+- 요약:
+  - 수동 로그와 계획의 scuba pressure를 start/end + `bar`/`psi` metadata로 기록할 수 있음을 문서화했다. Pressure는 로그/계획 맥락일 뿐 gas remaining, reserve, turn pressure, emergency instruction, certified dive-computer behavior가 아니며, 계획 depth/duration은 실제 로그 measured value로 복사하지 않는 경계를 유지했다.
+
 ## [2026-06-28] ingest | Diving App / Product Roadmap
 - Updated: Diving App / Overview
 - Updated: Diving App / QA and Test Plan
@@ -573,3 +584,5 @@
 - Updated: ADR 목록
 - Updated: ADR: Local-first mobile logbook with future Supabase sync
 - Updated: 열린 질문
+
+## [2026-06-28] ingest | 동기화 흐름 구조

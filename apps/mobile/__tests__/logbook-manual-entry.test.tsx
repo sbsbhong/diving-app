@@ -97,6 +97,7 @@ scubaEntry.manual = {
     waterCondition: 'mild',
     visibilityRating: 4,
     perceivedExertion: 3,
+    pressure: { unit: 'bar', start: 200, end: 70 },
   },
 };
 
@@ -198,8 +199,39 @@ const renderLogbook = async (
 
 const changeText = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: string) => {
   await ReactTestRenderer.act(async () => {
-    root.findByProps({ testID }).props.onChangeText(value);
+    const field = findInputLike(root, testID);
+    if (typeof field.props.onChangeText === 'function') {
+      field.props.onChangeText(value);
+      return;
+    }
+    if (typeof field.props.onChange === 'function') {
+      field.props.onChange(value);
+      return;
+    }
+    field.props.onValueChange(value);
   });
+};
+
+const changeDateTime = async (root: ReactTestRenderer.ReactTestInstance, testID: string, value: Date) => {
+  await ReactTestRenderer.act(async () => {
+    const field = findInputLike(root, testID);
+    if (typeof field.props.onChange === 'function') {
+      field.props.onChange(value);
+      return;
+    }
+
+    field.props.onChangeText(formatTestDate(value));
+  });
+};
+
+const findInputLike = (root: ReactTestRenderer.ReactTestInstance, testID: string): ReactTestRenderer.ReactTestInstance => {
+  const matches = root.findAllByProps({ testID });
+  return (
+    matches.find(match => typeof match.props.onChangeText === 'function') ??
+    matches.find(match => typeof match.props.onChange === 'function') ??
+    matches.find(match => typeof match.props.onValueChange === 'function') ??
+    root.findByProps({ testID })
+  );
 };
 
 const press = async (root: ReactTestRenderer.ReactTestInstance, testID: string) => {
@@ -214,16 +246,17 @@ const fillManualDraft = async (
   overrides: Partial<Record<string, string>> = {},
   mode: NonNullable<WatchSession['diveMode']> = 'freedive',
 ) => {
+  await press(root, `log-entry-editor-mode-${mode}`);
+  await changeDateTime(root, 'log-entry-editor-started-at', new Date('2026-06-20T09:30:00'));
+
   const values = {
-    'log-entry-editor-started-at': '2026-06-20 09:30',
     'log-entry-editor-site-name': 'Blue Corner',
     'log-entry-editor-duration': '47',
     'log-entry-editor-max-depth': '18.6',
-    'log-entry-editor-buddies': 'Mina, Alex',
-    'log-entry-editor-tags': 'reef, training',
-    'log-entry-editor-marine-life': 'turtle, nudibranch',
+    'log-entry-editor-buddies-input': 'Mina, Alex,',
+    'log-entry-editor-tags-input': 'reef, training,',
+    'log-entry-editor-marine-life-input': 'turtle, nudibranch,',
     'log-entry-editor-notes': 'Calm review dive with clear water.',
-    'log-entry-editor-rating': '5',
     ...overrides,
   };
 
@@ -233,7 +266,18 @@ const fillManualDraft = async (
     }
   }
 
-  await press(root, `log-entry-editor-mode-${mode}`);
+  if (!Object.prototype.hasOwnProperty.call(overrides, 'log-entry-editor-rating')) {
+    await press(root, 'log-entry-editor-rating-star-5');
+  }
+};
+
+const formatTestDate = (value: Date): string => {
+  const pad = (input: number) => `${input}`.padStart(2, '0');
+
+  return [
+    `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`,
+    `${pad(value.getHours())}:${pad(value.getMinutes())}`,
+  ].join(' ');
 };
 
 describe('Logbook manual entry flow', () => {
@@ -439,7 +483,102 @@ describe('Logbook manual entry flow', () => {
     expect(root.findByProps({ testID: 'logbook-list-item-Blue Corner' })).toBeTruthy();
   });
 
-  test('keeps blank manual numeric fields undefined instead of saving zero', async () => {
+  test('blocks saving a manual log until required fields are valid', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781351000 });
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await press(root, 'log-entry-editor-save');
+
+    expect(root.findByProps({ testID: 'log-entry-editor-site-name-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'log-entry-editor-duration-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'log-entry-editor-max-depth-error' }).props.children).toBe('Required');
+    expect(await repository.list()).toEqual([]);
+  });
+
+  test('uses the date time picker value when saving a manual log', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781351000 });
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+    const startedAt = new Date('2026-06-20T09:30:00');
+
+    await press(root, 'logbook-create-action');
+    await changeDateTime(root, 'log-entry-editor-started-at', startedAt);
+    await changeText(root, 'log-entry-editor-site-name', 'Blue Corner');
+    await changeText(root, 'log-entry-editor-duration', '47');
+    await changeText(root, 'log-entry-editor-max-depth', '18.6');
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+    expect(savedEntry.manual.measuredValues.startedAt).toBe(startedAt.getTime() / 1000);
+  });
+
+  test('commits comma-delimited logbook lists as removable badges', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781351000 });
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await changeDateTime(root, 'log-entry-editor-started-at', new Date('2026-06-20T09:30:00'));
+    await changeText(root, 'log-entry-editor-site-name', 'Blue Corner');
+    await changeText(root, 'log-entry-editor-duration', '47');
+    await changeText(root, 'log-entry-editor-max-depth', '18.6');
+    await changeText(root, 'log-entry-editor-buddies-input', 'Mina,');
+    expect(root.findByProps({ testID: 'log-entry-editor-buddies-badge-Mina' })).toBeTruthy();
+    await changeText(root, 'log-entry-editor-buddies-input', 'Alex,');
+    await press(root, 'log-entry-editor-buddies-remove-Mina');
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+    expect(savedEntry.manual.buddyIds).toEqual(['Alex']);
+  });
+
+  test('saves star ratings from the logbook editor', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781351000 });
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await press(root, 'log-entry-editor-mode-scuba');
+    await changeDateTime(root, 'log-entry-editor-started-at', new Date('2026-06-20T09:30:00'));
+    await changeText(root, 'log-entry-editor-site-name', 'Blue Corner');
+    await changeText(root, 'log-entry-editor-duration', '47');
+    await changeText(root, 'log-entry-editor-max-depth', '18.6');
+    await press(root, 'log-entry-editor-rating-star-5');
+    await press(root, 'log-entry-editor-visibility-rating-star-4');
+    await press(root, 'log-entry-editor-perceived-exertion-star-3');
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+    expect(savedEntry.manual.rating).toBe(5);
+    expect(savedEntry.manual.measuredValues.visibilityRating).toBe(4);
+    expect(savedEntry.manual.measuredValues.perceivedExertion).toBe(3);
+  });
+
+  test('shows fixed Air gas and saves scuba pressure metadata', async () => {
+    const repository = new LocalDiveLogRepository([], { now: () => 1781351000 });
+    const renderer = await renderLogbook(repository);
+    const root = renderer.root;
+
+    await press(root, 'logbook-create-action');
+    await press(root, 'log-entry-editor-mode-scuba');
+    expect(root.findByProps({ testID: 'log-entry-editor-gas-label-air' })).toBeTruthy();
+    await changeDateTime(root, 'log-entry-editor-started-at', new Date('2026-06-20T09:30:00'));
+    await changeText(root, 'log-entry-editor-site-name', 'Blue Corner');
+    await changeText(root, 'log-entry-editor-duration', '47');
+    await changeText(root, 'log-entry-editor-max-depth', '18.6');
+    await press(root, 'log-entry-editor-pressure-unit-psi');
+    await changeText(root, 'log-entry-editor-pressure-start', '3000');
+    await changeText(root, 'log-entry-editor-pressure-end', '900');
+    await press(root, 'log-entry-editor-save');
+
+    const [savedEntry] = await repository.list();
+    expect(savedEntry.manual.measuredValues.gasLabel).toBe('Air');
+    expect(savedEntry.manual.measuredValues.pressure).toEqual({ unit: 'psi', start: 3000, end: 900 });
+  });
+
+  test('blocks blank required manual numeric fields', async () => {
     const repository = new LocalDiveLogRepository([]);
     const renderer = await renderLogbook(repository);
     const root = renderer.root;
@@ -453,14 +592,12 @@ describe('Logbook manual entry flow', () => {
     });
     await press(root, 'log-entry-editor-save');
 
-    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Blank Metrics Reef');
-
-    expect(savedEntry?.manual.measuredValues.durationSeconds).toBeUndefined();
-    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
-    expect(savedEntry?.manual.rating).toBeUndefined();
+    expect(root.findByProps({ testID: 'log-entry-editor-duration-error' }).props.children).toBe('Required');
+    expect(root.findByProps({ testID: 'log-entry-editor-max-depth-error' }).props.children).toBe('Required');
+    expect((await repository.list()).find(entry => entry.manual.site.name === 'Blank Metrics Reef')).toBeUndefined();
   });
 
-  test('keeps invalid manual numeric fields undefined instead of saving corrupted values', async () => {
+  test('blocks invalid manual numeric fields instead of saving corrupted values', async () => {
     const repository = new LocalDiveLogRepository([]);
     const renderer = await renderLogbook(repository);
     const root = renderer.root;
@@ -474,11 +611,9 @@ describe('Logbook manual entry flow', () => {
     });
     await press(root, 'log-entry-editor-save');
 
-    const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Invalid Metrics Reef');
-
-    expect(savedEntry?.manual.measuredValues.durationSeconds).toBeUndefined();
-    expect(savedEntry?.manual.measuredValues.maxDepthMeters).toBeUndefined();
-    expect(savedEntry?.manual.rating).toBeUndefined();
+    expect(root.findByProps({ testID: 'log-entry-editor-duration-error' }).props.children).toBe('Must be 0 or more');
+    expect(root.findByProps({ testID: 'log-entry-editor-max-depth-error' }).props.children).toBe('Must be 0 or more');
+    expect((await repository.list()).find(entry => entry.manual.site.name === 'Invalid Metrics Reef')).toBeUndefined();
   });
 
   test('list rows show unknown placeholders for manual logs with blank metrics', async () => {
@@ -691,8 +826,8 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-list-item-Watch Reef');
     await press(root, 'log-entry-detail-edit');
-    expect(root.findByProps({ testID: 'log-entry-editor-duration' }).props.value).toBe('10');
-    expect(root.findByProps({ testID: 'log-entry-editor-max-depth' }).props.value).toBe('12');
+    expect(String(findInputLike(root, 'log-entry-editor-duration').props.value)).toBe('10');
+    expect(String(findInputLike(root, 'log-entry-editor-max-depth').props.value)).toBe('12');
     await changeText(root, 'log-entry-editor-site-name', 'Edited Watch Reef');
     await changeText(root, 'log-entry-editor-notes', 'Reviewed on mobile.');
     await press(root, 'log-entry-editor-save');
@@ -745,11 +880,10 @@ describe('Logbook manual entry flow', () => {
     await fillManualDraft(root, {
       'log-entry-editor-site-name': 'Scuba Wall',
     }, 'scuba');
-    await changeText(root, 'log-entry-editor-gas-label', 'EAN32');
-    await changeText(root, 'log-entry-editor-gear', 'bcd-1, computer-1');
+    await changeText(root, 'log-entry-editor-gear', 'bcd-1, computer-1,');
     await press(root, 'log-entry-editor-water-condition-mild');
-    await changeText(root, 'log-entry-editor-visibility-rating', '4');
-    await changeText(root, 'log-entry-editor-perceived-exertion', '3');
+    await press(root, 'log-entry-editor-visibility-rating-star-4');
+    await press(root, 'log-entry-editor-perceived-exertion-star-3');
     await press(root, 'log-entry-editor-save');
 
     const savedEntry = (await repository.list()).find(entry => entry.manual.site.name === 'Scuba Wall');
@@ -759,7 +893,7 @@ describe('Logbook manual entry flow', () => {
         gearIds: ['bcd-1', 'computer-1'],
         measuredValues: {
           diveMode: 'scuba',
-          gasLabel: 'EAN32',
+          gasLabel: 'Air',
           waterCondition: 'mild',
           visibilityRating: 4,
           perceivedExertion: 3,
@@ -823,14 +957,16 @@ describe('Logbook manual entry flow', () => {
     const root = renderer.root;
 
     expect(root.findByProps({ testID: 'log-entry-editor-site-name' }).props.value).toBe('Plan Reef');
-    expect(root.findByProps({ testID: 'log-entry-editor-gas-label' }).props.value).toBe('EAN32');
+    expect(root.findByProps({ testID: 'log-entry-editor-gas-label-air' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-entry-style-boat' }).props.selected).toBe(true);
+    await changeText(root, 'log-entry-editor-duration', '41');
+    await changeText(root, 'log-entry-editor-max-depth', '22');
     await press(root, 'log-entry-editor-save');
 
     const [savedEntry] = await repository.list();
     expect(savedEntry.localId).toBe('manual-from-plan');
-    expect(savedEntry.manual.measuredValues.maxDepthMeters).toBeUndefined();
-    expect(savedEntry.manual.measuredValues.durationSeconds).toBeUndefined();
+    expect(savedEntry.manual.measuredValues.maxDepthMeters).toBe(22);
+    expect(savedEntry.manual.measuredValues.durationSeconds).toBe(2460);
     expect(onPendingDraftSave).toHaveBeenCalledWith(expect.objectContaining({ localId: 'manual-from-plan' }), 'plan-1');
   });
 
@@ -841,12 +977,12 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-create-action');
     await press(root, 'log-entry-editor-mode-scuba');
-    await changeText(root, 'log-entry-editor-gas-label', 'Air');
+    expect(root.findByProps({ testID: 'log-entry-editor-gas-label-air' })).toBeTruthy();
     await press(root, 'log-entry-editor-mode-freedive');
 
     expect(root.findByProps({ testID: 'log-entry-editor-repetition-count' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-editor-training-focus' })).toBeTruthy();
-    expect(() => root.findByProps({ testID: 'log-entry-editor-gas-label' })).toThrow();
+    expect(() => root.findByProps({ testID: 'log-entry-editor-gas-label-air' })).toThrow();
 
     await fillManualDraft(root, {
       'log-entry-editor-site-name': 'Line Session',
@@ -875,8 +1011,9 @@ describe('Logbook manual entry flow', () => {
 
     await press(root, 'logbook-list-item-Scuba Metadata Reef');
 
-    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gas-label-EAN32' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gas-label-Air' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-gear-bcd-1,computer-1' })).toBeTruthy();
     expect(root.findByProps({ testID: 'log-entry-detail-mode-value-water-condition-mild' })).toBeTruthy();
+    expect(root.findByProps({ testID: 'log-entry-detail-mode-value-pressure-200bar->70bar' })).toBeTruthy();
   });
 });

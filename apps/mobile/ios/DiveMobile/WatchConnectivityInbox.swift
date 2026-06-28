@@ -235,7 +235,6 @@ final class WatchConnectivityInbox: NSObject, WCSessionDelegate {
     if connectivitySession.isReachable {
       connectivitySession.sendMessage(context, replyHandler: nil) { _ in }
     }
-    connectivitySession.transferUserInfo(context)
 
     do {
       try connectivitySession.updateApplicationContext(context)

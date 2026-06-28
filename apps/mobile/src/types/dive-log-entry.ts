@@ -4,6 +4,13 @@ import type { DiveEntryStyle } from './dive-plan';
 export type DiveLogSource = 'manual' | 'watch';
 export type DiveFieldSource = 'manual' | 'mobile' | 'watch';
 export type DiveLogSyncStatus = 'localOnly' | 'pending' | 'synced' | 'failed';
+export type DivePressureUnit = 'bar' | 'psi';
+
+export type DivePressureValues = {
+  unit?: DivePressureUnit;
+  start?: number;
+  end?: number;
+};
 
 export type DiveLogSite = {
   siteId?: string;
@@ -26,6 +33,7 @@ export type DiveLogManualMeasuredValues = {
   trainingFocus?: string;
   poolLengthMeters?: number;
   lapCount?: number;
+  pressure?: DivePressureValues;
 };
 
 export type DiveLogManualFields = {
@@ -87,6 +95,7 @@ export type DiveLogFieldProvenance = Partial<
     | 'trainingFocus'
     | 'poolLengthMeters'
     | 'lapCount'
+    | 'pressure'
     | 'depthSamples',
     DiveFieldSource
   >
